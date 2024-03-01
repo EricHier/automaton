@@ -75,22 +75,36 @@ export class PDA extends Automaton {
 }
 
 class PDASimulator extends Simulator {
+    public initStepByStep(): { graphInteraction: boolean } {
+        throw new Error('Method not implemented.');
+    }
     public simulate(): { success: boolean; message: string } {
         throw new Error('Method not implemented.');
     }
-    public startAnimation(callback: (result: { success: boolean; message: string }) => void): void {
+    public startAnimation(
+        callback: (result: { success: boolean; message: string; wordPosition: number }) => void
+    ): void {
         throw new Error('Method not implemented.');
     }
-    public stopAnimation(callback: (result: { success: boolean; message: string }) => void): void {
+    public stopAnimation(
+        callback: (result: { success: boolean; message: string; wordPosition: number }) => void
+    ): void {
         throw new Error('Method not implemented.');
     }
-    public pauseAnimation(callback: (result: { success: boolean; message: string }) => void): void {
+    public pauseAnimation(
+        callback: (result: { success: boolean; message: string; wordPosition: number }) => void
+    ): void {
         throw new Error('Method not implemented.');
     }
-    public stepForward(highlight: boolean): { success: boolean; message: string; finalStep?: boolean | undefined } {
+    public stepForward(highlight: boolean): {
+        success: boolean;
+        message: string;
+        wordPosition: number;
+        finalStep?: boolean | undefined;
+    } {
         throw new Error('Method not implemented.');
     }
-    public stepBackward(highlight: boolean): { success: boolean; message: string } {
+    public stepBackward(highlight: boolean): { success: boolean; message: string; wordPosition: number } {
         throw new Error('Method not implemented.');
     }
     public reset(): void {

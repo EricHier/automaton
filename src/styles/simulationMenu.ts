@@ -63,7 +63,7 @@ export const simulationMenuStyles = css`
         font-weight: var(--sl-input-font-weight);
         letter-spacing: var(--sl-input-letter-spacing);
         vertical-align: middle;
-        overflow: hidden;
+        overflow: visible;
         cursor: text;
         transition: var(--sl-transition-fast) color, var(--sl-transition-fast) border,
             var(--sl-transition-fast) box-shadow, var(--sl-transition-fast) background-color;
@@ -103,5 +103,13 @@ export const simulationMenuStyles = css`
         display: inline-flex;
         align-items: center;
         justify-content: start;
+    }
+
+    .simulator__input-display__input.danger {
+        border-color: var(--sl-color-danger-600);
+    }
+
+    .simulator__input-display__input.success {
+        border-color: var(--sl-color-success-600);
     }
 `;

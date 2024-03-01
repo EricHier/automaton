@@ -1,7 +1,7 @@
 import { Graph } from '../graph';
 import { DataSet } from 'vis-data';
 import { v4 as uuidv4 } from 'uuid';
-import { EdgeOptions, NodeOptions } from 'vis-network';
+import { EdgeOptions, Network, NodeOptions } from 'vis-network';
 import { AddEventPayload, UpdateEventPayload } from 'vis-data/declarations/data-interface';
 import { stripNode, stripTransition } from '../utils/updates';
 import { COLORS } from '../utils/colors';
@@ -203,35 +203,41 @@ export abstract class Automaton {
         });
     }
 
+    public highlightTransition(transition: Transition): void {
+        this.transitions.update({
+            id: transition.id,
+            color: {
+                color: COLORS.blue.background,
+                highlight: COLORS.blue.background,
+                hover: COLORS.blue.background,
+            },
+            width: 1.5,
+        });
+    }
+
+    public clearHighlights(): void {
+        this.nodes.update(
+            this.nodes
+                .get()
+                .filter((n) => n.id !== Graph.initialGhostNode.id)
+                .map((n) => ({ id: n.id, color: COLORS.standard }))
+        );
+
+        this.transitions.update(
+            this.transitions
+                .get()
+                .filter((t) => t.from !== Graph.initialGhostNode.id)
+                .map((t) => ({ id: t.id, color: COLORS.standard.border, width: 1 }))
+        );
+    }
+
     public getNewNodeLabel(): string {
         return 'q' + this.nodes.get().length;
     }
 
     public redrawNodes(): void {
         for (const node of this.nodes.get()) {
-            if (node.final) {
-                this.nodes.update({
-                    id: node.id,
-                    shape: 'custom',
-                    color: {
-                        background: '#fff',
-                        border: '#000',
-                        hover: { background: '#f0f9ff', border: '#0284c7' },
-                        highlight: { background: '#f0f9ff', border: '#0284c7' },
-                    },
-                });
-            } else {
-                this.nodes.update({
-                    id: node.id,
-                    shape: 'circle',
-                    color: {
-                        background: '#fff',
-                        border: '#000',
-                        hover: { background: '#f0f9ff', border: '#0284c7' },
-                        highlight: { background: '#f0f9ff', border: '#0284c7' },
-                    },
-                });
-            }
+            this.updateNode(node.id, { shape: node.final ? 'custom' : 'circle' });
         }
         this.nodes.update({ id: Graph.initialGhostNode.id, color: { background: '#fff', border: '#fff' } });
     }
@@ -245,6 +251,17 @@ export abstract class Automaton {
                     border: '#000',
                     hover: COLORS.blue,
                     highlight: COLORS.blue,
+                },
+            }))
+        );
+
+        this.transitions.update(
+            this.transitions.get().map((t) => ({
+                ...t,
+                color: {
+                    color: '#000',
+                    highlight: '#000',
+                    hover: '#000',
                 },
             }))
         );
@@ -347,6 +364,14 @@ export abstract class Automaton {
     }
 }
 
+export type SimulationFeedback = {
+    success: boolean | undefined;
+    message: string;
+    finalStep?: boolean;
+    firstStep?: boolean;
+    wordPosition: number;
+};
+
 export abstract class Simulator {
     protected _a: Automaton;
     protected _errors: AutomatonInfo[] = [];
@@ -361,6 +386,10 @@ export abstract class Simulator {
         this.reset();
     }
 
+    public get wordArray(): string[] {
+        return this._word;
+    }
+
     constructor(automaton: Automaton) {
         this._a = automaton;
         this._errors = this._a.checkAutomaton();
@@ -371,19 +400,14 @@ export abstract class Simulator {
         message: string;
     };
 
-    public abstract startAnimation(callback: (result: { success: boolean; message: string }) => void): void;
-    public abstract stopAnimation(callback: (result: { success: boolean; message: string }) => void): void;
-    public abstract pauseAnimation(callback: (result: { success: boolean; message: string }) => void): void;
+    public abstract initStepByStep(graph: Graph, callback: Function): { graphInteraction: boolean };
 
-    public abstract stepForward(highlight: boolean): {
-        success: boolean;
-        message: string;
-        finalStep?: boolean;
-    };
-    public abstract stepBackward(highlight: boolean): {
-        success: boolean;
-        message: string;
-    };
+    public abstract startAnimation(callback: (result: SimulationFeedback) => void): void;
+    public abstract stopAnimation(callback: (result: SimulationFeedback) => void): void;
+    public abstract pauseAnimation(callback: (result: SimulationFeedback) => void): void;
+
+    public abstract stepForward(highlight: boolean): SimulationFeedback;
+    public abstract stepBackward(highlight: boolean): SimulationFeedback;
 
     public abstract reset(): void;
 }

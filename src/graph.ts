@@ -22,6 +22,11 @@ export class Graph {
         return this._n;
     }
 
+    private _ac: AutomatonComponent;
+    public get component(): AutomatonComponent {
+        return this._ac;
+    }
+
     private _cm: ContextMenu;
     public get contextMenu(): ContextMenu {
         return this._cm;
@@ -66,8 +71,9 @@ export class Graph {
         return this._requestUpdate;
     }
 
-    constructor(e: HTMLElement, a: Automaton, tm: ToolMenu) {
+    constructor(e: HTMLElement, a: Automaton, tm: ToolMenu, ac: AutomatonComponent) {
         this._a = a;
+        this._ac = ac;
         this._tm = tm;
         this._cm = new ContextMenu();
         this._cm.requestUpdate = this._requestUpdate;

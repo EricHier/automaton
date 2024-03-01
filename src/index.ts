@@ -18,6 +18,7 @@ import SlIcon from '@shoelace-style/shoelace/dist/components/icon/icon.component
 import SlIconButton from '@shoelace-style/shoelace/dist/components/icon-button/icon-button.component.js';
 import SlPopup from '@shoelace-style/shoelace/dist/components/popup/popup.component.js';
 import SlTag from '@shoelace-style/shoelace/dist/components/tag/tag.component.js';
+import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.component.js';
 
 import '@shoelace-style/shoelace/dist/themes/light.css';
 
@@ -97,6 +98,7 @@ export class AutomatonComponent extends LitElementWw {
         this.type = a.type;
         this.setUpListeners(this._automaton);
         this._graph?.setAutomaton(this._automaton);
+        if (this.simulatorMenu) this.simulatorMenu.automaton = this._automaton;
         // if (this._automaton.extension) {
         //     this._automaton.extension.component = this;
         //     this._automaton.extension.requestUpdate = () => this.requestUpdate();
@@ -125,6 +127,7 @@ export class AutomatonComponent extends LitElementWw {
             'sl-alert': SlAlert,
             'sl-select': SlSelect,
             'sl-option': SlOption,
+            'sl-dialog': SlDialog,
             'ww-automaton-toolmenu': ToolMenu,
             'ww-automaton-simulatormenu': SimulatorMenu,
             'ww-automaton-infomenu': InfoMenu,
@@ -148,11 +151,12 @@ export class AutomatonComponent extends LitElementWw {
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
         super.firstUpdated(_changedProperties);
 
-        this._graph = new Graph(this.graphCanvas, this.automaton, this.toolMenu);
+        this._graph = new Graph(this.graphCanvas, this.automaton, this.toolMenu, this);
         this._graph.requestUpdate = () => this.requestUpdate();
         this.toolMenu.graph = this._graph;
         this.topMenu.component = this;
         this.simulatorMenu.automaton = this.automaton;
+        this.simulatorMenu.graph = this._graph;
 
         AutomatonComponent.log('first updated');
     }

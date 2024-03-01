@@ -1,5 +1,5 @@
 import { LitElement, PropertyValueMap, html } from 'lit';
-import { customElement, property, query } from 'lit/decorators.js';
+import { customElement, property, query, state } from 'lit/decorators.js';
 
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import SlButton from '@shoelace-style/shoelace/dist/components/button/button.component.js';
@@ -24,25 +24,38 @@ import { SlChangeEvent } from '@shoelace-style/shoelace';
 import { styleMap } from 'lit/directives/style-map.js';
 import { simulationMenuStyles } from '../styles/simulationMenu';
 import { LitElementWw } from '@webwriter/lit';
+import { Network } from 'vis-network';
+import { Graph } from '../graph';
 
 @customElement('ww-automaton-simulatormenu')
 export class SimulatorMenu extends LitElementWw {
-    @property({ type: Object, attribute: false })
+    @state()
     private _automaton!: Automaton;
     public set automaton(automaton: Automaton) {
         this._automaton = automaton;
     }
 
     @property({ type: Object, attribute: false })
+    public graph!: Graph;
+
+    @state()
     private _result!: {
-        success: boolean;
+        success: boolean | undefined;
         message: string;
+        wordPosition: number;
     } | null;
+    private set result(result: { success: boolean | undefined; message: string; wordPosition: number }) {
+        this._result = {
+            success: result.success,
+            message: result.message,
+            wordPosition: result.wordPosition,
+        };
+    }
 
     @property({ type: String, attribute: false })
     private _mode: 'idle' | 'step' | 'run' | 'animate' = 'idle';
 
-    @property({ type: Boolean, attribute: false })
+    @state()
     private _animationRunning: boolean = false;
 
     public static get styles() {
@@ -55,6 +68,8 @@ export class SimulatorMenu extends LitElementWw {
     @query('#simulator_toggle') private _toggleButton!: SlButton;
     @query('#simulator_stop') private _stopButton!: SlButton;
 
+    @query('#wordInput') private _wordInput!: SlInput;
+
     public static get scopedElements() {
         return {
             'sl-button': SlButton,
@@ -64,19 +79,19 @@ export class SimulatorMenu extends LitElementWw {
         };
     }
 
-    protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {}
-
     render() {
         return html`<div class="simulator">${this.renderInput()} ${this.renderButtonGroup()}</div>`;
     }
 
     private renderInput() {
-        if (this._mode === 'idle') {
-            return html` <sl-input
+        return html` <sl-input
                 class=${classMap({
                     simulator__input: true,
-                    danger: this._result != null && !this._result.success,
-                    success: this._result != null && this._result.success,
+                    danger: this._result != null && this._result.success === false,
+                    success: this._result != null && this._result.success === true,
+                })}
+                style=${styleMap({
+                    display: this._mode === 'idle' ? 'block' : 'none',
                 })}
                 @sl-input=${(e: SlChangeEvent) => {
                     this._automaton.simulator.word = (e.target as SlInput).value;
@@ -90,14 +105,31 @@ export class SimulatorMenu extends LitElementWw {
             >
                 <span slot="prefix" class="simulator__input__prefix">${biAlphabet}</span>
                 <span slot="label" class="simulator__input__helptext">${unsafeHTML(this._result?.message)}</span>
-            </sl-input>`;
-        }
-
-        return html`<div class="simulator__input-display">
-            <span slot="prefix" class="simulator__input-display__prefix">${biAlphabet}</span>
-            <span slot="label" class="simulator__input-display__helptext">${unsafeHTML(this._result?.message)}</span>
-            <div class="simulator__input-display__input">${this._automaton.simulator.word}</div>
-        </div>`;
+            </sl-input>
+            <div
+                class=${classMap({
+                    'simulator__input-display': true,
+                    danger: this._result != null && this._result.success === false,
+                    success: this._result != null && this._result.success === true,
+                })}
+                style=${styleMap({
+                    display: this._mode !== 'idle' ? 'flex' : 'none',
+                })}
+                @click=${() => {
+                    this.reset();
+                    this._wordInput.focus();
+                }}
+            >
+                <span slot="prefix" class="simulator__input-display__prefix">${biAlphabet}</span>
+                <span slot="label" class="simulator__input-display__helptext"
+                    >${unsafeHTML(this._result?.message)}</span
+                >
+                <div class="simulator__input-display__input">
+                    ${this._automaton.simulator.wordArray.map((e, i) => {
+                        return i === this._result?.wordPosition ? html`|${e}` : e;
+                    })}
+                </div>
+            </div>`;
     }
 
     private renderButtonGroup() {
@@ -138,7 +170,14 @@ export class SimulatorMenu extends LitElementWw {
                 })}
             >
                 <sl-tooltip content="Back" placement="top">
-                    <sl-button id="simulator_back">${biSkipStart}</sl-button>
+                    <sl-button
+                        id="simulator_back"
+                        @click=${() => {
+                            this.stepBackward();
+                        }}
+                        disabled
+                        >${biSkipStart}</sl-button
+                    >
                 </sl-tooltip>
                 <sl-tooltip content="Next" placement="top">
                     <sl-button
@@ -210,7 +249,11 @@ export class SimulatorMenu extends LitElementWw {
         this._mode = 'run';
 
         const result = this._automaton.simulator.simulate();
-        this._result = result;
+        this.result = {
+            success: result.success,
+            message: result.message,
+            wordPosition: this._automaton.simulator.word.length - 1,
+        };
 
         this.requestUpdate();
     }
@@ -222,16 +265,19 @@ export class SimulatorMenu extends LitElementWw {
         this._automaton.highlightNode(this._automaton.getInitialNode());
 
         if (this._automaton.simulator.word.length == 0) {
-            this._result = {
+            this.result = {
                 success: this._automaton.getInitialNode().final,
                 message: `Finished simulation on <b>${this._automaton.getInitialNode().label}</b>`,
+                wordPosition: 0,
             };
         } else {
             this._automaton.simulator.startAnimation((result) => {
-                this._result = result;
+                this.result = result;
 
-                this._toggleButton.disabled = true;
-                this._stopButton.disabled = true;
+                if (result.success !== undefined) {
+                    this._toggleButton.disabled = true;
+                    this._stopButton.disabled = true;
+                }
 
                 this.requestUpdate();
             });
@@ -243,7 +289,7 @@ export class SimulatorMenu extends LitElementWw {
 
     private stopAnimation() {
         this._automaton.simulator.stopAnimation((result) => {
-            this._result = result;
+            this.result = result;
 
             this._toggleButton.disabled = true;
             this._stopButton.disabled = true;
@@ -257,13 +303,13 @@ export class SimulatorMenu extends LitElementWw {
     private toggleAnimation() {
         if (this._animationRunning) {
             this._automaton.simulator.pauseAnimation((result) => {
-                this._result = result;
+                this.result = result;
                 this.requestUpdate();
             });
             this._animationRunning = false;
         } else {
             this._automaton.simulator.startAnimation((result) => {
-                this._result = result;
+                this.result = result;
                 this.requestUpdate();
             });
             this._animationRunning = true;
@@ -273,7 +319,11 @@ export class SimulatorMenu extends LitElementWw {
 
     private reset() {
         this._automaton.simulator.reset();
-        this._result = null;
+        this._result = {
+            success: undefined,
+            message: '',
+            wordPosition: 0,
+        };
         this._mode = 'idle';
         this._nextButton.disabled = false;
         this._backButton.disabled = true;
@@ -289,14 +339,25 @@ export class SimulatorMenu extends LitElementWw {
         this.reset();
         this._mode = 'step';
 
+        const { graphInteraction } = this._automaton.simulator.initStepByStep(this.graph, (res: any) => {
+            this.result = res;
+            this._backButton.disabled = false;
+            this.requestUpdate();
+        });
+
+        if (graphInteraction) {
+            this._nextButton.disabled = true;
+        }
+
         this._automaton.highlightNode(this._automaton.getInitialNode());
 
         if (this._automaton.simulator.word.length == 0) {
             this._nextButton.disabled = true;
 
-            this._result = {
+            this.result = {
                 success: this._automaton.getInitialNode().final,
                 message: `Finished simulation on <b>${this._automaton.getInitialNode().label}</b>`,
+                wordPosition: this._automaton.simulator.word.length - 1,
             };
         }
         this.requestUpdate();
@@ -308,12 +369,23 @@ export class SimulatorMenu extends LitElementWw {
         if (!result.success) {
             this._nextButton.disabled = true;
             this._backButton.disabled = true;
-            this._result = result;
+            this.result = result;
         }
 
         if (result.finalStep) {
             this._nextButton.disabled = true;
-            this._result = result;
+            this.result = result;
+        }
+
+        this.requestUpdate();
+    }
+
+    private stepBackward() {
+        const result = this._automaton.simulator.stepBackward(true);
+
+        if (result.firstStep) {
+            this._backButton.disabled = true;
+            this.result = result;
         }
 
         this.requestUpdate();

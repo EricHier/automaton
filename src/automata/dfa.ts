@@ -132,12 +132,20 @@ class DFASimulator extends Simulator {
                 this._a.highlightErrorNode(this._currentNode.id);
                 cb(result);
                 clearInterval(this._interval);
+                return;
             }
 
             if (result.finalStep) {
                 clearInterval(this._interval);
                 cb(result);
+                return;
             }
+
+            cb({
+                success: undefined,
+                message: '',
+                wordPosition: this._currentStep,
+            });
         }, 1000);
     }
 
@@ -157,16 +165,22 @@ class DFASimulator extends Simulator {
         });
     }
 
+    public initStepByStep(): { graphInteraction: boolean } {
+        return { graphInteraction: false };
+    }
+
     public stepForward(highlight: boolean): {
         success: boolean;
         finalStep?: boolean;
         message: string;
+        wordPosition: number;
     } {
         if (this._currentStep >= this._word.length) {
             return {
                 success: this._currentNode.final,
                 finalStep: true,
                 message: `Simulation already finished on <b>${this._currentNode.label}</b>`,
+                wordPosition: this._currentStep,
             };
         }
 
@@ -180,6 +194,7 @@ class DFASimulator extends Simulator {
                 message: `Simulation stopped on <b>${this._currentNode.label}</b><br/>${nodeErrors
                     .map((e) => e.message)
                     .join('<br/>')}`,
+                wordPosition: this._currentStep,
             };
         }
 
@@ -201,6 +216,7 @@ class DFASimulator extends Simulator {
                 message: `Finished simulation on <b>${this._currentNode.label}</b><br/>The Automaton <b>${
                     this._currentNode.final ? 'accepts' : 'rejects'
                 }</b> the word <b>${this._word.join('')}</b>`,
+                wordPosition: this._currentStep,
             };
         }
 
@@ -208,18 +224,21 @@ class DFASimulator extends Simulator {
             success: true,
             finalStep: false,
             message: '',
+            wordPosition: this._currentStep,
         };
     }
 
     public stepBackward(): {
         success: boolean;
         message: string;
+        wordPosition: number;
     } {
         this._currentStep--;
 
         return {
             success: true,
             message: '',
+            wordPosition: this._currentStep,
         };
     }
 

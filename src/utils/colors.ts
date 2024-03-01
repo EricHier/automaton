@@ -11,4 +11,8 @@ export const COLORS = {
         background: '#e0f2fe',
         border: '#075985',
     },
+    standard: {
+        background: 'white',
+        border: 'black',
+    },
 };
