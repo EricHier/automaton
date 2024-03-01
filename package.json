@@ -1,0 +1,80 @@
+{
+  "name": "@webwriter/ww-automaton",
+  "version": "0.0.1",
+  "keywords": [
+    "webwriter-widget"
+  ],
+  "license": "MIT",
+  "author": "Jorik van Genuchten",
+  "main": "src/index.ts",
+  "dependencies": {
+    "@shoelace-style/shoelace": "^2.13.1",
+    "@webwriter/lit": "^1.5.2",
+    "lit": ">=3.0.0 <4.0.0-0",
+    "uuid": "^9.0.1",
+    "vis-data": "^7.1.9",
+    "vis-network": "^9.1.9"
+  },
+  "devDependencies": {
+    "@types/uuid": "^9.0.7"
+  },
+  "exports": {
+    "./widgets/ww-automaton": "./src/index.ts",
+    "./snippets/dfa-simple": "./snippets/dfa/example-simple.html",
+    "./snippets/dfa-complex": "./snippets/dfa/example-complex.html",
+    "./snippets/nfa-simple": "./snippets/nfa/example-simple.html",
+    "./snippets/nfa-complex": "./snippets/nfa/example-complex.html",
+    "./snippets/pda-simple": "./snippets/pda/example-simple.html",
+    "./snippets/pda-complex": "./snippets/pda/example-complex.html"
+  },
+  "editingConfig": {
+    "./widgets/ww-automaton": {
+      "label": {
+        "de": "Automat",
+        "en": "Automaton"
+      }
+    },
+    "./snippets/example": {
+      "label": {
+        "de": "Beispiel",
+        "en": "Example"
+      }
+    },
+    "./snippets/dfa-simple": {
+      "label": {
+        "de": "DFA Einfach",
+        "en": "DFA Simple"
+      }
+    },
+    "./snippets/dfa-complex": {
+      "label": {
+        "de": "DFA Komplex",
+        "en": "DFA Complex"
+      }
+    },
+    "./snippets/nfa-simple": {
+      "label": {
+        "de": "NFA Einfach",
+        "en": "NFA Simple"
+      }
+    },
+    "./snippets/nfa-complex": {
+      "label": {
+        "de": "NFA Komplex",
+        "en": "NFA Complex"
+      }
+    },
+    "./snippets/pda-simple": {
+      "label": {
+        "de": "PDA Einfach",
+        "en": "PDA Simple"
+      }
+    },
+    "./snippets/pda-complex": {
+      "label": {
+        "de": "PDA Komplex",
+        "en": "PDA Complex"
+      }
+    }
+  }
+}
