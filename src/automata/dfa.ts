@@ -99,6 +99,8 @@ class DFASimulator extends Simulator {
         this._currentNode = this._a.getInitialNode();
     }
 
+    public init() {}
+
     public simulate(): {
         success: boolean;
         message: string;

@@ -410,6 +410,7 @@ export abstract class Simulator {
     public abstract stepBackward(highlight: boolean): SimulationFeedback;
 
     public abstract reset(): void;
+    public abstract init(): void;
 }
 
 export abstract class AutomatonExtension {

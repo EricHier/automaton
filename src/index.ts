@@ -237,11 +237,13 @@ export class AutomatonComponent extends LitElementWw {
                 @sl-change=${(e: SlChangeEvent) => {
                     this._mode = (e.target as SlSelect).value as 'edit' | 'simulate';
                     if (this._mode === 'edit') {
+                        this.simulatorMenu.reset();
                         this._graph.requestUpdate();
                     }
 
                     if (this._mode === 'simulate') {
                         this.automaton.redrawNodes();
+                        this.simulatorMenu.init();
                         this.automaton.highlightNode(this.automaton.getInitialNode());
                     }
                 }}

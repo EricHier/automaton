@@ -85,7 +85,10 @@ class NFASimulator extends Simulator {
         word: string[],
         state: Node
     ): { success: boolean; message: string; path: { node: Node; symbol: string }[] } {
-        if (word.length === 0) {
+        const transitions = this._a.getTransitionsFromNode(state);
+        let validTransitions = transitions.filter((t) => t.symbols.includes(word[0]) || t.symbols.includes(''));
+
+        if (word.length === 0 && validTransitions.length === 0) {
             return {
                 success: state.final,
                 message: state.final ? 'Accepted' : 'Rejected',
@@ -93,8 +96,6 @@ class NFASimulator extends Simulator {
             };
         }
 
-        const transitions = this._a.getTransitionsFromNode(state);
-        const validTransitions = transitions.filter((t) => t.symbols.includes(word[0]) || t.symbols.includes(''));
         AutomatonComponent.log(
             'Simulating from state',
             [state.label],
@@ -107,6 +108,8 @@ class NFASimulator extends Simulator {
             const to = this._a.getNode(transition.to) as Node;
 
             for (const symbol of transition.symbols) {
+                if (symbol !== word[0] && symbol !== '') continue;
+
                 if (symbol === '') {
                     const result = this.simulationFromState(word, to);
                     if (result.success) {
@@ -181,6 +184,8 @@ class NFASimulator extends Simulator {
             wordPosition: this._currentStep,
         });
     }
+
+    public init() {}
 
     public initStepByStep(graph: Graph, cb: Function): { graphInteraction: boolean } {
         this._currentNode = this._a.getInitialNode() as Node;

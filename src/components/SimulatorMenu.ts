@@ -317,7 +317,7 @@ export class SimulatorMenu extends LitElementWw {
         this.requestUpdate();
     }
 
-    private reset() {
+    public reset() {
         this._automaton.simulator.reset();
         this._result = {
             success: undefined,
@@ -333,6 +333,10 @@ export class SimulatorMenu extends LitElementWw {
 
         this._automaton.highlightNode(this._automaton.getInitialNode());
         this.requestUpdate();
+    }
+
+    public init() {
+        this._automaton.simulator.init();
     }
 
     private startStepByStep() {

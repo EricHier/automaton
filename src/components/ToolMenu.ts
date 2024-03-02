@@ -131,13 +131,24 @@ export class ToolMenu extends LitElementWw {
         }
 
         if (edge) {
-            this._graph.automaton.transitions.update({
-                ...edge,
-                symbols: [...edge.symbols, 'a'],
-                // label: edge.symbols.join(', ') + ', a',
-            });
+            if (this._graph.automaton.type === 'pda') {
+                this._graph.automaton.transitions.update({
+                    ...edge,
+                    symbols: [...edge.symbols, 'a'],
+                    stackOperations: [...edge.stackOperations!, { operation: 'none', symbol: 'a' }],
+                });
+            } else {
+                this._graph.automaton.transitions.update({
+                    ...edge,
+                    symbols: [...edge.symbols, 'a'],
+                });
+            }
         } else {
             edgeData.symbols = ['a'];
+
+            if (this._graph.automaton.type === 'pda') {
+                edgeData.stackOperations = [{ operation: 'none', symbol: 'a' }];
+            }
             // edgeData.label = 'a';
             callback(edgeData);
         }

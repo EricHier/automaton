@@ -1,5 +1,5 @@
 import { AutomatonComponent } from '../';
-import { Automaton, AutomatonInfo, Node, Simulator, Transition } from './';
+import { Automaton, AutomatonInfo, Node, SimulationFeedback, Simulator, Transition } from './';
 import { PropertyValueMap, TemplateResult, html } from 'lit';
 import { DataSet } from 'vis-data';
 import { LitElementWw } from '@webwriter/lit';
@@ -10,12 +10,13 @@ import SlButton from '@shoelace-style/shoelace/dist/components/button/button.com
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
 import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js';
 import { biTrash } from '../styles/icons';
+import { Graph } from '../graph';
 
 export class PDA extends Automaton {
     public simulator: Simulator;
     public type: string = 'pda';
 
-    public extension = document.createElement('stack-extension');
+    public extension = document.createElement('stack-extension') as StackExtension;
 
     public checkAutomaton(): AutomatonInfo[] {
         return [];
@@ -48,6 +49,7 @@ export class PDA extends Automaton {
     }
 
     public getTransitionLabel(transition: Transition): string {
+        console.log('getTransitionLabel', transition);
         if (transition.stackOperations) {
             const operations = transition.stackOperations;
             const parts = transition.symbols.map((s, i) => {
@@ -75,40 +77,224 @@ export class PDA extends Automaton {
 }
 
 class PDASimulator extends Simulator {
+    private _currentNode: Node;
+
+    private _previousTransitions: {
+        node: Node;
+        transitionSymbol: string;
+    }[] = [];
+
+    private _mode: 'simulation' | 'stepByStep' = 'simulation';
+    private _graph: Graph | undefined;
+
+    private _currentStep: number = 0;
+    private _currentWordPosition: number = 0;
+
+    private _interval: number | undefined;
+
+    private _initialStack: string[] = [];
+
+    constructor(protected _a: PDA) {
+        super(_a);
+        this._currentNode = this._a.getInitialNode();
+        this._initialStack = this._a.extension.getStack();
+    }
+
+    public simulate(): { success: boolean; message: string } {
+        console.log('Simulating PDA', this._word);
+        this._initialStack = this._a.extension.getStack();
+        const word = this._word;
+        const result = this.simulationFromState(word, this._a.getInitialNode() as Node, [...this._initialStack]);
+        console.log('Result', result);
+        const lastNode = result.path[result.path.length - 1].node;
+        this._a.highlightNode(lastNode);
+        return {
+            success: result.success,
+            message: `Finished simulation on <b>${lastNode.label}</b>.<br />Path: ${result.path
+                .map((n) => `<b>${n.node.label}</b>`)
+                .join(',')}`,
+        };
+    }
+
+    private simulationFromState(
+        word: string[],
+        state: Node,
+        stack: string[]
+    ): { success: boolean; message: string; path: { node: Node; symbol: string; stack: string[] }[] } {
+        const transitions = this._a.getTransitionsFromNode(state) as Transition[];
+        let validTransitions = transitions.filter((t) => t.symbols.includes(word[0]) || t.symbols.includes(''));
+        validTransitions = validTransitions.filter((t) => {
+            for (let i = 0; i < t.stackOperations!.length; i++) {
+                const symbol = t.symbols[i];
+                const stackOperation = t.stackOperations![i];
+
+                let validStackOperation: boolean = false;
+                if (stackOperation.operation === 'none') validStackOperation = true;
+                if (stackOperation.operation === 'push') validStackOperation = true;
+                if (stackOperation.operation === 'pop' && stack[stack.length - 1] === stackOperation.symbol)
+                    validStackOperation = true;
+                if (stackOperation.operation === 'empty' && stack.length === 0) validStackOperation = true;
+
+                if (validStackOperation && (symbol == word[0] || symbol == '')) return true;
+            }
+
+            return false;
+        });
+
+        if (word.length === 0 && validTransitions.length === 0) {
+            return {
+                success: state.final,
+                message: state.final ? 'Accepted' : 'Rejected',
+                path: [{ node: state, symbol: '', stack }],
+            };
+        }
+
+        AutomatonComponent.log(
+            'Simulating from state',
+            [state.label],
+            'with word',
+            [word.join('')],
+            'and stack',
+            [stack.join(',')],
+            'valid transitions',
+            validTransitions.map((t) => t.symbols.map((s) => (s === '' ? 'ε' : s)).join(',')).flat()
+        );
+        for (const transition of validTransitions) {
+            const to = this._a.getNode(transition.to) as Node;
+
+            for (let i = 0; i < transition.symbols.length; i++) {
+                const symbol = transition.symbols[i];
+                const stackOperation = transition.stackOperations![i];
+
+                if (symbol !== word[0] && symbol !== '') continue;
+
+                const newStack = [...stack];
+
+                if (stackOperation.operation == 'push') newStack.push(stackOperation.symbol);
+                if (stackOperation.operation == 'pop') newStack.pop();
+
+                AutomatonComponent.log(
+                    'Take transition from',
+                    state.label,
+                    'with',
+                    symbol == '' ? 'ε' : symbol,
+                    'with stack',
+                    newStack.join(',')
+                );
+
+                let result;
+                if (symbol === '') result = this.simulationFromState(word, to as Node, newStack);
+                else result = this.simulationFromState(word.slice(1), to as Node, newStack);
+
+                if (result.success) {
+                    return {
+                        success: true,
+                        message: 'Accepted',
+                        path: [{ node: state, symbol, stack }, ...result.path],
+                    };
+                }
+            }
+        }
+
+        return { success: false, message: 'Rejected', path: [{ node: state, symbol: '', stack }] };
+    }
+    public init() {
+        this._initialStack = this._a.extension.getStack();
+    }
+
+    public startAnimation(callback: (result: SimulationFeedback) => void): void {
+        let { success, path } = this.simulationFromState(this._word, this._a.getInitialNode() as Node, [
+            ...this._initialStack,
+        ]);
+
+        if (!success) {
+            callback({ success, message: 'No valid path found', wordPosition: 0 });
+            return;
+        }
+
+        console.log('Path', path);
+
+        this._interval = setInterval(() => {
+            this._currentStep++;
+            this._currentNode = path[this._currentStep]?.node;
+            this._a.clearHighlights();
+
+            if (this._currentStep >= path.length) {
+                clearInterval(this._interval);
+                this._a.highlightNode(path[path.length - 1].node);
+                callback({ success: true, message: 'Finished', wordPosition: 0 });
+                return;
+            }
+
+            this._a.highlightNode(path[this._currentStep]?.node);
+            this._a.extension.setStack(path[this._currentStep]?.stack);
+
+            if (path[this._currentStep - 1]?.symbol !== '') {
+                this._currentWordPosition++;
+            }
+
+            callback({
+                success: undefined,
+                message: '',
+                wordPosition: this._currentWordPosition,
+            });
+        }, 1000);
+    }
+    public stopAnimation(callback: (result: SimulationFeedback) => void): void {
+        clearInterval(this._interval);
+        callback({
+            success: false,
+            message: `Simulation stopped on <b>${this._currentNode.label}</b>`,
+            wordPosition: this._currentStep,
+        });
+    }
+    public pauseAnimation(callback: (result: SimulationFeedback) => void): void {
+        clearInterval(this._interval);
+        callback({
+            success: false,
+            message: `Simulation paused on <b>${this._currentNode.label}</b>`,
+            wordPosition: this._currentStep,
+        });
+    }
     public initStepByStep(): { graphInteraction: boolean } {
         throw new Error('Method not implemented.');
     }
-    public simulate(): { success: boolean; message: string } {
+    public stepForward(highlight: boolean): SimulationFeedback {
         throw new Error('Method not implemented.');
     }
-    public startAnimation(
-        callback: (result: { success: boolean; message: string; wordPosition: number }) => void
-    ): void {
+    public stepBackward(highlight: boolean): SimulationFeedback {
         throw new Error('Method not implemented.');
     }
-    public stopAnimation(
-        callback: (result: { success: boolean; message: string; wordPosition: number }) => void
-    ): void {
-        throw new Error('Method not implemented.');
+
+    private isValidTransition(transition: Transition): boolean {
+        const validSymbol =
+            transition.symbols.includes(this._word[this._currentWordPosition]) || transition.symbols.includes('');
+        const validFrom = transition.from === this._currentNode.id;
+
+        return validSymbol && validFrom;
     }
-    public pauseAnimation(
-        callback: (result: { success: boolean; message: string; wordPosition: number }) => void
-    ): void {
-        throw new Error('Method not implemented.');
+
+    private highlightPossibleTransitions(node: Node): void {
+        const transitions = this._a.getTransitionsFromNode(node);
+        const currentSymbol = this._word[this._currentWordPosition];
+        const validTransitions = transitions.filter((t) => t.symbols.includes(currentSymbol) || t.symbols.includes(''));
+
+        validTransitions.forEach((t) => {
+            this._a.highlightTransition(t);
+        });
     }
-    public stepForward(highlight: boolean): {
-        success: boolean;
-        message: string;
-        wordPosition: number;
-        finalStep?: boolean | undefined;
-    } {
-        throw new Error('Method not implemented.');
-    }
-    public stepBackward(highlight: boolean): { success: boolean; message: string; wordPosition: number } {
-        throw new Error('Method not implemented.');
-    }
+
     public reset(): void {
-        throw new Error('Method not implemented.');
+        this._a.clearHighlights();
+        this._currentStep = 0;
+        this._currentWordPosition = 0;
+        this._currentNode = this._a.getInitialNode();
+        this._a.redrawNodes();
+        this._errors = this._a.checkAutomaton();
+
+        this._a.extension.setStack(this._initialStack);
+
+        this.stopAnimation(() => {});
     }
 }
 
@@ -147,11 +333,37 @@ export class StackExtension extends LitElementWw {
             this.stack = [...this._stack.get()];
         });
 
-        this._stack.add([{ id: 0, symbol: '0' }]);
-        this._stack.add([{ id: 1, symbol: '1' }]);
-        this._stack.add([{ id: 2, symbol: '2' }]);
-        this._stack.add([{ id: 3, symbol: '3' }]);
-        this._stack.add([{ id: 4, symbol: '4' }]);
+        // this._stack.add([{ id: 0, symbol: '0' }]);
+        // this._stack.add([{ id: 1, symbol: '1' }]);
+        // this._stack.add([{ id: 2, symbol: '2' }]);
+        // this._stack.add([{ id: 3, symbol: '3' }]);
+        // this._stack.add([{ id: 4, symbol: '4' }]);
+    }
+
+    public getStack(): string[] {
+        return this._stack.get().map((s) => s.symbol);
+    }
+
+    public setStack(stack: string[]): void {
+        this._stack.clear();
+        this._stack.add(stack.map((s, i) => ({ id: i, symbol: s })));
+    }
+
+    public push(symbol: string): void {
+        this.pushItemToStack(symbol);
+    }
+
+    public pop(): void {
+        this.popItemFromStack();
+    }
+
+    public checkEmpty(): boolean {
+        return this._stack.length === 0;
+    }
+
+    public checkSymbol(symbol: string): boolean {
+        const item = this._stack.get(0);
+        return item?.symbol === symbol;
     }
 
     public render(): TemplateResult {
@@ -245,9 +457,16 @@ export class StackExtension extends LitElementWw {
         </div>`;
     }
 
-    public pushItemToStack(symbol: string): void {
+    private pushItemToStack(symbol: string): void {
         const symbols = this._stack.get().map((s) => s.symbol);
         symbols.unshift(symbol);
+        this._stack.clear();
+        this._stack.add(symbols.map((s, i) => ({ id: i, symbol: s })));
+    }
+
+    private popItemFromStack(): void {
+        const symbols = this._stack.get().map((s) => s.symbol);
+        symbols.shift();
         this._stack.clear();
         this._stack.add(symbols.map((s, i) => ({ id: i, symbol: s })));
     }
