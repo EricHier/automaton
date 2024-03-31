@@ -3,6 +3,7 @@ import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { contextMenuStyles } from '../styles/contextMenu';
 import { biDatabase, biDatabaseAdd, biDatabaseDash, biDatabaseSlash, biTrash } from '../styles/icons';
+import { AutomatonComponent } from 'index';
 
 export class ContextMenu {
     private selected: {
@@ -22,7 +23,7 @@ export class ContextMenu {
 
     public requestUpdate: () => void = () => {};
 
-    constructor() {}
+    constructor(private parentComponent: AutomatonComponent) {}
 
     public render() {
         return html`<div
@@ -51,6 +52,9 @@ export class ContextMenu {
                         this.selected.deleteFn();
                         this.hide();
                     }}
+                    style=${styleMap({
+                        display: this.parentComponent.settings.permissions.node.delete ? 'block' : 'none',
+                    })}
                     >${biTrash}</sl-button
                 >
             </div>
@@ -61,11 +65,13 @@ export class ContextMenu {
                     this.selected.updateFn({ ...this.selected.data, label: e.target.value });
                     this.selected.data = { ...this.selected.data, label: e.target.value };
                 }}
+                ?disabled=${!this.parentComponent.settings.permissions.node.change}
             ></sl-input>
 
             <sl-checkbox
                 ?checked=${(this.selected?.data as Node).initial}
-                ?disabled=${(this.selected?.data as Node).initial}
+                ?disabled=${(this.selected?.data as Node).initial ||
+                !this.parentComponent.settings.permissions.node.change}
                 @sl-change=${(e: any) => {
                     console.log('initial', e.target.checked);
                     this.selected.updateFn({ ...this.selected.data, initial: e.target.checked });
@@ -75,6 +81,7 @@ export class ContextMenu {
             >
             <sl-checkbox
                 ?checked=${(this.selected?.data as Node).final}
+                ?disabled=${!this.parentComponent.settings.permissions.node.change}
                 @sl-change=${(e: any) => {
                     this.selected.updateFn({ ...this.selected.data, final: e.target.checked });
                     this.selected.data = { ...this.selected.data, final: e.target.checked };
@@ -98,6 +105,9 @@ export class ContextMenu {
                         this.selected.deleteFn();
                         this.hide();
                     }}
+                    style=${styleMap({
+                        display: this.parentComponent.settings.permissions.edge.delete ? 'block' : 'none',
+                    })}
                     >${biTrash}</sl-button
                 >
             </div>
@@ -107,6 +117,7 @@ export class ContextMenu {
                         <sl-input
                             placeholder="Symbol"
                             value=${symbol}
+                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                             @sl-input=${(e: any) => {
                                 console.log(e.target.value);
                                 const symbols = transition.symbols;
@@ -130,6 +141,9 @@ export class ContextMenu {
                                     this.hide();
                                 }
                             }}
+                            style=${styleMap({
+                                display: this.parentComponent.settings.permissions.edge.delete ? 'block' : 'none',
+                            })}
                             >${biTrash}</sl-button
                         >
                     </div>
@@ -153,6 +167,9 @@ export class ContextMenu {
                         this.selected.deleteFn();
                         this.hide();
                     }}
+                    style=${styleMap({
+                        display: this.parentComponent.settings.permissions.edge.delete ? 'block' : 'none',
+                    })}
                     >${biTrash}</sl-button
                 >
             </div>
@@ -163,6 +180,7 @@ export class ContextMenu {
                             placeholder="Symbol"
                             value=${symbol}
                             size="small"
+                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                             @sl-input=${(e: any) => {
                                 console.log(e.target.value);
                                 const symbols = transition.symbols;
@@ -175,20 +193,47 @@ export class ContextMenu {
                             placeholder="Stack"
                             value=${stackOperations[i].symbol}
                             size="small"
+                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                             @sl-input=${(e: any) => {
-                                const operation = { operation: stackOperations[i].operation, symbol: e.target.value };
+                                const operation = {
+                                    operation: stackOperations[i].operation,
+                                    symbol: e.target.value,
+                                    condition: stackOperations[i].condition,
+                                };
                                 stackOperations[i] = operation as StackOperation;
                                 this.selected.updateFn({ ...transition, stackOperations: stackOperations });
                                 transition = { ...transition, stackOperations: stackOperations };
                             }}
                         ></sl-input>
-                        <sl-button-group label="Alignment">
+                        <sl-input
+                            palceholder="If"
+                            value=${stackOperations[i].condition}
+                            size="small"
+                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                            @sl-input=${(e: any) => {
+                                const operation = {
+                                    operation: stackOperations[i].operation,
+                                    symbol: stackOperations[i].symbol,
+                                    condition: e.target.value,
+                                };
+                                stackOperations[i] = operation as StackOperation;
+                                this.selected.updateFn({ ...transition, stackOperations: stackOperations });
+                                transition = { ...transition, stackOperations: stackOperations };
+                            }}
+                        ></sl-input>
+
+                        <sl-button-group label="Stack Actions">
                             <sl-tooltip content="Push" placement="top">
                                 <sl-button
                                     variant=${stackOperations[i].operation == 'push' ? 'primary' : 'default'}
                                     size="small"
+                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                                     @click=${() => {
-                                        const operation = { operation: 'push', symbol: stackOperations[i].symbol };
+                                        const operation = {
+                                            operation: 'push',
+                                            symbol: stackOperations[i].symbol,
+                                            condition: stackOperations[i].condition,
+                                        };
                                         stackOperations[i] = operation as StackOperation;
                                         this.selected.updateFn({ ...transition, stackOperations: stackOperations });
                                         transition = { ...transition, stackOperations: stackOperations };
@@ -200,8 +245,13 @@ export class ContextMenu {
                                 <sl-button
                                     variant=${stackOperations[i].operation == 'pop' ? 'primary' : 'default'}
                                     size="small"
+                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                                     @click=${() => {
-                                        const operation = { operation: 'pop', symbol: stackOperations[i].symbol };
+                                        const operation = {
+                                            operation: 'pop',
+                                            symbol: stackOperations[i].symbol,
+                                            condition: stackOperations[i].condition,
+                                        };
                                         stackOperations[i] = operation as StackOperation;
                                         this.selected.updateFn({ ...transition, stackOperations: stackOperations });
                                         transition = { ...transition, stackOperations: stackOperations };
@@ -213,8 +263,13 @@ export class ContextMenu {
                                 <sl-button
                                     variant=${stackOperations[i].operation == 'empty' ? 'primary' : 'default'}
                                     size="small"
+                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                                     @click=${() => {
-                                        const operation = { operation: 'empty', symbol: '' };
+                                        const operation = {
+                                            operation: 'empty',
+                                            symbol: '',
+                                            condition: '',
+                                        };
                                         stackOperations[i] = operation as StackOperation;
                                         this.selected.updateFn({ ...transition, stackOperations: stackOperations });
                                         transition = { ...transition, stackOperations: stackOperations };
@@ -226,8 +281,13 @@ export class ContextMenu {
                                 <sl-button
                                     variant=${stackOperations[i].operation == 'none' ? 'primary' : 'default'}
                                     size="small"
+                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                                     @click=${() => {
-                                        const operation = { operation: 'none', symbol: '' };
+                                        const operation = {
+                                            operation: 'none',
+                                            symbol: '',
+                                            condition: stackOperations[i].condition,
+                                        };
                                         stackOperations[i] = operation as StackOperation;
                                         this.selected.updateFn({ ...transition, stackOperations: stackOperations });
                                         transition = { ...transition, stackOperations: stackOperations };
@@ -252,6 +312,9 @@ export class ContextMenu {
                                     this.hide();
                                 }
                             }}
+                            style=${styleMap({
+                                display: this.parentComponent.settings.permissions.edge.delete ? 'block' : 'none',
+                            })}
                             >${biTrash}</sl-button
                         >
                     </div>

@@ -46,7 +46,16 @@ export class ToolMenu extends LitElementWw {
     }
 
     render() {
-        return html` <div class="toolmenu">
+        return html` <div
+            class="toolmenu"
+            style=${styleMap({
+                display:
+                    this._graph.component.settings.permissions.node.add ||
+                    this._graph.component.settings.permissions.edge.add
+                        ? 'flex'
+                        : 'none',
+            })}
+        >
             <sl-button class="toolmenu__button" @click=${this.toggleToolbar} circle size="large">${biPlus}</sl-button>
             <div class="toolmenu__buttons" style=${styleMap({ display: this._visible ? 'flex' : 'none' })}>
                 <sl-tooltip content="Add node" placement="right">
@@ -55,6 +64,9 @@ export class ToolMenu extends LitElementWw {
                         @click=${this.addNode}
                         variant=${this._mode === 'addNode' ? 'primary' : 'default'}
                         circle
+                        style=${styleMap({
+                            display: this._graph.component.settings.permissions.node.add ? 'block' : 'none',
+                        })}
                         >${biNodePlus}
                         <sl-button
                             size="small"
@@ -74,6 +86,9 @@ export class ToolMenu extends LitElementWw {
                         @click=${this.addEdge}
                         variant=${this._mode === 'addEdge' ? 'primary' : 'default'}
                         circle
+                        style=${styleMap({
+                            display: this._graph.component.settings.permissions.edge.add ? 'block' : 'none',
+                        })}
                         >${biShare}
                         <sl-button
                             size="small"
@@ -135,7 +150,7 @@ export class ToolMenu extends LitElementWw {
                 this._graph.automaton.transitions.update({
                     ...edge,
                     symbols: [...edge.symbols, 'a'],
-                    stackOperations: [...edge.stackOperations!, { operation: 'none', symbol: 'a' }],
+                    stackOperations: [...edge.stackOperations!, { operation: 'none', symbol: 'a', condition: '' }],
                 });
             } else {
                 this._graph.automaton.transitions.update({

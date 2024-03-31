@@ -1,6 +1,6 @@
 {
-  "name": "@webwriter/ww-automaton",
-  "version": "0.0.1",
+  "name": "@webwriter/automaton",
+  "version": "0.8.0",
   "keywords": [
     "webwriter-widget"
   ],
@@ -11,6 +11,7 @@
     "@shoelace-style/shoelace": "^2.13.1",
     "@webwriter/lit": "^1.5.2",
     "lit": ">=3.0.0 <4.0.0-0",
+    "randexp": "^0.5.3",
     "uuid": "^9.0.1",
     "vis-data": "^7.1.9",
     "vis-network": "^9.1.9"

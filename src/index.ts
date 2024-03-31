@@ -31,13 +31,21 @@ import { ToolMenu } from './components/ToolMenu';
 import { InfoMenu } from './components/InfoMenu';
 import { SimulatorMenu } from './components/SimulatorMenu';
 
+import { Settings } from './components/Settings';
+
 import { biBoxes, biExclamationTriangle, biPencil } from './styles/icons';
 
 import { styleMap } from 'lit/directives/style-map.js';
+
+import { cache } from 'lit/directives/cache.js';
+import { keyed } from 'lit/directives/keyed.js';
+import { guard } from 'lit/directives/guard.js';
 import { SlChangeEvent } from '@shoelace-style/shoelace';
 import { checkIfNodesUpdated, checkIfTransitionsUpdated, stripNode, stripTransition } from './utils/updates';
 import { NFA } from './automata/nfa';
 import { PDA, StackExtension } from './automata/pda';
+
+import RandExp from 'randexp';
 
 @customElement('ww-automaton')
 export class AutomatonComponent extends LitElementWw {
@@ -69,10 +77,20 @@ export class AutomatonComponent extends LitElementWw {
     @property({ type: String, attribute: true, reflect: true })
     public type: string = 'dfa';
 
+    @property({ type: String, attribute: true, reflect: true })
+    public testLanguage: string = '';
+
+    @property({ type: Array, attribute: true, reflect: true })
+    public testWords: string[] = [];
+
     @property({ type: Boolean, attribute: true, reflect: false })
     public set verbose(v: boolean) {
         AutomatonComponent.verbose = v;
     }
+
+    @property({ type: String, attribute: true, reflect: true })
+    public permissions: string = '777';
+
     public get verbose() {
         return AutomatonComponent.verbose;
     }
@@ -87,6 +105,8 @@ export class AutomatonComponent extends LitElementWw {
     public get graph() {
         return this._graph;
     }
+
+    public settings = new Settings(this);
 
     static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
 
@@ -158,6 +178,16 @@ export class AutomatonComponent extends LitElementWw {
         this.simulatorMenu.automaton = this.automaton;
         this.simulatorMenu.graph = this._graph;
 
+        this.settings = new Settings(this);
+        this.settings.numberStringToPermissions(this.permissions);
+
+        if (this.automaton.extension) {
+            this.automaton.extension.contentEditable = 'true';
+            (this.automaton.extension as StackExtension).add = this.settings.permissions.stack.add;
+            (this.automaton.extension as StackExtension).delete = this.settings.permissions.stack.delete;
+            (this.automaton.extension as StackExtension).change = this.settings.permissions.stack.change;
+        }
+
         AutomatonComponent.log('first updated');
     }
 
@@ -174,6 +204,12 @@ export class AutomatonComponent extends LitElementWw {
             this.automaton.updateAutomaton(this.nodes, this.transitions);
         }
 
+        if (this.automaton && this.automaton.extension) {
+            (this.automaton.extension as StackExtension).add = this.settings.permissions.stack.add;
+            (this.automaton.extension as StackExtension).delete = this.settings.permissions.stack.delete;
+            (this.automaton.extension as StackExtension).change = this.settings.permissions.stack.change;
+        }
+
         AutomatonComponent.log('will update');
     }
 
@@ -186,10 +222,11 @@ export class AutomatonComponent extends LitElementWw {
         this.toolMenu?.requestUpdate();
         this.simulatorMenu?.requestUpdate();
         this.infoMenu?.requestUpdate();
+        this.topMenu?.requestUpdate();
     }
 
     public render(): TemplateResult {
-        return html` ${this.renderEditor()} ${this.renderSettings()} `;
+        return html` ${this.renderEditor()} ${guard([this.settings], () => this.renderSettings())} `;
     }
 
     private renderEditor(): TemplateResult {
@@ -207,20 +244,13 @@ export class AutomatonComponent extends LitElementWw {
                     id="toolMenu"
                     style=${styleMap({ display: this._mode === 'edit' ? 'flex' : 'none' })}
                 ></ww-automaton-toolmenu>
-                ${this.automaton.extension}
+                ${guard([this.permissions, this.automaton], () => this.automaton.extension)}
             </div>
         `;
     }
 
     private renderSettings(): TemplateResult {
-        return html`
-            <aside part="options">
-                <h2>Options</h2>
-                <sl-checkbox ?checked=${this.verbose} @sl-change=${(e: any) => (this.verbose = e.target.checked)}>
-                    Verbose
-                </sl-checkbox>
-            </aside>
-        `;
+        return html` <aside class="settings" part="options">${this.settings.render()}</aside> `;
     }
 
     protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
@@ -239,12 +269,16 @@ export class AutomatonComponent extends LitElementWw {
                     if (this._mode === 'edit') {
                         this.simulatorMenu.reset();
                         this._graph.requestUpdate();
+                        this._graph.setInteractve(true);
+                        if (this.automaton.extension) this.automaton.extension.contentEditable = 'true';
                     }
 
                     if (this._mode === 'simulate') {
                         this.automaton.redrawNodes();
                         this.simulatorMenu.init();
+                        this._graph.setInteractve(false);
                         this.automaton.highlightNode(this.automaton.getInitialNode());
+                        if (this.automaton.extension) this.automaton.extension.contentEditable = 'false';
                     }
                 }}
             >

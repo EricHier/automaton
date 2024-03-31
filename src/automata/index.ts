@@ -28,6 +28,7 @@ export interface Transition extends EdgeOptions {
 export interface StackOperation {
     symbol: string;
     operation: 'push' | 'pop' | 'empty' | 'none';
+    condition: string;
 }
 
 interface FormalDefinition {
@@ -144,6 +145,11 @@ export abstract class Automaton {
             final,
             shape: final ? 'custom' : 'circle',
         });
+    }
+
+    public hasTransitionSymbol(node: Node, symbol: string): boolean {
+        const transitions = this.getTransitionsFromNode(node);
+        return transitions.some((t) => t.symbols.includes(symbol));
     }
 
     /* GETTERS */

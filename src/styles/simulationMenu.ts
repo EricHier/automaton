@@ -20,10 +20,12 @@ export const simulationMenuStyles = css`
 
     .simulator__input.danger::part(base) {
         border-color: var(--sl-color-danger-600);
+        background-color: var(--sl-color-danger-50);
     }
 
     .simulator__input.success::part(base) {
         border-color: var(--sl-color-success-600);
+        background-color: var(--sl-color-success-50);
     }
 
     .simulator__input.danger:focus-within::part(base) {
@@ -105,11 +107,13 @@ export const simulationMenuStyles = css`
         justify-content: start;
     }
 
-    .simulator__input-display__input.danger {
+    .simulator__input-display.danger {
         border-color: var(--sl-color-danger-600);
+        background-color: var(--sl-color-danger-50);
     }
 
-    .simulator__input-display__input.success {
+    .simulator__input-display.success {
         border-color: var(--sl-color-success-600);
+        background-color: var(--sl-color-success-50);
     }
 `;

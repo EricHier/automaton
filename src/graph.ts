@@ -32,6 +32,8 @@ export class Graph {
         return this._cm;
     }
 
+    private _interactive: boolean = true;
+
     private _tm: ToolMenu;
 
     private _hovered!: Node | Transition | null;
@@ -75,7 +77,7 @@ export class Graph {
         this._a = a;
         this._ac = ac;
         this._tm = tm;
-        this._cm = new ContextMenu();
+        this._cm = new ContextMenu(ac);
         this._cm.requestUpdate = this._requestUpdate;
 
         const options = {
@@ -118,6 +120,27 @@ export class Graph {
         this._errors = this._a.checkAutomaton();
         this.displayErrors();
         this.setupListeners();
+    }
+
+    public setInteractve(interactive: boolean): void {
+        this._interactive = interactive;
+        if (this._interactive) {
+            this._n.setOptions({
+                interaction: {
+                    dragNodes: true,
+                    // dragView: true,
+                    // zoomView: true,
+                },
+            });
+        } else {
+            this._n.setOptions({
+                interaction: {
+                    dragNodes: false,
+                    // dragView: false,
+                    // zoomView: false,
+                },
+            });
+        }
     }
 
     public setAutomaton(automaton: Automaton): void {
@@ -164,6 +187,8 @@ export class Graph {
         });
         this._n.on('oncontext', (e: any) => {
             e.event.preventDefault();
+
+            if (!this._interactive) return;
 
             if (!this._hovered) {
                 this._cm.blur();

@@ -11,6 +11,7 @@ import SlInput from '@shoelace-style/shoelace/dist/components/input/input.compon
 import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js';
 import { biTrash } from '../styles/icons';
 import { Graph } from '../graph';
+import { styleMap } from 'lit/directives/style-map.js';
 
 export class PDA extends Automaton {
     public simulator: Simulator;
@@ -49,20 +50,20 @@ export class PDA extends Automaton {
     }
 
     public getTransitionLabel(transition: Transition): string {
-        console.log('getTransitionLabel', transition);
         if (transition.stackOperations) {
             const operations = transition.stackOperations;
             const parts = transition.symbols.map((s, i) => {
+                const stackSymbol = operations[i].condition || 'X';
                 if (s === '') s = 'ε';
                 switch (operations[i].operation) {
                     case 'push':
-                        return `${s},X|${operations[i].symbol}X`;
+                        return `${s},${stackSymbol}|${operations[i].symbol}${stackSymbol}`;
                     case 'pop':
                         return `${s},${operations[i].symbol}|ε`;
                     case 'empty':
                         return `${s},Γ₀|Γ₀`;
                     default:
-                        return `${s},X|X`;
+                        return `${s},${stackSymbol}|${stackSymbol}`;
                 }
             });
             return parts.join('\n');
@@ -82,6 +83,7 @@ class PDASimulator extends Simulator {
     private _previousTransitions: {
         node: Node;
         transitionSymbol: string;
+        stackOperation: { operation: string; symbol: string };
     }[] = [];
 
     private _mode: 'simulation' | 'stepByStep' = 'simulation';
@@ -149,6 +151,10 @@ class PDASimulator extends Simulator {
             };
         }
 
+        if (word.length === 0 && state.final) {
+            return { success: true, message: 'Accepted', path: [{ node: state, symbol: '', stack }] };
+        }
+
         AutomatonComponent.log(
             'Simulating from state',
             [state.label],
@@ -167,6 +173,7 @@ class PDASimulator extends Simulator {
                 const stackOperation = transition.stackOperations![i];
 
                 if (symbol !== word[0] && symbol !== '') continue;
+                if (stackOperation.condition && stackOperation.condition !== stack[stack.length - 1]) continue;
 
                 const newStack = [...stack];
 
@@ -256,14 +263,158 @@ class PDASimulator extends Simulator {
             wordPosition: this._currentStep,
         });
     }
-    public initStepByStep(): { graphInteraction: boolean } {
+
+    public initStepByStep(graph: Graph, cb: Function): { graphInteraction: boolean } {
+        this._currentNode = this._a.getInitialNode() as Node;
+        this._currentStep = 0;
+        this._currentWordPosition = 0;
+
+        this._mode = 'stepByStep';
+
+        this.highlightPossibleTransitions(this._currentNode);
+
+        if (this._graph !== graph) {
+            this._graph = graph;
+
+            this._graph?.network.on('selectEdge', (e) => {
+                this._graph?.network.selectEdges([]);
+                if (this._mode !== 'stepByStep') return;
+
+                const transition = this._a.getTransition(e.edges[0]);
+
+                if (!transition) return;
+                if (!this.isValidTransition(transition)) return;
+
+                const posibleSymbols = transition.symbols.filter(
+                    (s) => s == '' || s == this._word[this._currentWordPosition]
+                );
+
+                if (posibleSymbols.length > 1) {
+                    const dialog = document.createElement('dialog');
+
+                    const buttons = posibleSymbols.map((s, i) => {
+                        const button = document.createElement('button');
+                        button.innerHTML = s === '' ? 'ε' : s;
+                        button.addEventListener('click', () => {
+                            dialog.close();
+                            this._a.clearHighlights();
+
+                            const stackOperation = transition.stackOperations![i];
+
+                            if (stackOperation.operation === 'push') {
+                                this._a.extension.push(stackOperation.symbol);
+                            }
+
+                            if (stackOperation.operation === 'pop') {
+                                stackOperation.symbol = this._a.extension.getTopItem();
+                                this._a.extension.pop();
+                            }
+
+                            this._previousTransitions.push({
+                                node: this._currentNode,
+                                transitionSymbol: s,
+                                stackOperation,
+                            });
+
+                            this._currentNode = this._a.getNode(transition.to) as Node;
+                            this._currentStep++;
+
+                            if (s !== '') {
+                                this._currentWordPosition++;
+                            }
+
+                            this._a.highlightNode(this._currentNode);
+                            this.highlightPossibleTransitions(this._currentNode);
+                            cb({
+                                success:
+                                    this._currentWordPosition >= this._word.length
+                                        ? this._currentNode.final
+                                        : undefined,
+                                message: '',
+                                wordPosition: this._currentWordPosition,
+                            });
+                            dialog.remove();
+                        });
+                        return button;
+                    });
+
+                    dialog.append(...buttons);
+                    graph.component.shadowRoot?.appendChild(dialog);
+                    dialog.showModal();
+                    return;
+                }
+
+                const stackOperation = transition.stackOperations![transition.symbols.indexOf(posibleSymbols[0])];
+
+                if (stackOperation.operation === 'push') {
+                    this._a.extension.push(stackOperation.symbol);
+                }
+
+                if (stackOperation.operation === 'pop') {
+                    stackOperation.symbol = this._a.extension.getTopItem();
+                    this._a.extension.pop();
+                }
+
+                const to = this._a.getNode(transition.to) as Node;
+
+                this._previousTransitions.push({
+                    node: this._currentNode,
+                    transitionSymbol: posibleSymbols[0],
+                    stackOperation,
+                });
+
+                this._currentNode = to;
+                this._currentStep++;
+
+                if (posibleSymbols[0] !== '') {
+                    this._currentWordPosition++;
+                }
+
+                this._a.clearHighlights();
+                this._a.highlightNode(to);
+                this.highlightPossibleTransitions(to);
+                cb({
+                    success: undefined,
+                    message: '',
+                    wordPosition: this._currentWordPosition,
+                });
+            });
+        }
+
+        return { graphInteraction: true };
+    }
+    public stepForward(): SimulationFeedback {
         throw new Error('Method not implemented.');
     }
-    public stepForward(highlight: boolean): SimulationFeedback {
-        throw new Error('Method not implemented.');
-    }
-    public stepBackward(highlight: boolean): SimulationFeedback {
-        throw new Error('Method not implemented.');
+    public stepBackward(): SimulationFeedback {
+        console.log('StepBackward', this._previousTransitions, this._currentStep, this._currentWordPosition);
+
+        this._a.clearHighlights();
+        if (this._previousTransitions[this._currentStep - 1].transitionSymbol !== '') {
+            this._currentWordPosition--;
+        }
+
+        this._currentNode = this._previousTransitions[this._currentStep - 1].node;
+        this._a.highlightNode(this._currentNode);
+        this.highlightPossibleTransitions(this._currentNode);
+
+        if (this._previousTransitions[this._currentStep - 1].stackOperation.operation === 'push') {
+            this._a.extension.pop();
+        }
+
+        if (this._previousTransitions[this._currentStep - 1].stackOperation.operation === 'pop') {
+            this._a.extension.push(this._previousTransitions[this._currentStep - 1].stackOperation.symbol);
+        }
+
+        this._previousTransitions.pop();
+
+        this._currentStep--;
+        return {
+            success: undefined,
+            message: '',
+            wordPosition: this._currentWordPosition,
+            firstStep: this._currentStep === 0,
+        };
     }
 
     private isValidTransition(transition: Transition): boolean {
@@ -277,7 +428,28 @@ class PDASimulator extends Simulator {
     private highlightPossibleTransitions(node: Node): void {
         const transitions = this._a.getTransitionsFromNode(node);
         const currentSymbol = this._word[this._currentWordPosition];
-        const validTransitions = transitions.filter((t) => t.symbols.includes(currentSymbol) || t.symbols.includes(''));
+        const stack = this._a.extension.getStack();
+
+        console.log(stack);
+
+        let validTransitions = transitions.filter((t) => t.symbols.includes(currentSymbol) || t.symbols.includes(''));
+        validTransitions = validTransitions.filter((t) => {
+            for (let i = 0; i < t.stackOperations!.length; i++) {
+                const symbol = t.symbols[i];
+                const stackOperation = t.stackOperations![i];
+
+                let validStackOperation: boolean = false;
+                if (stackOperation.operation === 'none') validStackOperation = true;
+                if (stackOperation.operation === 'push') validStackOperation = true;
+                if (stackOperation.operation === 'pop' && stack[0] === stackOperation.symbol)
+                    validStackOperation = true;
+                if (stackOperation.operation === 'empty' && stack.length === 0) validStackOperation = true;
+
+                if (validStackOperation && (symbol == currentSymbol || symbol == '')) return true;
+            }
+
+            return false;
+        });
 
         validTransitions.forEach((t) => {
             this._a.highlightTransition(t);
@@ -309,6 +481,15 @@ export class StackExtension extends LitElementWw {
 
     @property({ type: Array }) public stack: StackItem[] = [];
 
+    @property({ type: String, attribute: true, reflect: true })
+    public add: boolean = true;
+
+    @property({ type: String, attribute: true, reflect: true })
+    public delete: boolean = true;
+
+    @property({ type: String, attribute: true, reflect: true })
+    public change: boolean = true;
+
     static get styles() {
         return stackStyles;
     }
@@ -327,17 +508,15 @@ export class StackExtension extends LitElementWw {
         };
     }
 
+    private isEditable(): boolean {
+        return this.contentEditable === 'true';
+    }
+
     constructor() {
         super();
         this._stack.on('*', () => {
             this.stack = [...this._stack.get()];
         });
-
-        // this._stack.add([{ id: 0, symbol: '0' }]);
-        // this._stack.add([{ id: 1, symbol: '1' }]);
-        // this._stack.add([{ id: 2, symbol: '2' }]);
-        // this._stack.add([{ id: 3, symbol: '3' }]);
-        // this._stack.add([{ id: 4, symbol: '4' }]);
     }
 
     public getStack(): string[] {
@@ -346,7 +525,7 @@ export class StackExtension extends LitElementWw {
 
     public setStack(stack: string[]): void {
         this._stack.clear();
-        this._stack.add(stack.map((s, i) => ({ id: i, symbol: s })));
+        this._stack.add(stack.reverse().map((s, i) => ({ id: i, symbol: s })));
     }
 
     public push(symbol: string): void {
@@ -355,6 +534,10 @@ export class StackExtension extends LitElementWw {
 
     public pop(): void {
         this.popItemFromStack();
+    }
+
+    public getTopItem(): string {
+        return this._stack.get(0)?.symbol || '';
     }
 
     public checkEmpty(): boolean {
@@ -371,15 +554,18 @@ export class StackExtension extends LitElementWw {
             <div class="pda__stack-title">Stack</div>
             <sl-button
                 class="pda__stack-button"
+                style=${styleMap({ display: this.isEditable() ? 'block' : 'none' })}
                 size="small"
                 id="pda__stack-button"
                 circle
+                ?disabled=${!this.add}
                 @click=${() => {
                     this.pushItemToStack('a');
                     this.requestUpdate();
                 }}
                 @dragover=${(e: DragEvent) => {
                     e.preventDefault();
+                    if (!this.delete) return;
                     this.clearDropMarkers();
                     this._stackButton.classList.add('dragover');
                     this._draggingElement.classList.add('deleteable');
@@ -389,7 +575,7 @@ export class StackExtension extends LitElementWw {
                     this._stackButton.classList.remove('dragover');
                     this._draggingElement.classList.remove('deleteable');
                 }}
-                >${this._dragging ? biTrash : '+'}</sl-button
+                >${this._dragging && this.delete ? biTrash : '+'}</sl-button
             >
             <div
                 class="pda__stack-items"
@@ -439,7 +625,7 @@ export class StackExtension extends LitElementWw {
                             @dragover=${(e: DragEvent) => {
                                 e.preventDefault();
                             }}
-                            draggable="true"
+                            draggable=${this.isEditable() && this.change ? 'true' : 'false'}
                             data-index=${i}
                         >
                             <sl-tooltip content=${s.symbol} placement="left" class="pda__stack-item__tooltip">
@@ -448,6 +634,7 @@ export class StackExtension extends LitElementWw {
                                     @sl-input=${(e: Event) =>
                                         this.changeStackSymbol(i, (e.target as HTMLInputElement).value)}
                                     value=${s.symbol}
+                                    ?disabled=${!this.isEditable() || !this.change}
                                 ></sl-input>
                             </sl-tooltip>
                         </div>

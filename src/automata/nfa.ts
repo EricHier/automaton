@@ -96,6 +96,10 @@ class NFASimulator extends Simulator {
             };
         }
 
+        if (word.length === 0 && state.final) {
+            return { success: true, message: 'Accepted', path: [{ node: state, symbol: '' }] };
+        }
+
         AutomatonComponent.log(
             'Simulating from state',
             [state.label],
@@ -260,7 +264,7 @@ class NFASimulator extends Simulator {
                 this._currentNode = to;
                 this._currentStep++;
 
-                if (transition.symbols[0] !== '') {
+                if (posibleSymbols[0] !== '') {
                     this._currentWordPosition++;
                 }
 

@@ -1,7 +1,7 @@
 import { LitElement, PropertyValueMap, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
-import { biArrowLeftRight, biCodeSlash, biFullscreen, biFullscreenExit, biGear } from '../styles/icons';
+import { biArrowLeftRight, biClipboard, biCodeSlash, biFullscreen, biFullscreenExit, biGear } from '../styles/icons';
 
 import '@shoelace-style/shoelace/dist/themes/light.css';
 import SlButton from '@shoelace-style/shoelace/dist/components/button/button.component.js';
@@ -16,6 +16,7 @@ import { LitElementWw } from '@webwriter/lit';
 import { SimulatorMenu } from './SimulatorMenu';
 import { Graph } from '../graph';
 import { stripNode, stripTransition } from '../utils/updates';
+import RandExp from 'randexp';
 
 @customElement('ww-automaton-topmenu')
 export class TopMenu extends LitElementWw {
@@ -23,6 +24,9 @@ export class TopMenu extends LitElementWw {
     private _component!: AutomatonComponent;
     public set component(component: AutomatonComponent) {
         this._component = component;
+    }
+    public get component(): AutomatonComponent {
+        return this._component;
     }
 
     @property({ type: Boolean, attribute: false })
@@ -54,19 +58,6 @@ export class TopMenu extends LitElementWw {
             <div class="topmenu__button_group">
                 <sl-button
                     class="topmenu__button"
-                    variant="primary"
-                    @click=${() => {
-                        console.log(this._component.automaton);
-                        this.requestUpdate();
-                    }}
-                    circle
-                >
-                    Test</sl-button
-                >
-            </div>
-            <div class="topmenu__button_group">
-                <sl-button
-                    class="topmenu__button"
                     @click=${() => {
                         if (this._fullscreen) document.exitFullscreen();
                         else this._component.requestFullscreen();
@@ -78,6 +69,61 @@ export class TopMenu extends LitElementWw {
             </div>
             <div class="topmenu__button_group">
                 <sl-button class="topmenu__button" circle>${biGear}</sl-button>
+            </div>
+            <div
+                class="topmenu__button_group"
+                style=${this.component.testLanguage == '' && this.component.testWords.length == 0 ? 'display:none' : ''}
+            >
+                <sl-popup placement="bottom-end" distance="8" arrow>
+                    <sl-button
+                        slot="anchor"
+                        class="topmenu__button"
+                        @click=${(e: Event) => {
+                            const popup = (e.target as HTMLElement).closest('sl-popup') as SlPopup;
+                            popup.active = !popup.active;
+                        }}
+                        circle
+                    >
+                        ${biClipboard}</sl-button
+                    >
+                    <div class="topmenu__popup">
+                        <b>Language: </b>${this.component.testLanguage}
+                        <br />
+                        <sl-button
+                            @click=${(e: Event) => {
+                                const reg = new RegExp(this.component.testLanguage);
+                                const randexp = new RandExp(reg);
+                                let accepted = true;
+                                for (let i = 0; i < 10; i++) {
+                                    const word = randexp.gen();
+                                    this.component.automaton.simulator.word = word;
+                                    this.component.automaton.simulator.init();
+                                    const res = this.component.automaton.simulator.simulate();
+                                    accepted &&= res.success;
+                                }
+                                this.component.automaton.simulator.word = '';
+                                this.component.automaton.simulator.init();
+
+                                (e.target as SlButton).variant = accepted ? 'success' : 'danger';
+                            }}
+                            >Check Automaton</sl-button
+                        >
+
+                        ${this.component.testWords.map(
+                            (word) => html`<sl-button
+                                @click=${(e: Event) => {
+                                    this.component.automaton.simulator.word = word;
+                                    this.component.automaton.simulator.init();
+                                    const res = this.component.automaton.simulator.simulate();
+                                    (e.target as SlButton).variant = res.success ? 'success' : 'danger';
+                                    this.component.automaton.simulator.word = '';
+                                    this.component.automaton.simulator.init();
+                                }}
+                                >${word}</sl-button
+                            >`
+                        )}
+                    </div>
+                </sl-popup>
             </div>
             <div class="topmenu__button_group">
                 <sl-popup placement="bottom-end" distance="8" arrow>
@@ -108,6 +154,28 @@ export class TopMenu extends LitElementWw {
                 <sl-tooltip content="Transformations" placement="bottom">
                     <sl-button class="topmenu__button" circle>${biArrowLeftRight}</sl-button>
                 </sl-tooltip>
+                <div class="topmenu__buttons">
+                    <!-- <sl-tooltip content="Minimize" placement="left">
+                        <sl-button class="topmenu__button" size="small" circle>Min</sl-button>
+                    </sl-tooltip>
+                    <sl-tooltip content="Determinize" placement="left">
+                        <sl-button class="topmenu__button" size="small" circle>Det</sl-button>
+                    </sl-tooltip> -->
+                    <sl-tooltip content="Add Sinkstate" placement="left">
+                        <sl-button
+                            class="topmenu__button"
+                            size="small"
+                            circle
+                            @click=${() => {
+                                transformations.AddSinkstateToDFA(this._component.automaton);
+                            }}
+                            >Sink</sl-button
+                        >
+                    </sl-tooltip>
+                    <!-- <sl-tooltip content="Remove Unreachable States" placement="left">
+                        <sl-button class="topmenu__button" size="small" circle>Unr</sl-button>
+                    </sl-tooltip> -->
+                </div>
             </div>
             <div class="topmenu__button_group">
                 <sl-tooltip content="Automaton Type" placement="left">
