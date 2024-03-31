@@ -18,7 +18,7 @@ import { Graph } from '../graph';
 import { stripNode, stripTransition } from '../utils/updates';
 import RandExp from 'randexp';
 
-@customElement('ww-automaton-topmenu')
+@customElement('webwriter-automaton-topmenu')
 export class TopMenu extends LitElementWw {
     @property({ type: Object, attribute: false })
     private _component!: AutomatonComponent;

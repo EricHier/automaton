@@ -14,7 +14,7 @@ import { biExclamationOctagon, biInfo } from '../styles/icons';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-@customElement('ww-automaton-infomenu')
+@customElement('webwriter-automaton-infomenu')
 export class InfoMenu extends LitElement {
     @property({ type: Boolean, attribute: false })
     private infoCardOpen = false;

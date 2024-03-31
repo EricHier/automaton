@@ -27,7 +27,7 @@ import { LitElementWw } from '@webwriter/lit';
 import { Network } from 'vis-network';
 import { Graph } from '../graph';
 
-@customElement('ww-automaton-simulatormenu')
+@customElement('webwriter-automaton-simulatormenu')
 export class SimulatorMenu extends LitElementWw {
     @state()
     private _automaton!: Automaton;

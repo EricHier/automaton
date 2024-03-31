@@ -11,7 +11,7 @@ import { Graph } from '../graph';
 import { toolMenuStyles } from '../styles/toolMenu';
 import { LitElementWw } from '@webwriter/lit';
 
-@customElement('ww-automaton-toolmenu')
+@customElement('webwriter-automaton-toolmenu')
 export class ToolMenu extends LitElementWw {
     @property({ type: Boolean, attribute: false })
     private _visible = false;

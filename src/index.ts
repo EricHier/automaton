@@ -47,7 +47,7 @@ import { PDA, StackExtension } from './automata/pda';
 
 import RandExp from 'randexp';
 
-@customElement('ww-automaton')
+@customElement('webwriter-automaton')
 export class AutomatonComponent extends LitElementWw {
     @query('#graphCanvas') private graphCanvas!: HTMLElement;
     @query('#toolMenu') private toolMenu!: ToolMenu;
@@ -148,10 +148,10 @@ export class AutomatonComponent extends LitElementWw {
             'sl-select': SlSelect,
             'sl-option': SlOption,
             'sl-dialog': SlDialog,
-            'ww-automaton-toolmenu': ToolMenu,
-            'ww-automaton-simulatormenu': SimulatorMenu,
-            'ww-automaton-infomenu': InfoMenu,
-            'ww-automaton-topmenu': TopMenu,
+            'webwriter-automaton-toolmenu': ToolMenu,
+            'webwriter-automaton-simulatormenu': SimulatorMenu,
+            'webwriter-automaton-infomenu': InfoMenu,
+            'webwriter-automaton-topmenu': TopMenu,
             'stack-extension': StackExtension,
             'sl-icon': SlIcon,
             'sl-icon-button': SlIconButton,
@@ -234,16 +234,16 @@ export class AutomatonComponent extends LitElementWw {
             <div class="editor">
                 <div id="graphCanvas"></div>
                 ${this._graph?.contextMenu.render()} ${this.renderModeSwitch()} ${this._graph?.renderErrorDisplay()}
-                <!-- <ww-automaton-infomenu id="infoMenu"></ww-automaton-infomenu> -->
-                <ww-automaton-topmenu id="topMenu"></ww-automaton-topmenu>
-                <ww-automaton-simulatormenu
+                <!-- <webwriter-automaton-infomenu id="infoMenu"></webwriter-automaton-infomenu> -->
+                <webwriter-automaton-topmenu id="topMenu"></webwriter-automaton-topmenu>
+                <webwriter-automaton-simulatormenu
                     id="simulatorMenu"
                     style=${styleMap({ display: this._mode === 'simulate' ? 'flex' : 'none' })}
-                ></ww-automaton-simulatormenu>
-                <ww-automaton-toolmenu
+                ></webwriter-automaton-simulatormenu>
+                <webwriter-automaton-toolmenu
                     id="toolMenu"
                     style=${styleMap({ display: this._mode === 'edit' ? 'flex' : 'none' })}
-                ></ww-automaton-toolmenu>
+                ></webwriter-automaton-toolmenu>
                 ${guard([this.permissions, this.automaton], () => this.automaton.extension)}
             </div>
         `;
@@ -315,7 +315,7 @@ export class AutomatonComponent extends LitElementWw {
 
     static log(...args: any[]) {
         if (this.verbose) {
-            console.log('[ww-automaton]', ...args);
+            console.log('[webwriter-automaton]', ...args);
         }
     }
 }

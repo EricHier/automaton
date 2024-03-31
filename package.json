@@ -20,7 +20,7 @@
     "@types/uuid": "^9.0.7"
   },
   "exports": {
-    "./widgets/ww-automaton": "./src/index.ts",
+    "./widgets/webwriter-automaton": "./src/index.ts",
     "./snippets/dfa-simple": "./snippets/dfa/example-simple.html",
     "./snippets/dfa-complex": "./snippets/dfa/example-complex.html",
     "./snippets/nfa-simple": "./snippets/nfa/example-simple.html",
@@ -29,7 +29,7 @@
     "./snippets/pda-complex": "./snippets/pda/example-complex.html"
   },
   "editingConfig": {
-    "./widgets/ww-automaton": {
+    "./widgets/webwriter-automaton": {
       "label": {
         "de": "Automat",
         "en": "Automaton"
