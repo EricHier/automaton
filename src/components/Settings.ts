@@ -1,7 +1,7 @@
 import { biGear } from '../styles/icons';
 import { AutomatonComponent } from '../';
 import { html } from 'lit';
-import { SlChangeEvent, SlCheckbox, SlInput } from '@shoelace-style/shoelace';
+import { SlChangeEvent, SlCheckbox, SlInput, SlSelect } from '@shoelace-style/shoelace';
 
 import { live } from 'lit/directives/live.js';
 
@@ -174,11 +174,66 @@ export class Settings {
                         </td>
                     </tr>
                 </table>
+                <sl-select
+                    label="Automaton Types"
+                    .value=${this.parentComponent.allowedTypes}
+                    value=${this.parentComponent.allowedTypes.join(' ')}
+                    multiple
+                    @sl-change=${(e: SlChangeEvent) => {
+                        this.parentComponent.allowedTypes = (e.target as SlSelect).value as string[];
+                        this.parentComponent.requestUpdate();
+                    }}
+                >
+                    <sl-option value="nfa">NFA</sl-option>
+                    <sl-option value="dfa">DFA</sl-option>
+                    <sl-option value="pda">PDA</sl-option>
+                </sl-select>
+                <sl-select
+                    label="Transformations"
+                    .value=${this.parentComponent.allowedTransformations}
+                    value=${this.parentComponent.allowedTransformations.join(' ')}
+                    multiple
+                    @sl-change=${(e: SlChangeEvent) => {
+                        this.parentComponent.allowedTransformations = (e.target as SlSelect).value as string[];
+                        this.parentComponent.requestUpdate();
+                    }}
+                >
+                    <sl-option value="sink">Sinkstate</sl-option>
+                </sl-select>
             </sl-details>
             <sl-details summary="View">
+                <sl-switch
+                    value=${this.parentComponent.showHelp == 'true' ? true : false}
+                    ?checked=${this.parentComponent.showHelp == 'true' ? true : false}
+                    @sl-change=${(e: SlChangeEvent) => {
+                        this.parentComponent.showHelp = (e.target as SlCheckbox).checked ? 'true' : 'false';
+                        this.parentComponent.automaton.showErrors = (e.target as SlCheckbox).checked;
+                        this.parentComponent.requestUpdate();
+                    }}
+                    >Show Help</sl-switch
+                >
+                <sl-switch
+                    value=${this.parentComponent.showFromalDefinition == 'true' ? true : false}
+                    ?checked=${this.parentComponent.showFromalDefinition == 'true' ? true : false}
+                    @sl-change=${(e: SlChangeEvent) => {
+                        this.parentComponent.showFromalDefinition = (e.target as SlCheckbox).checked ? 'true' : 'false';
+                        this.parentComponent.requestUpdate();
+                    }}
+                    >Show Formal Definition</sl-switch
+                >
+                <sl-switch
+                    value=${this.parentComponent.showTransitionsTable == 'true' ? true : false}
+                    ?checked=${this.parentComponent.showTransitionsTable == 'true' ? true : false}
+                    @sl-change=${(e: SlChangeEvent) => {
+                        this.parentComponent.showTransitionsTable = (e.target as SlCheckbox).checked ? 'true' : 'false';
+                        this.parentComponent.requestUpdate();
+                    }}
+                    >Show Transitions Table</sl-switch
+                >
+
                 <sl-select label="PDA Label Style">
                     <sl-option>a, X|aX</sl-option>
-                    <sl-option>a -> aa|a</sl-option>
+                    <!-- <sl-option>a -> aa|a</sl-option> -->
                 </sl-select>
             </sl-details>
             <sl-details summary="Automation">
@@ -194,7 +249,25 @@ export class Settings {
                     label="Test Words"
                     value=${this.parentComponent.testWords.join(',')}
                     @sl-input=${(e: SlChangeEvent) => {
+                        if ((e.target as SlInput).value === '') {
+                            this.parentComponent.testWords = [];
+                            this.parentComponent.requestUpdate();
+                            return;
+                        }
                         this.parentComponent.testWords = (e.target as SlInput).value.split(',');
+                        this.parentComponent.requestUpdate();
+                    }}
+                ></sl-input>
+                <sl-input
+                    label="Predefined Alphabet"
+                    value=${this.parentComponent.forcedAlphabet.join(',')}
+                    @sl-input=${(e: SlChangeEvent) => {
+                        if ((e.target as SlInput).value === '') {
+                            this.parentComponent.forcedAlphabet = [];
+                            this.parentComponent.requestUpdate();
+                            return;
+                        }
+                        this.parentComponent.forcedAlphabet = (e.target as SlInput).value.split(',');
                         this.parentComponent.requestUpdate();
                     }}
                 ></sl-input>

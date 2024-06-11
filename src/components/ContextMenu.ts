@@ -1,10 +1,12 @@
 import { Transition, Node, StackOperation } from '../automata';
 import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
-import { contextMenuStyles } from '../styles/contextMenu';
 import { biDatabase, biDatabaseAdd, biDatabaseDash, biDatabaseSlash, biTrash } from '../styles/icons';
 import { AutomatonComponent } from 'index';
 
+/**
+ * Represents a context menu component that provides options for interacting with nodes and edges.
+ */
 export class ContextMenu {
     private selected: {
         data: Transition | Node;
@@ -114,18 +116,40 @@ export class ContextMenu {
             ${transition.symbols.map(
                 (symbol, i) => html`
                     <div class="context-menu__input-group">
-                        <sl-input
-                            placeholder="Symbol"
-                            value=${symbol}
-                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                            @sl-input=${(e: any) => {
-                                console.log(e.target.value);
-                                const symbols = transition.symbols;
-                                symbols[i] = e.target.value;
-                                this.selected.updateFn({ ...transition, symbols });
-                                transition = { ...transition, symbols };
-                            }}
-                        ></sl-input>
+                        ${this.parentComponent.forcedAlphabet.length > 0
+                            ? html`
+                                  <sl-select
+                                      placeholder="Symbol"
+                                      value=${symbol}
+                                      size="small"
+                                      ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                                      @sl-change=${(e: any) => {
+                                          console.log(e.target.value);
+                                          const symbols = transition.symbols;
+                                          symbols[i] = e.target.value;
+                                          this.selected.updateFn({ ...transition, symbols });
+                                          transition = { ...transition, symbols };
+                                      }}
+                                  >
+                                      ${this.parentComponent.forcedAlphabet.map(
+                                          (symbol) => html`<sl-option value=${symbol}>${symbol}</sl-option>`
+                                      )}
+                                  </sl-select>
+                              `
+                            : html`
+                                  <sl-input
+                                      placeholder="Symbol"
+                                      value=${symbol}
+                                      ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                                      @sl-input=${(e: any) => {
+                                          console.log(e.target.value);
+                                          const symbols = transition.symbols;
+                                          symbols[i] = e.target.value;
+                                          this.selected.updateFn({ ...transition, symbols });
+                                          transition = { ...transition, symbols };
+                                      }}
+                                  ></sl-input>
+                              `}
                         <sl-button
                             class="context-menu__button"
                             circle
@@ -149,6 +173,22 @@ export class ContextMenu {
                     </div>
                 `
             )}
+            <sl-range
+                label="Bend"
+                min="-100"
+                max="100"
+                style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);--track-active-offset: 50%;"
+                value=${(transition.smooth as any)?.roundness ? (transition.smooth as any).roundness * 100 : 0}
+                @sl-input=${(e: any) => {
+                    const value = e.target.value;
+                    this.selected.updateFn({
+                        ...transition,
+                        smooth: { type: value < 0 ? 'curvedCCW' : 'curvedCW', roundness: Math.abs(value / 100) },
+                    });
+
+                    console.log(e.target.value);
+                }}
+            ></sl-range>
         `;
     }
 
@@ -318,6 +358,25 @@ export class ContextMenu {
                             >${biTrash}</sl-button
                         >
                     </div>
+                    <sl-range
+                        label="Bend"
+                        min="-100"
+                        max="100"
+                        style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);--track-active-offset: 50%;"
+                        value=${(transition.smooth as any)?.roundness ? (transition.smooth as any).roundness * 100 : 0}
+                        @sl-input=${(e: any) => {
+                            const value = e.target.value;
+                            this.selected.updateFn({
+                                ...transition,
+                                smooth: {
+                                    type: value < 0 ? 'curvedCCW' : 'curvedCW',
+                                    roundness: Math.abs(value / 100),
+                                },
+                            });
+
+                            console.log(e.target.value);
+                        }}
+                    ></sl-range>
                 `
             )}
         `;

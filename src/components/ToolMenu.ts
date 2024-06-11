@@ -1,4 +1,4 @@
-import { LitElement, html } from 'lit';
+import { LitElement, PropertyValueMap, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { biLock, biNodePlus, biPlus, biShare, biUnlock } from '../styles/icons';
@@ -15,11 +15,17 @@ import { LitElementWw } from '@webwriter/lit';
 export class ToolMenu extends LitElementWw {
     @property({ type: Boolean, attribute: false })
     private _visible = false;
+    public set visible(visible: boolean) {
+        this._visible = visible;
+    }
 
     @property({ type: String, attribute: false })
     private _mode: 'idle' | 'addNode' | 'addEdge' = 'idle';
-    public set mode(mode: 'idle') {
+    public set mode(mode: 'idle' | 'addNode' | 'addEdge') {
         this._mode = mode;
+    }
+    public get mode() {
+        return this._mode;
     }
 
     @property({ type: Object, attribute: false })
@@ -30,8 +36,21 @@ export class ToolMenu extends LitElementWw {
 
     @property({ type: Boolean, attribute: false })
     private _lockNodeAdd = false;
+    public set lockNodeAdd(lockNodeAdd: boolean) {
+        this._lockNodeAdd = lockNodeAdd;
+    }
+    public get lockNodeAdd() {
+        return this._lockNodeAdd;
+    }
+
     @property({ type: Boolean, attribute: false })
     private _lockEdgeAdd = false;
+    public set lockEdgeAdd(lockEdgeAdd: boolean) {
+        this._lockEdgeAdd = lockEdgeAdd;
+    }
+    public get lockEdgeAdd() {
+        return this._lockEdgeAdd;
+    }
 
     public static get styles() {
         return toolMenuStyles;
@@ -43,6 +62,16 @@ export class ToolMenu extends LitElementWw {
             'sl-badge': SlBadge,
             'sl-tooltip': SlTooltip,
         };
+    }
+
+    protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+        if (this._mode === 'addNode') {
+            this._graph.network.addNodeMode();
+        }
+
+        if (this._mode === 'idle') {
+            this._graph.network.disableEditMode();
+        }
     }
 
     render() {
@@ -145,24 +174,28 @@ export class ToolMenu extends LitElementWw {
             }
         }
 
+        const newSymbol = this._graph.component.forcedAlphabet[0] || 'a';
         if (edge) {
             if (this._graph.automaton.type === 'pda') {
                 this._graph.automaton.transitions.update({
                     ...edge,
-                    symbols: [...edge.symbols, 'a'],
-                    stackOperations: [...edge.stackOperations!, { operation: 'none', symbol: 'a', condition: '' }],
+                    symbols: [...edge.symbols, newSymbol],
+                    stackOperations: [
+                        ...edge.stackOperations!,
+                        { operation: 'none', symbol: newSymbol, condition: '' },
+                    ],
                 });
             } else {
                 this._graph.automaton.transitions.update({
                     ...edge,
-                    symbols: [...edge.symbols, 'a'],
+                    symbols: [...edge.symbols, newSymbol],
                 });
             }
         } else {
-            edgeData.symbols = ['a'];
+            edgeData.symbols = [newSymbol];
 
             if (this._graph.automaton.type === 'pda') {
-                edgeData.stackOperations = [{ operation: 'none', symbol: 'a' }];
+                edgeData.stackOperations = [{ operation: 'none', symbol: newSymbol }];
             }
             // edgeData.label = 'a';
             callback(edgeData);
@@ -184,7 +217,7 @@ export class ToolMenu extends LitElementWw {
         this.requestUpdate();
     }
 
-    private addNode() {
+    public addNode() {
         if (this._mode === 'addNode') {
             this._mode = 'idle';
             this._graph.network.disableEditMode();
@@ -195,7 +228,7 @@ export class ToolMenu extends LitElementWw {
         this._graph.network.addNodeMode();
     }
 
-    private addEdge() {
+    public addEdge() {
         if (this._mode === 'addEdge') {
             this._mode = 'idle';
             this._graph.network.disableEditMode();

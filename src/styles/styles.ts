@@ -36,6 +36,8 @@ const baseStyles = css`
         top: 10px;
         left: 10px;
         line-height: 16px;
+
+        z-index: 1500;
     }
 
     .errordisplay {
@@ -53,6 +55,36 @@ const baseStyles = css`
 
     .mode_switch__select {
         width: 150px;
+    }
+
+    .help-backdrop {
+        background-color: rgba(0, 0, 0, 0.1);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
+        z-index: 1000;
+    }
+
+    .help-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+
+        z-index: 2000;
+    }
+
+    .help-overlay > * {
+        position: absolute;
+    }
+
+    .help-overlay .line {
+        border-bottom: 2px solid white;
+        border-right: 2px solid white;
     }
 `;
 

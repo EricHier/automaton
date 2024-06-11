@@ -50,6 +50,15 @@ export abstract class Automaton {
     public nodes: DataSet<Node> = new DataSet<Node>();
     public transitions: DataSet<Transition> = new DataSet<Transition>();
 
+    private _showErrors = true;
+    public set showErrors(value: boolean) {
+        this._showErrors = value;
+        this.resetColors();
+    }
+    public get showErrors(): boolean {
+        return this._showErrors;
+    }
+
     public abstract type: string;
 
     constructor(nodes: Node[], transitions: Transition[]) {
@@ -167,9 +176,12 @@ export abstract class Automaton {
     }
 
     public removeNode(id: string): void {
+        const transitions = this.transitions.get().filter((t) => t.from === id || t.to === id);
+
+        for (const transition of transitions) {
+            this.transitions.remove(transition.id);
+        }
         this.nodes.remove(id);
-        this.transitions.remove(this.transitions.getIds({ filter: (e: Transition) => e.from === id }));
-        this.transitions.remove(this.transitions.getIds({ filter: (e: Transition) => e.to === id }));
     }
 
     public updateNode(nodeId: string, data: Partial<Node>): void {
@@ -196,6 +208,8 @@ export abstract class Automaton {
     /* ------------------- */
 
     public highlightErrorNode(id: string): void {
+        if (!this.showErrors) return;
+
         this.nodes.update({
             id,
             color: COLORS.red,
@@ -250,15 +264,18 @@ export abstract class Automaton {
 
     protected resetColors(): void {
         this.nodes.update(
-            this.nodes.get().map((n) => ({
-                ...n,
-                color: {
-                    background: '#fff',
-                    border: '#000',
-                    hover: COLORS.blue,
-                    highlight: COLORS.blue,
-                },
-            }))
+            this.nodes
+                .get()
+                .filter((n) => n.id !== Graph.initialGhostNode.id)
+                .map((n) => ({
+                    ...n,
+                    color: {
+                        background: '#fff',
+                        border: '#000',
+                        hover: COLORS.blue,
+                        highlight: COLORS.blue,
+                    },
+                }))
         );
 
         this.transitions.update(

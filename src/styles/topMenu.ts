@@ -28,7 +28,7 @@ export const topMenuStyles = css`
         gap: 10px;
     }
 
-    .topmenu__button_group:hover .topmenu__buttons {
+    .topmenu__button_group:not([disabled]):hover .topmenu__buttons {
         display: flex;
     }
 
@@ -40,6 +40,7 @@ export const topMenuStyles = css`
 
     .topmenu__button {
         position: relative;
+        z-index: 1500;
     }
 
     .topmenu__button sl-button {

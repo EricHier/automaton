@@ -12,6 +12,8 @@ export const toolMenuStyles = css`
 
         left: 10px;
         bottom: 10px;
+
+        z-index: 1500;
     }
 
     .toolmenu sl-button::part(base),

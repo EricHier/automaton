@@ -11,6 +11,9 @@ import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { COLORS } from './utils/colors';
 import { AutomatonComponent } from './index';
 
+/**
+ * Represents a graph that combines an automaton, network, and other components.
+ */
 export class Graph {
     private _a: Automaton;
     public get automaton(): Automaton {
@@ -41,6 +44,8 @@ export class Graph {
 
     private _selected!: Node | Transition;
     private _selectedType!: 'Node' | 'Transition';
+
+    private _keys: Map<string, boolean> = new Map();
 
     private _errors: AutomatonInfo[] = [];
     public get errors(): AutomatonInfo[] {
@@ -122,6 +127,10 @@ export class Graph {
         this.setupListeners();
     }
 
+    /**
+     * Sets the interactive mode of the graph.
+     * @param interactive - A boolean value indicating whether the graph should be interactive or not.
+     */
     public setInteractve(interactive: boolean): void {
         this._interactive = interactive;
         if (this._interactive) {
@@ -143,6 +152,11 @@ export class Graph {
         }
     }
 
+    /**
+     * Sets the automaton for the graph.
+     *
+     * @param automaton - The automaton to set.
+     */
     public setAutomaton(automaton: Automaton): void {
         this._a = automaton;
         this._n.setData(this._a.getGraphData());
@@ -150,6 +164,9 @@ export class Graph {
         this.requestUpdate();
     }
 
+    /**
+     * Represents the initial ghost node in the graph.
+     */
     static initialGhostNode: Node = {
         id: uuidv4(),
         label: '',
@@ -159,18 +176,30 @@ export class Graph {
         final: false,
     };
 
-    private cmUpdate(data: Node | Transition) {
+    /**
+     * Updates the selected data (either a Node or a Transition) in the graph.
+     *
+     * @param data - The data (Node or Transition) to be updated.
+     */
+    private updateSelectedData(data: Node | Transition) {
         if (this._selectedType === 'Node') {
             if (!data.label) this._a.updateNode(data.id, { ...(data as Node), label: undefined });
             else this._a.updateNode(data.id, data as Node);
+
+            this._selected = this._a.getNode(data.id) as Node;
         } else if (this._selectedType === 'Transition') {
             if (!data.label) this._a.updateTransition(data.id, { ...(data as Transition), label: undefined });
             this._a.updateTransition(data.id, data as Transition);
+
+            this._selected = this._a.getTransition(data.id) as Transition;
         }
         this._requestUpdate();
     }
 
-    private cmDelete() {
+    /**
+     * Deletes the selected node or transition from the automaton.
+     */
+    private deleteSelected() {
         AutomatonComponent.log('Deleting', this._selected);
 
         if (this._selectedType === 'Node') {
@@ -179,8 +208,20 @@ export class Graph {
             this._a.removeTransition(this._selected.id);
         }
         this._requestUpdate();
+
+        if (this._tm.mode === 'addEdge') {
+            this.network.addEdgeMode();
+        }
+
+        this._cm.blur();
+        this._selected = null as any;
     }
 
+    /**
+     * Sets up event listeners for the graph.
+     * This method handles various events such as click, context menu, node selection, node hover, etc.
+     * It also handles keyboard events for adding nodes, adding edges, deleting selected elements, etc.
+     */
     private setupListeners() {
         this._n.on('click', () => {
             this._cm.blur();
@@ -204,7 +245,12 @@ export class Graph {
 
             this._selected = this._hovered;
             this._selectedType = this._hoveredType;
-            this._cm.setData(this._selected, this._selectedType, this.cmUpdate.bind(this), this.cmDelete.bind(this));
+            this._cm.setData(
+                this._selected,
+                this._selectedType,
+                this.updateSelectedData.bind(this),
+                this.deleteSelected.bind(this)
+            );
             this._cm.setPosition(e.pointer.DOM);
             if (this._selectedType === 'Node') {
                 this._n.selectNodes([this._selected.id]);
@@ -213,9 +259,15 @@ export class Graph {
             }
             this._cm.show();
         });
+        this._n.on('selectNode', (e: any) => {
+            this._selected = this._a.getNode(e.nodes[0]) as Node;
+            this._selectedType = 'Node';
+        });
         this._n.on('hoverNode', (e: any) => {
             this._hovered = this._a.getNode(e.node as string);
             this._hoveredType = 'Node';
+
+            if (this._ac.showHelp == 'false') return;
 
             if (this._errors.some((e) => e.node?.id === this._hovered?.id)) {
                 this._currentError = {
@@ -248,8 +300,70 @@ export class Graph {
         this._n.on('dragEnd', (e: any) => {
             this._n.storePositions();
         });
+        this._ac.addEventListener('keyup', (e: KeyboardEvent) => {
+            this._keys.set(e.key, false);
+        });
+        this._ac.addEventListener('keydown', (e: KeyboardEvent) => {
+            this._keys.set(e.key, true);
+
+            if (this._keys.get('Delete') && this._selected) {
+                this.deleteSelected();
+            }
+
+            if (this._keys.get('Escape')) {
+                this._cm.blur();
+                this._tm.mode = 'idle';
+            }
+
+            if (this._keys.get('Control') && this._keys.get('Tab')) {
+                this._ac.toggleMode();
+            }
+
+            if (this._keys.get('s') && this._keys.get('Control') && !this._keys.get('ShiftLeft')) {
+                this._tm.addNode();
+                this._tm.visible = true;
+            }
+
+            if (this._keys.get('Control') && this._keys.get('s') && this._keys.get('ShiftLeft')) {
+                this._tm.lockNodeAdd = !this._tm.lockNodeAdd;
+                this._tm.visible = true;
+            }
+
+            if (this._keys.get('t') && this._keys.get('Control') && !this._keys.get('ShiftLeft')) {
+                this._tm.addEdge();
+                this._tm.visible = true;
+            }
+
+            if (this._keys.get('Control') && this._keys.get('t') && this._keys.get('ShiftLeft')) {
+                this._tm.lockEdgeAdd = !this._tm.lockEdgeAdd;
+                this._tm.visible = true;
+            }
+
+            if (this._keys.get('ArrowLeft') && this._selected && this._selectedType === 'Node') {
+                const x = (this._selected as Node).x || 0;
+                this.updateSelectedData({ ...this._selected, x: x - 10 });
+            }
+
+            if (this._keys.get('ArrowRight') && this._selected && this._selectedType === 'Node') {
+                const x = (this._selected as Node).x || 0;
+                this.updateSelectedData({ ...this._selected, x: x + 10 });
+            }
+
+            if (this._keys.get('ArrowUp') && this._selected && this._selectedType === 'Node') {
+                const y = (this._selected as Node).y || 0;
+                this.updateSelectedData({ ...this._selected, y: y - 10 });
+            }
+
+            if (this._keys.get('ArrowDown') && this._selected && this._selectedType === 'Node') {
+                const y = (this._selected as Node).y || 0;
+                this.updateSelectedData({ ...this._selected, y: y + 10 });
+            }
+        });
     }
 
+    /**
+     * Displays the errors in the graph by highlighting the error nodes.
+     */
     private displayErrors() {
         this._a.redrawNodes();
         for (const error of this._errors) {
@@ -260,6 +374,10 @@ export class Graph {
         this._n.redraw();
     }
 
+    /**
+     * Renders the error display.
+     * @returns The HTML representation of the error display.
+     */
     public renderErrorDisplay() {
         return html`<sl-alert
             class="errordisplay"

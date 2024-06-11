@@ -3,8 +3,8 @@ import { DFA } from '../../automata/dfa';
 import { v4 as uuidv4 } from 'uuid';
 
 export function AddSinkstateToDFA(dfa: DFA): void {
-    const meanX = dfa.nodes.get().reduce((acc, node) => acc + node.x, 0) / dfa.nodes.get().length;
-    const meanY = dfa.nodes.get().reduce((acc, node) => acc + node.y, 0) / dfa.nodes.get().length;
+    const meanX = dfa.nodes.get().reduce((acc, node) => acc + node.x!, 0) / dfa.nodes.get().length;
+    const meanY = dfa.nodes.get().reduce((acc, node) => acc + node.y!, 0) / dfa.nodes.get().length;
 
     const sinkstateId = uuidv4();
     const sinkstate = dfa.addNode({

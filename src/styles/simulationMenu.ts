@@ -12,6 +12,8 @@ export const simulationMenuStyles = css`
         display: flex;
         flex-direction: row;
         align-items: flex-end;
+
+        z-index: 1500;
     }
 
     .simulator__input {

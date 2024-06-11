@@ -248,7 +248,10 @@ export class SimulatorMenu extends LitElementWw {
         this.reset();
         this._mode = 'run';
 
+        DEV: console.time('simulation');
         const result = this._automaton.simulator.simulate();
+        DEV: console.timeEnd('simulation');
+
         this.result = {
             success: result.success,
             message: result.message,
