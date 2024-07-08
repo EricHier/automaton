@@ -270,7 +270,9 @@ export class AutomatonComponent extends LitElementWw {
      * @returns {TemplateResult} The rendered TemplateResult.
      */
     public render(): TemplateResult {
-        return html` ${this.renderEditor()} ${guard([this.settings], () => this.renderSettings())} `;
+        return html`
+            ${this.renderEditor()} ${this.isContentEditable ? guard([this.settings], () => this.renderSettings()) : ''}
+        `;
     }
 
     private renderEditor(): TemplateResult {
