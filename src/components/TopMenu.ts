@@ -32,7 +32,7 @@ import RandExp from 'randexp';
 @customElement('webwriter-automaton-topmenu')
 export class TopMenu extends LitElementWw {
     @property({ type: Object, attribute: false })
-    private _component!: AutomatonComponent;
+    private accessor _component!: AutomatonComponent;
     public set component(component: AutomatonComponent) {
         this._component = component;
     }
@@ -41,10 +41,10 @@ export class TopMenu extends LitElementWw {
     }
 
     @property({ type: Boolean, attribute: false })
-    private _fullscreen: boolean = false;
+    private accessor _fullscreen: boolean = false;
 
     @state()
-    private _helpOverlay: boolean = false;
+    private accessor _helpOverlay: boolean = false;
 
     public static get styles() {
         return topMenuStyles;

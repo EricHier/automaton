@@ -17,10 +17,10 @@ import { styleMap } from 'lit/directives/style-map.js';
 @customElement('webwriter-automaton-infomenu')
 export class InfoMenu extends LitElement {
     @property({ type: Boolean, attribute: false })
-    private infoCardOpen = false;
+    private accessor infoCardOpen = false;
 
     @property({ type: Object, attribute: false })
-    private _graph!: Graph;
+    private accessor _graph!: Graph;
     public set graph(graph: Graph) {
         this._graph = graph;
     }

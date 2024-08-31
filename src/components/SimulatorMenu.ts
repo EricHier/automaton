@@ -30,16 +30,16 @@ import { Graph } from '../graph';
 @customElement('webwriter-automaton-simulatormenu')
 export class SimulatorMenu extends LitElementWw {
     @state()
-    private _automaton!: Automaton;
+    private accessor _automaton!: Automaton;
     public set automaton(automaton: Automaton) {
         this._automaton = automaton;
     }
 
     @property({ type: Object, attribute: false })
-    public graph!: Graph;
+    public accessor graph!: Graph;
 
     @state()
-    private _result!: {
+    private accessor _result!: {
         success: boolean | undefined;
         message: string;
         wordPosition: number;
@@ -53,22 +53,22 @@ export class SimulatorMenu extends LitElementWw {
     }
 
     @property({ type: String, attribute: false })
-    private _mode: 'idle' | 'step' | 'run' | 'animate' = 'idle';
+    private accessor _mode: 'idle' | 'step' | 'run' | 'animate' = 'idle';
 
     @state()
-    private _animationRunning: boolean = false;
+    private accessor _animationRunning: boolean = false;
 
     public static get styles() {
         return simulationMenuStyles;
     }
 
-    @query('#simulator_back') private _backButton!: SlButton;
-    @query('#simulator_next') private _nextButton!: SlButton;
+    @query('#simulator_back') private accessor _backButton!: SlButton;
+    @query('#simulator_next') private accessor _nextButton!: SlButton;
 
-    @query('#simulator_toggle') private _toggleButton!: SlButton;
-    @query('#simulator_stop') private _stopButton!: SlButton;
+    @query('#simulator_toggle') private accessor _toggleButton!: SlButton;
+    @query('#simulator_stop') private accessor _stopButton!: SlButton;
 
-    @query('#wordInput') private _wordInput!: SlInput;
+    @query('#wordInput') private accessor _wordInput!: SlInput;
 
     public static get scopedElements() {
         return {

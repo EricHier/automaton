@@ -53,11 +53,11 @@ import { debounce } from 'lodash';
  * This component is responsible for rendering and managing the automaton editor and simulator.
  */
 export class AutomatonComponent extends LitElementWw {
-    @query('#graphCanvas') private graphCanvas!: HTMLElement;
-    @query('#toolMenu') private toolMenu!: ToolMenu;
-    @query('#simulatorMenu') private simulatorMenu!: SimulatorMenu;
-    @query('#infoMenu') private infoMenu!: InfoMenu;
-    @query('#topMenu') private topMenu!: TopMenu;
+    @query('#graphCanvas') private accessor graphCanvas!: HTMLElement;
+    @query('#toolMenu') private accessor toolMenu!: ToolMenu;
+    @query('#simulatorMenu') private accessor simulatorMenu!: SimulatorMenu;
+    @query('#infoMenu') private accessor infoMenu!: InfoMenu;
+    @query('#topMenu') private accessor topMenu!: TopMenu;
 
     @property({
         type: Array,
@@ -65,7 +65,7 @@ export class AutomatonComponent extends LitElementWw {
         reflect: true,
         hasChanged: checkIfNodesUpdated,
     })
-    public nodes: Node[] = [];
+    public accessor nodes: Node[] = [];
 
     @property({
         type: Array,
@@ -73,22 +73,22 @@ export class AutomatonComponent extends LitElementWw {
         reflect: true,
         hasChanged: checkIfTransitionsUpdated,
     })
-    public transitions: Transition[] = [];
+    public accessor transitions: Transition[] = [];
 
     @property({ type: Object, attribute: false })
-    extension: any;
+    accessor extension: any;
 
     @property({ type: String, attribute: true, reflect: true })
-    public type: string = 'dfa';
+    public accessor type: string = 'dfa';
 
     @property({ type: String, attribute: true, reflect: true })
-    public testLanguage: string = '';
+    public accessor testLanguage: string = '';
 
     @property({ type: Array, attribute: true, reflect: true })
-    public forcedAlphabet: string[] = [];
+    public accessor forcedAlphabet: string[] = [];
 
     @property({ type: Array, attribute: true, reflect: true })
-    public testWords: string[] = [];
+    public accessor testWords: string[] = [];
 
     @property({ type: Boolean, attribute: true, reflect: false })
     public set verbose(v: boolean) {
@@ -96,22 +96,22 @@ export class AutomatonComponent extends LitElementWw {
     }
 
     @property({ type: String, attribute: true, reflect: true })
-    public permissions: string = '777';
+    public accessor permissions: string = '777';
 
     @property({ type: String, attribute: true, reflect: true })
-    public showHelp: string = 'true';
+    public accessor showHelp: string = 'true';
 
     @property({ type: String, attribute: true, reflect: true })
-    public showFromalDefinition: string = 'true';
+    public accessor showFromalDefinition: string = 'true';
 
     @property({ type: String, attribute: true, reflect: true })
-    public showTransitionsTable: string = 'true';
+    public accessor showTransitionsTable: string = 'true';
 
     @property({ type: Array, attribute: true, reflect: true })
-    public allowedTypes: string[] = ['dfa', 'nfa', 'pda'];
+    public accessor allowedTypes: string[] = ['dfa', 'nfa', 'pda'];
 
     @property({ type: Array, attribute: true, reflect: true })
-    public allowedTransformations: string[] = ['sink'];
+    public accessor allowedTransformations: string[] = ['sink'];
 
     public static verbose: boolean = false;
     public get verbose() {
@@ -119,7 +119,7 @@ export class AutomatonComponent extends LitElementWw {
     }
 
     @state()
-    private _graph!: Graph;
+    private accessor _graph!: Graph;
     public set graph(g: Graph) {
         this._graph = g;
     }
@@ -132,10 +132,10 @@ export class AutomatonComponent extends LitElementWw {
     static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
 
     @property({ type: Object, attribute: false })
-    private _automaton: Automaton = new DFA([], []);
+    private accessor _automaton: Automaton = new DFA([], []);
 
     @property({ type: Boolean, attribute: false })
-    private _helpOverlay: boolean = false;
+    private accessor _helpOverlay: boolean = false;
 
     public set helpOverlay(h: boolean) {
         this._helpOverlay = h;
@@ -155,7 +155,7 @@ export class AutomatonComponent extends LitElementWw {
     }
 
     @property({ type: String, attribute: false })
-    private _mode: 'edit' | 'simulate' = 'edit';
+    private accessor _mode: 'edit' | 'simulate' = 'edit';
 
     public static get styles() {
         return styles;

@@ -14,13 +14,13 @@ import { LitElementWw } from '@webwriter/lit';
 @customElement('webwriter-automaton-toolmenu')
 export class ToolMenu extends LitElementWw {
     @property({ type: Boolean, attribute: false })
-    private _visible = false;
+    private accessor _visible = false;
     public set visible(visible: boolean) {
         this._visible = visible;
     }
 
     @property({ type: String, attribute: false })
-    private _mode: 'idle' | 'addNode' | 'addEdge' = 'idle';
+    private accessor _mode: 'idle' | 'addNode' | 'addEdge' = 'idle';
     public set mode(mode: 'idle' | 'addNode' | 'addEdge') {
         this._mode = mode;
     }
@@ -29,13 +29,13 @@ export class ToolMenu extends LitElementWw {
     }
 
     @property({ type: Object, attribute: false })
-    private _graph!: Graph;
+    private accessor _graph!: Graph;
     public set graph(graph: Graph) {
         this._graph = graph;
     }
 
     @property({ type: Boolean, attribute: false })
-    private _lockNodeAdd = false;
+    private accessor _lockNodeAdd = false;
     public set lockNodeAdd(lockNodeAdd: boolean) {
         this._lockNodeAdd = lockNodeAdd;
     }
@@ -44,7 +44,7 @@ export class ToolMenu extends LitElementWw {
     }
 
     @property({ type: Boolean, attribute: false })
-    private _lockEdgeAdd = false;
+    private accessor _lockEdgeAdd = false;
     public set lockEdgeAdd(lockEdgeAdd: boolean) {
         this._lockEdgeAdd = lockEdgeAdd;
     }

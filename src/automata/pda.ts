@@ -479,26 +479,26 @@ type StackItem = {
 export class StackExtension extends LitElementWw {
     private _stack: DataSet<StackItem> = new DataSet<StackItem>();
 
-    @property({ type: Array }) public stack: StackItem[] = [];
+    @property({ type: Array }) public accessor stack: StackItem[] = [];
 
     @property({ type: String, attribute: true, reflect: true })
-    public add: boolean = true;
+    public accessor add: boolean = true;
 
     @property({ type: String, attribute: true, reflect: true })
-    public delete: boolean = true;
+    public accessor delete: boolean = true;
 
     @property({ type: String, attribute: true, reflect: true })
-    public change: boolean = true;
+    public accessor change: boolean = true;
 
     static get styles() {
         return stackStyles;
     }
     private afterElement: HTMLElement | null = null;
-    @state() private _dragging: boolean = false;
+    @state() private accessor _dragging: boolean = false;
 
-    @query('.pda__stack-items') private _stackItems!: HTMLElement;
-    @query('.pda__stack-button') private _stackButton!: HTMLElement;
-    @query('.dragging') private _draggingElement!: HTMLElement;
+    @query('.pda__stack-items') private accessor _stackItems!: HTMLElement;
+    @query('.pda__stack-button') private accessor _stackButton!: HTMLElement;
+    @query('.dragging') private accessor _draggingElement!: HTMLElement;
 
     public static get scopedElements() {
         return {
