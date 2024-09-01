@@ -1,6 +1,6 @@
 {
     "name": "@webwriter/automaton",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "keywords": [
         "webwriter-widget"
     ],
@@ -29,7 +29,8 @@
         "./snippets/nfa-simple": "./snippets/nfa/example-simple.html",
         "./snippets/nfa-complex": "./snippets/nfa/example-complex.html",
         "./snippets/pda-simple": "./snippets/pda/example-simple.html",
-        "./snippets/pda-complex": "./snippets/pda/example-complex.html"
+        "./snippets/pda-complex": "./snippets/pda/example-complex.html",
+        "./*": {"source": "./*", "default": null}
     },
     "editingConfig": {
         "./widgets/webwriter-automaton": {
