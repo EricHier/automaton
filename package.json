@@ -6,7 +6,7 @@
     ],
     "license": "MIT",
     "author": "Jorik van Genuchten",
-    "description": "build and visualize interactive automata of different kinds. Prebuild with snippets.",
+    "description": "Build, visualize and interactive automata of different kinds (DFA, NFA, PDA).",
     "main": "src/index.ts",
     "dependencies": {
         "@shoelace-style/shoelace": "^2.13.1",
