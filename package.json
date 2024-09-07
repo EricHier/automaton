@@ -1,17 +1,19 @@
 {
     "name": "@webwriter/automaton",
-    "version": "1.0.3",
+    "version": "2.0.0",
     "keywords": [
         "webwriter-widget"
     ],
     "license": "MIT",
     "author": "Jorik van Genuchten",
     "description": "Build, visualize and interactive automata of different kinds (DFA, NFA, PDA).",
-    "main": "src/index.ts",
+    "scripts": {
+      "prepublishOnly": "npx @webwriter/build"
+    },
     "dependencies": {
         "@shoelace-style/shoelace": "^2.13.1",
         "@webwriter/lit": "^2.0.0",
-        "lit": ">=3.0.0 <4.0.0-0",
+        "lit": "^3.2.0",
         "lodash": "^4.17.21",
         "randexp": "^0.5.3",
         "uuid": "^9.0.1",
@@ -23,14 +25,16 @@
         "@types/uuid": "^9.0.7"
     },
     "exports": {
-        "./widgets/webwriter-automaton": "./src/index.ts",
-        "./snippets/dfa-simple": "./snippets/dfa/example-simple.html",
-        "./snippets/dfa-complex": "./snippets/dfa/example-complex.html",
-        "./snippets/nfa-simple": "./snippets/nfa/example-simple.html",
-        "./snippets/nfa-complex": "./snippets/nfa/example-complex.html",
-        "./snippets/pda-simple": "./snippets/pda/example-simple.html",
-        "./snippets/pda-complex": "./snippets/pda/example-complex.html",
-        "./*": {"source": "./*", "default": null}
+        "./widgets/webwriter-automaton.*": {
+            "source": "./src/index.ts",
+            "default": "./dist/widgets/webwriter-automaton.*"
+        },
+        "./snippets/dfa-simple.html": "./snippets/dfa/example-simple.html",
+        "./snippets/dfa-complex.html": "./snippets/dfa/example-complex.html",
+        "./snippets/nfa-simple.html": "./snippets/nfa/example-simple.html",
+        "./snippets/nfa-complex.html": "./snippets/nfa/example-complex.html",
+        "./snippets/pda-simple.html": "./snippets/pda/example-simple.html",
+        "./snippets/pda-complex.html": "./snippets/pda/example-complex.html"
     },
     "editingConfig": {
         "./widgets/webwriter-automaton": {
