@@ -34,7 +34,8 @@
         "./snippets/nfa-simple.html": "./snippets/nfa/example-simple.html",
         "./snippets/nfa-complex.html": "./snippets/nfa/example-complex.html",
         "./snippets/pda-simple.html": "./snippets/pda/example-simple.html",
-        "./snippets/pda-complex.html": "./snippets/pda/example-complex.html"
+        "./snippets/pda-complex.html": "./snippets/pda/example-complex.html",
+        "./icon":"./icon.svg"
     },
     "editingConfig": {
         "./widgets/webwriter-automaton": {
