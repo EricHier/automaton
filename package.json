@@ -1,90 +1,98 @@
 {
-	"name": "@webwriter/automaton",
-	"version": "2.0.2",
-	"description": "Build, visualize and interactive automata of different kinds (DFA, NFA, PDA).",
-	"keywords": [
-		"webwriter-widget"
-	],
-	"license": "MIT",
-	"author": "Jorik van Genuchten",
-	"scripts": {
-		"prepublishOnly": "npx @webwriter/build"
-	},
-	"dependencies": {
-		"@shoelace-style/shoelace": "^2.17.1",
-		"@webwriter/lit": "^2.0.0",
-		"lit": "^3.2.0",
-		"lodash": "^4.17.21",
-		"randexp": "^0.5.3",
-		"uuid": "^9.0.1",
-		"vis-data": "^7.1.9",
-		"vis-network": "^9.1.9"
-	},
-	"devDependencies": {
-		"@types/lodash": "^4.17.4",
-		"@types/uuid": "^9.0.7"
-	},
-	"exports": {
-		"./widgets/webwriter-automaton.*": {
-			"source": "./src/index.ts",
-			"default": "./dist/widgets/webwriter-automaton.*"
-		},
-		"./snippets/dfa-simple.html": "./snippets/dfa/example-simple.html",
-		"./snippets/dfa-complex.html": "./snippets/dfa/example-complex.html",
-		"./snippets/nfa-simple.html": "./snippets/nfa/example-simple.html",
-		"./snippets/nfa-complex.html": "./snippets/nfa/example-complex.html",
-		"./snippets/pda-simple.html": "./snippets/pda/example-simple.html",
-		"./snippets/pda-complex.html": "./snippets/pda/example-complex.html",
-		"./icon": "./icon.svg"
-	},
-	"editingConfig": {
-		"./widgets/webwriter-automaton": {
-			"label": {
-				"de": "Automat",
-				"en": "Automaton"
-			}
-		},
-		"./snippets/example": {
-			"label": {
-				"de": "Beispiel",
-				"en": "Example"
-			}
-		},
-		"./snippets/dfa-simple": {
-			"label": {
-				"de": "DFA Einfach",
-				"en": "DFA Simple"
-			}
-		},
-		"./snippets/dfa-complex": {
-			"label": {
-				"de": "DFA Komplex",
-				"en": "DFA Complex"
-			}
-		},
-		"./snippets/nfa-simple": {
-			"label": {
-				"de": "NFA Einfach",
-				"en": "NFA Simple"
-			}
-		},
-		"./snippets/nfa-complex": {
-			"label": {
-				"de": "NFA Komplex",
-				"en": "NFA Complex"
-			}
-		},
-		"./snippets/pda-simple": {
-			"label": {
-				"de": "PDA Einfach",
-				"en": "PDA Simple"
-			}
-		},
-		"./snippets/pda-complex": {
-			"label": {
-				"de": "PDA Komplex",
-				"en": "PDA Complex"
-			}
-		}
-	}
+    "name": "@webwriter/automaton",
+    "version": "2.0.3",
+    "description": "Build, visualize and interactive automata of different kinds (DFA, NFA, PDA).",
+    "keywords": [
+        "webwriter-widget",
+        "widget-lang-en",
+        "iscedf2013-06",
+        "isced2011-3",
+		"isced2011-6",
+		"automaton",
+		"NFA",
+		"DFA",
+		"PDA"
+    ],
+    "license": "MIT",
+    "author": "Jorik van Genuchten",
+    "scripts": {
+        "prepublishOnly": "npx @webwriter/build"
+    },
+    "dependencies": {
+        "@shoelace-style/shoelace": "^2.17.1",
+        "@webwriter/lit": "^2.0.0",
+        "lit": "^3.2.0",
+        "lodash": "^4.17.21",
+        "randexp": "^0.5.3",
+        "uuid": "^9.0.1",
+        "vis-data": "^7.1.9",
+        "vis-network": "^9.1.9"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.17.4",
+        "@types/uuid": "^9.0.7"
+    },
+    "exports": {
+        "./widgets/webwriter-automaton.*": {
+            "source": "./src/index.ts",
+            "default": "./dist/widgets/webwriter-automaton.*"
+        },
+        "./snippets/dfa-simple.html": "./snippets/dfa/example-simple.html",
+        "./snippets/dfa-complex.html": "./snippets/dfa/example-complex.html",
+        "./snippets/nfa-simple.html": "./snippets/nfa/example-simple.html",
+        "./snippets/nfa-complex.html": "./snippets/nfa/example-complex.html",
+        "./snippets/pda-simple.html": "./snippets/pda/example-simple.html",
+        "./snippets/pda-complex.html": "./snippets/pda/example-complex.html",
+        "./icon": "./icon.svg"
+    },
+    "editingConfig": {
+        "./widgets/webwriter-automaton": {
+            "label": {
+                "de": "Automat",
+                "en": "Automaton"
+            }
+        },
+        "./snippets/example": {
+            "label": {
+                "de": "Beispiel",
+                "en": "Example"
+            }
+        },
+        "./snippets/dfa-simple": {
+            "label": {
+                "de": "DFA Einfach",
+                "en": "DFA Simple"
+            }
+        },
+        "./snippets/dfa-complex": {
+            "label": {
+                "de": "DFA Komplex",
+                "en": "DFA Complex"
+            }
+        },
+        "./snippets/nfa-simple": {
+            "label": {
+                "de": "NFA Einfach",
+                "en": "NFA Simple"
+            }
+        },
+        "./snippets/nfa-complex": {
+            "label": {
+                "de": "NFA Komplex",
+                "en": "NFA Complex"
+            }
+        },
+        "./snippets/pda-simple": {
+            "label": {
+                "de": "PDA Einfach",
+                "en": "PDA Simple"
+            }
+        },
+        "./snippets/pda-complex": {
+            "label": {
+                "de": "PDA Komplex",
+                "en": "PDA Complex"
+            }
+        }
+    }
 }
