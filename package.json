@@ -1,17 +1,17 @@
 {
     "name": "@webwriter/automaton",
-    "version": "2.0.3",
+    "version": "2.0.4",
     "description": "Build, visualize and interactive automata of different kinds (DFA, NFA, PDA).",
     "keywords": [
         "webwriter-widget",
         "widget-lang-en",
         "iscedf2013-06",
         "isced2011-3",
-		"isced2011-6",
-		"automaton",
-		"NFA",
-		"DFA",
-		"PDA"
+        "isced2011-6",
+        "automaton",
+        "NFA",
+        "DFA",
+        "PDA"
     ],
     "license": "MIT",
     "author": "Jorik van Genuchten",
@@ -46,6 +46,11 @@
         "./icon": "./icon.svg"
     },
     "editingConfig": {
+        ".": {
+            "description": {
+                "de": "Erstellung, Visualisierung und Interaktion von Automaten verschiedener Art (DEA, NEA, KA)."
+            }
+        },
         "./widgets/webwriter-automaton": {
             "label": {
                 "de": "Automat",
@@ -60,37 +65,37 @@
         },
         "./snippets/dfa-simple": {
             "label": {
-                "de": "DFA Einfach",
+                "de": "DEA Einfach",
                 "en": "DFA Simple"
             }
         },
         "./snippets/dfa-complex": {
             "label": {
-                "de": "DFA Komplex",
+                "de": "DEA Komplex",
                 "en": "DFA Complex"
             }
         },
         "./snippets/nfa-simple": {
             "label": {
-                "de": "NFA Einfach",
+                "de": "NEA Einfach",
                 "en": "NFA Simple"
             }
         },
         "./snippets/nfa-complex": {
             "label": {
-                "de": "NFA Komplex",
+                "de": "NEA Komplex",
                 "en": "NFA Complex"
             }
         },
         "./snippets/pda-simple": {
             "label": {
-                "de": "PDA Einfach",
+                "de": "KA Einfach",
                 "en": "PDA Simple"
             }
         },
         "./snippets/pda-complex": {
             "label": {
-                "de": "PDA Komplex",
+                "de": "KA Komplex",
                 "en": "PDA Complex"
             }
         }
