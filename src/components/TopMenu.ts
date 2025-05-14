@@ -40,7 +40,7 @@ export class TopMenu extends LitElementWw {
         return this._component;
     }
 
-    @property({ type: Boolean, attribute: false })
+    @state()
     private accessor _fullscreen: boolean = false;
 
     @state()
@@ -63,8 +63,9 @@ export class TopMenu extends LitElementWw {
     }
 
     protected firstUpdated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
+        // Important for when the user exits fullscreen mode by pressing ESC or F11
         document.addEventListener('fullscreenchange', () => {
-            this._fullscreen = document.fullscreenElement ? true : false;
+            this._fullscreen = !!document.fullscreenElement;
         });
     }
 
@@ -75,9 +76,25 @@ export class TopMenu extends LitElementWw {
             <div class="topmenu__button_group">
                 <sl-button
                     class="topmenu__button"
-                    @click=${() => {
-                        if (this._fullscreen) document.exitFullscreen();
-                        else this._component.requestFullscreen();
+                    @click=${async (e: Event) => {
+                        this._fullscreen = this.ownerDocument.fullscreenElement === this._component;
+                        
+                        const button = (e.target as HTMLElement).closest('sl-button') as SlButton;
+
+                        try {
+                            if (this._fullscreen) await document.exitFullscreen();
+                            else await this._component.requestFullscreen();
+                        } catch (err) {
+                            console.error('Error entering/exiting fullscreen:', err);
+                        }
+
+                        // Remove and re-append the button to update its hover state
+                        const parent = button.parentElement;
+                        if (parent) {
+                            parent.removeChild(button);
+                            parent.appendChild(button);
+                        }
+                        this._fullscreen = this.ownerDocument.fullscreenElement === this._component;
                     }}
                     circle
                 >
