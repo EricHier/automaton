@@ -1,5 +1,5 @@
 import { Transition, Node, Automaton, AutomatonInfo } from './automata';
-import { Network } from 'vis-network';
+import { Network, Position } from 'vis-network';
 import { v4 as uuidv4 } from 'uuid';
 import { ContextMenu } from './components/ContextMenu';
 import { ToolMenu } from './components/ToolMenu';
@@ -59,6 +59,8 @@ export class Graph {
         };
         message: string;
     } | null;
+
+    private _lastPosition: Position = { x: 0, y: 0 };
 
     private _requestUpdate: () => void = () => {};
     public set requestUpdate(fn: () => void) {
@@ -299,6 +301,16 @@ export class Graph {
         });
         this._n.on('dragEnd', (e: any) => {
             this._n.storePositions();
+            this._lastPosition = this._n.getViewPosition();
+        });
+        this._n.on('zoom', (e: any) => {
+            if (e.scale < 0.5) {
+                this._n.moveTo({ scale: 0.5, position: this._lastPosition });
+            } else if (e.scale > 5) {
+                this._n.moveTo({ scale: 5, position: this._lastPosition });
+            } else {
+                this._lastPosition = this._n.getViewPosition();
+            }
         });
         this._ac.addEventListener('keyup', (e: KeyboardEvent) => {
             this._keys.set(e.key, false);
