@@ -21,6 +21,7 @@ import SlTag from '@shoelace-style/shoelace/dist/components/tag/tag.component.js
 import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.component.js';
 import SlRange from '@shoelace-style/shoelace/dist/components/range/range.component.js';
 import SlSwitch from '@shoelace-style/shoelace/dist/components/switch/switch.component.js';
+import SlDivider from '@shoelace-style/shoelace/dist/components/divider/divider.component.js';
 
 import '@shoelace-style/shoelace/dist/themes/light.css';
 
@@ -184,6 +185,7 @@ export class AutomatonComponent extends LitElementWw {
             'sl-tag': SlTag,
             'sl-range': SlRange,
             'sl-switch': SlSwitch,
+            'sl-divider': SlDivider,
         };
     }
 

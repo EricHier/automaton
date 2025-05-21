@@ -32,7 +32,14 @@ export class ContextMenu {
         return html`<div
             id="contextMenu"
             class="context-menu"
-            style=${styleMap({ left: this.position.x + 'px', top: this.position.y + 'px', transform: `translate(${this.translate.x}, ${this.translate.y})`, display: this.visible ? 'block' : 'none' })}
+            style=${styleMap(
+                { 
+                    left: this.position.x + 'px', 
+                    top: this.position.y + 'px', 
+                    transform: `translate(${this.translate.x}, ${this.translate.y})`, 
+                    display: this.visible ? 'block' : 'none' 
+                }
+            )}
         >
             ${this.selected?.type === 'Node' ? this.nodeContextMenu() : null}
             ${this.selected?.type === 'Transition'
@@ -46,7 +53,7 @@ export class ContextMenu {
     private nodeContextMenu() {
         return html`
             <div class="context-menu__header">
-                Node ${this.selected?.data.label}
+                <span class="context-menu__header__label">Node ${this.selected?.data.label}</span>
                 <sl-button
                     class="context-menu__button"
                     circle
@@ -61,6 +68,7 @@ export class ContextMenu {
                     >${biTrash}</sl-button
                 >
             </div>
+            <sl-divider style="--spacing: var(--sl-spacing-x-small)"></sl-divider>
             <sl-input
                 placeholder="Label"
                 value=${this.selected?.data.label || ''}
@@ -70,27 +78,29 @@ export class ContextMenu {
                 }}
                 ?disabled=${!this.parentComponent.settings.permissions.node.change}
             ></sl-input>
-
-            <sl-checkbox
-                ?checked=${(this.selected?.data as Node).initial}
-                ?disabled=${(this.selected?.data as Node).initial ||
-                !this.parentComponent.settings.permissions.node.change}
-                @sl-change=${(e: any) => {
-                    console.log('initial', e.target.checked);
-                    this.selected.updateFn({ ...this.selected.data, initial: e.target.checked });
-                    this.selected.data = { ...this.selected.data, initial: e.target.checked };
-                }}
-                >Initial</sl-checkbox
-            >
-            <sl-checkbox
-                ?checked=${(this.selected?.data as Node).final}
-                ?disabled=${!this.parentComponent.settings.permissions.node.change}
-                @sl-change=${(e: any) => {
-                    this.selected.updateFn({ ...this.selected.data, final: e.target.checked });
-                    this.selected.data = { ...this.selected.data, final: e.target.checked };
-                }}
-                >Final</sl-checkbox
-            >
+            <sl-divider style="--spacing: var(--sl-spacing-x-small)"></sl-divider>
+            <div class="context-menu__checkboxes">
+                <sl-checkbox
+                    ?checked=${(this.selected?.data as Node).initial}
+                    ?disabled=${(this.selected?.data as Node).initial ||
+                    !this.parentComponent.settings.permissions.node.change}
+                    @sl-change=${(e: any) => {
+                        console.log('initial', e.target.checked);
+                        this.selected.updateFn({ ...this.selected.data, initial: e.target.checked });
+                        this.selected.data = { ...this.selected.data, initial: e.target.checked };
+                    }}
+                    >Initial</sl-checkbox
+                >
+                <sl-checkbox
+                    ?checked=${(this.selected?.data as Node).final}
+                    ?disabled=${!this.parentComponent.settings.permissions.node.change}
+                    @sl-change=${(e: any) => {
+                        this.selected.updateFn({ ...this.selected.data, final: e.target.checked });
+                        this.selected.data = { ...this.selected.data, final: e.target.checked };
+                    }}
+                    >Final</sl-checkbox
+                >
+            </div>
         `;
     }
 
@@ -99,7 +109,7 @@ export class ContextMenu {
 
         return html`
             <div class="context-menu__header">
-                Edge ${transition.label}
+                <span class="context-menu__header__label">Edge ${transition.label}</span>
                 <sl-button
                     class="context-menu__button"
                     circle
@@ -114,67 +124,86 @@ export class ContextMenu {
                     >${biTrash}</sl-button
                 >
             </div>
-            ${transition.symbols.map(
-                (symbol, i) => html`
-                    <div class="context-menu__input-group">
-                        ${this.parentComponent.forcedAlphabet.length > 0
-                            ? html`
-                                  <sl-select
-                                      placeholder="Symbol"
-                                      value=${symbol}
-                                      size="small"
-                                      ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                                      @sl-change=${(e: any) => {
-                                          console.log(e.target.value);
-                                          const symbols = transition.symbols;
-                                          symbols[i] = e.target.value;
-                                          this.selected.updateFn({ ...transition, symbols });
-                                          transition = { ...transition, symbols };
-                                      }}
-                                  >
-                                      ${this.parentComponent.forcedAlphabet.map(
-                                          (symbol) => html`<sl-option value=${symbol}>${symbol}</sl-option>`
-                                      )}
-                                  </sl-select>
-                              `
-                            : html`
-                                  <sl-input
-                                      placeholder="Symbol"
-                                      value=${symbol}
-                                      maxlength="1"
-                                      ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                                      @sl-input=${(e: any) => {
-                                          console.log(e.target.value);
-                                          const symbols = transition.symbols;
-                                          symbols[i] = e.target.value;
-                                          this.selected.updateFn({ ...transition, symbols });
-                                          transition = { ...transition, symbols };
-                                      }}
-                                  ></sl-input>
-                              `}
-                        <sl-button
-                            class="context-menu__button"
-                            circle
-                            size="small"
-                            @click=${() => {
-                                const symbols = transition.symbols;
-                                symbols.splice(i, 1);
-                                this.selected.updateFn({ ...transition, symbols });
-                                transition = { ...transition, symbols };
+            <sl-divider style="--spacing: var(--sl-spacing-x-small)"></sl-divider>
+            <div class="context-menu__inputs">
+                ${transition.symbols.map(
+                    (symbol, i) => html`
+                        <div class="context-menu__inputs__group">
+                            ${this.parentComponent.forcedAlphabet.length > 0
+                                ? html`
+                                    <sl-select
+                                        placeholder="Symbol"
+                                        value=${symbol}
+                                        size="small"
+                                        ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                                        @sl-change=${(e: any) => {
+                                            console.log(e.target.value);
+                                            const symbols = transition.symbols;
+                                            symbols[i] = e.target.value;
+                                            this.selected.updateFn({ ...transition, symbols });
+                                            transition = { ...transition, symbols };
+                                        }}
+                                    >
+                                        ${this.parentComponent.forcedAlphabet.map(
+                                            (symbol) => html`<sl-option value=${symbol}>${symbol}</sl-option>`
+                                        )}
+                                    </sl-select>
+                                `
+                                : html`
+                                    <sl-input
+                                        placeholder="Symbol"
+                                        value=${symbol}
+                                        size="small"
+                                        maxlength="1"
+                                        ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                                        @sl-input=${(e: any) => {
+                                            console.log(e.target.value);
+                                            const symbols = transition.symbols;
+                                            symbols[i] = e.target.value;
+                                            this.selected.updateFn({ ...transition, symbols });
+                                            transition = { ...transition, symbols };
+                                        }}
+                                    ></sl-input>
+                                `}
+                            <sl-button
+                                class="context-menu__button"
+                                circle
+                                size="small"
+                                @click=${() => {
+                                    const symbols = transition.symbols;
+                                    symbols.splice(i, 1);
+                                    this.selected.updateFn({ ...transition, symbols });
+                                    transition = { ...transition, symbols };
 
-                                if (symbols.length === 0) {
-                                    this.selected.deleteFn();
-                                    this.hide();
-                                }
-                            }}
-                            style=${styleMap({
-                                display: this.parentComponent.settings.permissions.edge.delete ? 'block' : 'none',
-                            })}
-                            >${biTrash}</sl-button
-                        >
-                    </div>
-                `
-            )}
+                                    if (symbols.length === 0) {
+                                        this.selected.deleteFn();
+                                        this.hide();
+                                    }
+                                }}
+                                style=${styleMap({
+                                    display: this.parentComponent.settings.permissions.edge.delete ? 'block' : 'none',
+                                })}
+                                >${biTrash}</sl-button
+                            >
+                        </div>
+                    `
+                )}
+                <sl-button
+                    class="context-menu__button__add"
+                    size="small"
+                    @click=${() => {
+                        const symbols = transition.symbols;
+                        symbols.push('');
+                        this.selected.updateFn({ ...transition, symbols });
+                        transition = { ...transition, symbols };
+                    }}
+                    style=${styleMap({
+                        display: this.parentComponent.settings.permissions.edge.add ? 'block' : 'none',
+                    })}>
+                    Add symbol
+                </sl-button>
+            </div>
+            <sl-divider style="--spacing: var(--sl-spacing-x-small)"></sl-divider>
             ${transition.from === transition.to ? html`
                 <sl-range
                     label="Position"
@@ -214,7 +243,7 @@ export class ContextMenu {
         let stackOperations = transition.stackOperations as StackOperation[];
 
         return html`
-            <div class="context-menu__header">
+            <div class="context-menu__header context-menu__header--pda">
                 PDA Edge ${transition.label}
                 <sl-button
                     class="context-menu__button"
@@ -232,7 +261,7 @@ export class ContextMenu {
             </div>
             ${transition.symbols.map(
                 (symbol, i) => html`
-                    <div class="context-menu__input-group">
+                    <div class="context-menu__inputs__group">
                         <sl-input
                             placeholder="Symbol"
                             value=${symbol}
@@ -375,27 +404,27 @@ export class ContextMenu {
                             >${biTrash}</sl-button
                         >
                     </div>
-                    <sl-range
-                        label="Bend"
-                        min="-100"
-                        max="100"
-                        style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);--track-active-offset: 50%;"
-                        value=${(transition.smooth as any)?.roundness ? (transition.smooth as any).roundness * 100 : 0}
-                        @sl-input=${(e: any) => {
-                            const value = e.target.value;
-                            this.selected.updateFn({
-                                ...transition,
-                                smooth: {
-                                    type: value < 0 ? 'curvedCCW' : 'curvedCW',
-                                    roundness: Math.abs(value / 100),
-                                },
-                            });
-
-                            console.log(e.target.value);
-                        }}
-                    ></sl-range>
                 `
             )}
+            <sl-range
+                label="Bend"
+                min="-100"
+                max="100"
+                style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);--track-active-offset: 50%;"
+                value=${(transition.smooth as any)?.roundness ? (transition.smooth as any).roundness * 100 : 0}
+                @sl-input=${(e: any) => {
+                    const value = e.target.value;
+                    this.selected.updateFn({
+                        ...transition,
+                        smooth: {
+                            type: value < 0 ? 'curvedCCW' : 'curvedCW',
+                            roundness: Math.abs(value / 100),
+                        },
+                    });
+
+                    console.log(e.target.value);
+                }}
+            ></sl-range>
         `;
     }
 
