@@ -73,15 +73,22 @@ export function stripNode(node: Node): Node {
 export function stripTransition(transition: any) {
     AutomatonComponent.log('stripTransition', transition);
 
-    return {
+    let strippedTransition = {
         id: transition.id,
         from: transition.from,
         to: transition.to,
         symbols: transition.symbols,
         label: transition.label,
+        selfReference: transition.selfReference,
         smooth: transition.smooth,
         stackOperations: transition.stackOperations,
     };
+
+    if (!transition.selfReference) {
+        delete strippedTransition.selfReference;
+    }
+
+    return strippedTransition;
 }
 
 /**
@@ -116,6 +123,7 @@ export function hasTransitionChanged(newData: Transition, oldData: Transition) {
         newData.to !== oldData.to ||
         newData.label !== oldData.label ||
         didSymbolsChange(newData.symbols, oldData.symbols) ||
+        newData.selfReference !== oldData.selfReference ||
         newData.smooth !== oldData.smooth ||
         didStackOperationsChange(
             newData.stackOperations as StackOperation[],

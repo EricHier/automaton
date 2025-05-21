@@ -173,22 +173,37 @@ export class ContextMenu {
                     </div>
                 `
             )}
-            <sl-range
-                label="Bend"
-                min="-100"
-                max="100"
-                style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);--track-active-offset: 50%;"
-                value=${(transition.smooth as any)?.roundness ? (transition.smooth as any).roundness * 100 : 0}
-                @sl-input=${(e: any) => {
-                    const value = e.target.value;
-                    this.selected.updateFn({
-                        ...transition,
-                        smooth: { type: value < 0 ? 'curvedCCW' : 'curvedCW', roundness: Math.abs(value / 100) },
-                    });
-
-                    console.log(e.target.value);
-                }}
-            ></sl-range>
+            ${transition.from === transition.to ? html`
+                <sl-range
+                    label="Position"
+                    min="0"
+                    max="360"
+                    style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);"
+                    value=${(450 - (transition.selfReference?.angle ?? (Math.PI / 4)) * (180 / Math.PI)) % 360}
+                    @sl-input=${(e: any) => {
+                        const value = e.target.value;
+                        this.selected.updateFn({
+                            ...transition,
+                            selfReference: { angle: ((450 - value) % 360) * (Math.PI / 180) },
+                        });
+                    }}
+                ></sl-range>`
+            : html`
+                <sl-range
+                    label="Bend"
+                    min="-100"
+                    max="100"
+                    style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);--track-active-offset: 50%;"
+                    value=${(transition.smooth as any)?.roundness ? (transition.smooth as any).roundness * 100 : 0}
+                    @sl-input=${(e: any) => {
+                        const value = e.target.value;
+                        this.selected.updateFn({
+                            ...transition,
+                            smooth: { type: value < 0 ? 'curvedCCW' : 'curvedCW', roundness: Math.abs(value / 100) },
+                        });
+                    }}
+                ></sl-range>`
+            }
         `;
     }
 
