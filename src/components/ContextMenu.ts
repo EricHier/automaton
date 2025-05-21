@@ -20,6 +20,7 @@ export class ContextMenu {
         deleteFn: () => {},
     };
     private position = { x: 0, y: 0 };
+    private translate = { x: '-100%', y: '-100%' };
 
     private visible = false;
 
@@ -31,7 +32,7 @@ export class ContextMenu {
         return html`<div
             id="contextMenu"
             class="context-menu"
-            style=${styleMap({ left: this.position.x, top: this.position.y, display: this.visible ? 'block' : 'none' })}
+            style=${styleMap({ left: this.position.x + 'px', top: this.position.y + 'px', transform: `translate(${this.translate.x}, ${this.translate.y})`, display: this.visible ? 'block' : 'none' })}
         >
             ${this.selected?.type === 'Node' ? this.nodeContextMenu() : null}
             ${this.selected?.type === 'Transition'
@@ -404,6 +405,13 @@ export class ContextMenu {
 
     public setPosition({ x, y }: { x: number; y: number }) {
         this.position = { x, y };
+
+        const totalWidth = this.parentComponent.shadowRoot?.getElementById("graphCanvas")?.clientWidth || 0;
+        const totalHeight = this.parentComponent.shadowRoot?.getElementById("graphCanvas")?.clientHeight || 0;
+
+        this.translate.x = x > totalWidth / 2 ? '-100%' : '0%';
+        this.translate.y = y > totalHeight / 2 ? '-100%' : '0%';
+
         this.requestUpdate();
     }
 
