@@ -133,7 +133,7 @@ export class Graph {
      * Sets the interactive mode of the graph.
      * @param interactive - A boolean value indicating whether the graph should be interactive or not.
      */
-    public setInteractve(interactive: boolean): void {
+    public setInteractive(interactive: boolean): void {
         this._interactive = interactive;
         if (this._interactive) {
             this._n.setOptions({
@@ -205,8 +205,13 @@ export class Graph {
         AutomatonComponent.log('Deleting', this._selected);
 
         if (this._selectedType === 'Node') {
+            if (this._selected.id === Graph.initialGhostNode.id) return;
+            if (!this._ac.settings.permissions.node.delete) return;
+
             this._a.removeNode(this._selected.id);
         } else if (this._selectedType === 'Transition') {
+            if (!this._ac.settings.permissions.edge.delete) return;
+
             this._a.removeTransition(this._selected.id);
         }
         this._requestUpdate();
@@ -317,6 +322,8 @@ export class Graph {
         });
         this._ac.addEventListener('keydown', (e: KeyboardEvent) => {
             this._keys.set(e.key, true);
+
+            if (!this._interactive) return;
 
             if (this._keys.get('Delete') && this._selected) {
                 this.deleteSelected();

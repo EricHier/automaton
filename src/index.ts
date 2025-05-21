@@ -405,14 +405,14 @@ export class AutomatonComponent extends LitElementWw {
         if (this._mode === 'edit') {
             this.simulatorMenu.reset();
             this._graph.requestUpdate();
-            this._graph.setInteractve(true);
+            this._graph.setInteractive(true);
             if (this.automaton.extension) this.automaton.extension.contentEditable = 'true';
         }
 
         if (this._mode === 'simulate') {
             this.automaton.redrawNodes();
             this.simulatorMenu.init();
-            this._graph.setInteractve(false);
+            this._graph.setInteractive(false);
             this.automaton.highlightNode(this.automaton.getInitialNode());
             if (this.automaton.extension) this.automaton.extension.contentEditable = 'false';
         }
