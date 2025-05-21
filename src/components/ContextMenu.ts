@@ -141,6 +141,7 @@ export class ContextMenu {
                                   <sl-input
                                       placeholder="Symbol"
                                       value=${symbol}
+                                      maxlength="1"
                                       ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                                       @sl-input=${(e: any) => {
                                           console.log(e.target.value);

@@ -267,7 +267,10 @@ export class Settings {
                             this.parentComponent.requestUpdate();
                             return;
                         }
-                        this.parentComponent.forcedAlphabet = (e.target as SlInput).value.split(',');
+                        this.parentComponent.forcedAlphabet = (e.target as SlInput).value.split(',').filter((x) => x.length === 1);
+                        // remove duplicates
+                        this.parentComponent.forcedAlphabet = [...new Set(this.parentComponent.forcedAlphabet)];
+
                         this.parentComponent.requestUpdate();
                     }}
                 ></sl-input>
