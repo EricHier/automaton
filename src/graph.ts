@@ -61,6 +61,7 @@ export class Graph {
     } | null;
 
     private _lastPosition: Position = { x: 0, y: 0 };
+    private _nodeCenterPointerOffset: Position = { x: 0, y: 0 };
 
     private _requestUpdate: () => void = () => {};
     public set requestUpdate(fn: () => void) {
@@ -176,8 +177,12 @@ export class Graph {
         y: -100,
         initial: false,
         final: false,
-    };
-
+        widthConstraint: false,
+        size: 1,
+        hidden: true,
+        fixed: true,
+    };    
+    
     /**
      * Updates the selected data (either a Node or a Transition) in the graph.
      *
@@ -185,6 +190,8 @@ export class Graph {
      */
     private updateSelectedData(data: Node | Transition) {
         if (this._selectedType === 'Node') {
+            if (data.id === Graph.initialGhostNode.id) return;
+
             if (!data.label) this._a.updateNode(data.id, { ...(data as Node), label: undefined });
             else this._a.updateNode(data.id, data as Node);
 
@@ -267,11 +274,21 @@ export class Graph {
             this._cm.show();
         });
         this._n.on('selectNode', (e: any) => {
-            this._selected = this._a.getNode(e.nodes[0]) as Node;
+            const nodeId = e.nodes[0];
+            
+            if (nodeId === Graph.initialGhostNode.id) {
+                this._n.unselectAll();
+                return;
+            }
+            
+            this._selected = this._a.getNode(nodeId) as Node;
             this._selectedType = 'Node';
         });
         this._n.on('hoverNode', (e: any) => {
-            this._hovered = this._a.getNode(e.node as string);
+            const nodeId = e.node as string;
+            if (nodeId === Graph.initialGhostNode.id) return;
+            
+            this._hovered = this._a.getNode(nodeId);
             this._hoveredType = 'Node';
 
             if (this._ac.showHelp == 'false') return;
@@ -298,13 +315,37 @@ export class Graph {
         });
         this._n.on('blurEdge', () => {
             this._hovered = null;
-        });
+        });        
+        this._n.on('dragging', (e: any) => {
+            if (!e.nodes || e.nodes.length == 0) return;
+
+            const draggedNodeId = e.nodes[0];
+            const draggedNode = this._a.getNode(draggedNodeId);
+            
+            if (draggedNode && draggedNode.initial && draggedNodeId !== Graph.initialGhostNode.id) {
+                const newX = e.pointer.canvas.x + this._nodeCenterPointerOffset.x - 100;
+                const newY = e.pointer.canvas.y + this._nodeCenterPointerOffset.y;
+                
+                this._a.updateNode(Graph.initialGhostNode.id, {
+                    x: newX,
+                    y: newY
+                });
+            }
+        });        
         this._n.on('dragStart', (e: any) => {
             this._currentError = null;
             this._cm.blur();
+
+            if (e.nodes && e.nodes.length > 0) {
+                this._nodeCenterPointerOffset = {
+                    x: (e.nodes[0] ? this._a.getNode(e.nodes[0])?.x ?? 0 : 0) - e.pointer.canvas.x,
+                    y: (e.nodes[0] ? this._a.getNode(e.nodes[0])?.y ?? 0 : 0) - e.pointer.canvas.y
+                }
+            }
+
             this.requestUpdate();
         });
-        this._n.on('dragEnd', (e: any) => {
+        this._n.on('dragEnd', () => {
             this._n.storePositions();
             this._lastPosition = this._n.getViewPosition();
         });
@@ -378,6 +419,25 @@ export class Graph {
                 this.updateSelectedData({ ...this._selected, y: y + 10 });
             }
         });
+    }
+
+    /**
+     * Updates the position of the ghost node based on the initial node's position.
+     */
+    public updateGhostNodePosition() {
+        const initialNode = this._a.getInitialNode();
+        if (initialNode && this._a.getNode(Graph.initialGhostNode.id)) {
+            const newX = (initialNode.x || 0) - 100;
+            const newY = initialNode.y || 0;
+            
+            Graph.initialGhostNode.x = newX;
+            Graph.initialGhostNode.y = newY;
+            
+            this._a.updateNode(Graph.initialGhostNode.id, {
+                x: newX,
+                y: newY
+            });
+        }
     }
 
     /**

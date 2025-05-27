@@ -240,6 +240,7 @@ export class AutomatonComponent extends LitElementWw {
 
         if (_changedProperties.has('nodes') || _changedProperties.has('transitions')) {
             this.automaton.updateAutomaton(this.nodes, this.transitions);
+            if (this._graph) this._graph.updateGhostNodePosition();
         }
 
         if (this.automaton && this.automaton.extension) {

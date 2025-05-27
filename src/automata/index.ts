@@ -259,7 +259,18 @@ export abstract class Automaton {
         for (const node of this.nodes.get()) {
             this.updateNode(node.id, { shape: node.final ? 'custom' : 'circle' });
         }
-        this.nodes.update({ id: Graph.initialGhostNode.id, color: { background: '#fff', border: '#fff' } });
+        this.nodes.update({ 
+            id: Graph.initialGhostNode.id, 
+            color: { 
+                background: 'transparent', 
+                border: 'transparent',
+                hover: 'transparent',
+                highlight: 'transparent'
+            },
+            size: 1,
+            borderWidth: 0,
+            opacity: 0
+        });
     }
 
     protected resetColors(): void {
@@ -374,16 +385,14 @@ export abstract class Automaton {
             symbols: [],
         });
 
-        this.updateNode(Graph.initialGhostNode.id, {
-            x: node.x ? node.x - 100 : -100,
-            y: node.y ? node.y : 0,
-        });
-
         Graph.initialGhostNode = {
             ...Graph.initialGhostNode,
             x: node.x ? node.x - 100 : -100,
             y: node.y ? node.y : 0,
+            hidden: false,
+            fixed: true,
         };
+        this.nodes.update(Graph.initialGhostNode);
     }
 }
 
