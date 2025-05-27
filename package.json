@@ -59,46 +59,40 @@
                 "en": "Automaton"
             }
         },
-        "./snippets/example": {
-            "label": {
-                "de": "Beispiel",
-                "en": "Example"
-            }
-        },
         "./snippets/dfa-simple": {
             "label": {
-                "de": "DEA Einfach",
-                "en": "DFA Simple"
+                "de": "DEA einfach",
+                "en": "DFA simple"
             }
         },
         "./snippets/dfa-complex": {
             "label": {
-                "de": "DEA Komplex",
-                "en": "DFA Complex"
+                "de": "DEA komplex",
+                "en": "DFA complex"
             }
         },
         "./snippets/nfa-simple": {
             "label": {
-                "de": "NEA Einfach",
-                "en": "NFA Simple"
+                "de": "NEA einfach",
+                "en": "NFA simple"
             }
         },
         "./snippets/nfa-complex": {
             "label": {
-                "de": "NEA Komplex",
-                "en": "NFA Complex"
+                "de": "NEA komplex",
+                "en": "NFA complex"
             }
         },
         "./snippets/pda-simple": {
             "label": {
-                "de": "KA Einfach",
-                "en": "PDA Simple"
+                "de": "KA einfach",
+                "en": "PDA simple"
             }
         },
         "./snippets/pda-complex": {
             "label": {
-                "de": "KA Komplex",
-                "en": "PDA Complex"
+                "de": "KA komplex",
+                "en": "PDA complex"
             }
         }
     }
