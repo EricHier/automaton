@@ -223,16 +223,35 @@ export abstract class Automaton {
         });
     }
 
+    public flashHighlightNode(node: Node, duration: number): void {
+        this.highlightNode(node);
+
+        setTimeout(() => {
+            this.nodes.update({
+                id: node.id,
+                color: COLORS.standard,
+            });
+        }, duration);
+    }
+
     public highlightTransition(transition: Transition): void {
         this.transitions.update({
             id: transition.id,
-            color: {
-                color: COLORS.blue.background,
-                highlight: COLORS.blue.background,
-                hover: COLORS.blue.background,
-            },
-            width: 1.5,
+            color: COLORS.blue.border,
+            width: 2,
         });
+    }
+
+    public flashHighlightTransition(transition: Transition, duration: number): void {
+        this.highlightTransition(transition);
+
+        setTimeout(() => {
+            this.transitions.update({
+                id: transition.id,
+                color: COLORS.standard.border,
+                width: 1,
+            });
+        }, duration);
     }
 
     public clearHighlights(): void {

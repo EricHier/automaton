@@ -85,6 +85,7 @@ export const simulationMenuStyles = css`
         position: absolute;
         left: 0;
         bottom: calc(100% + 10px);
+        max-width: 100%;
     }
 
     .simulator__input-display__input {

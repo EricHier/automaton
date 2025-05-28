@@ -94,6 +94,15 @@ class DFASimulator extends Simulator {
 
     private _interval: number | undefined;
 
+    private _speed: number = 1000;
+
+    private _stepByStepPath: {
+        accepted: boolean;
+        path: Node[];
+        errors?: AutomatonInfo[];
+    } | undefined = undefined;
+    private _stepByStepHightlightTimeouts: number[] = [];
+
     constructor(automaton: DFA) {
         super(automaton);
         this._currentNode = this._a.getInitialNode();
@@ -101,54 +110,108 @@ class DFASimulator extends Simulator {
 
     public init() {}
 
+    private getPath(): {
+        accepted: boolean;
+        path: Node[];
+        errors?: AutomatonInfo[];
+    } {
+        this._errors = this._a.checkAutomaton();
+        if (this._errors.length > 0) {
+            return { accepted: false, path: [], errors: this._errors };
+        }
+
+        const path: Node[] = [];
+        let currentNode = this._a.getInitialNode();
+        path.push(currentNode);
+
+        for (const letter of this._word) {
+            const transition = this._a.getTransitionsFromNode(currentNode).find((t) => t.symbols.includes(letter));
+            if (!transition) {
+                return { accepted: false, path };
+            }
+            currentNode = this._a.getNode(transition.to) as Node;
+            path.push(currentNode);
+        }
+
+        return { accepted: currentNode.final, path };
+    }
+
     public simulate(): {
         success: boolean;
         message: string;
     } {
-        this._errors = this._a.checkAutomaton();
+        const result = this.getPath();
+        this._a.redrawNodes();
 
-        for (let i = 0; i < this._word.length; i++) {
-            const result = this.stepForward(false);
-            if (!result.success && !result.finalStep) {
-                this._a.highlightErrorNode(this._currentNode.id);
-                return result;
-            }
+        if (result.errors && result.errors.length > 0) {
+            return {
+                success: false,
+                message: `Please fix the following errors to run the simulation:<br/>${result.errors
+                    .map((e) => e.message)
+                    .join('<br/>')}`,
+            };
         }
 
-        this._a.redrawNodes();
-        this._a.highlightNode(this._currentNode);
+        const lastNode = result.path[result.path.length - 1];
+        this._a.highlightNode(lastNode);
 
         return {
-            success: this._currentNode.final,
-            message: `Finished simulation on <b>${this._currentNode.label}</b>`,
+            success: result.accepted,
+            message: `Finished simulation on <b>${lastNode.label}</b>.<br />Path: ${result.path
+                .map((n: Node) => `<b>${n.label}</b>`)
+                .join(', ')}`,
         };
     }
 
     public startAnimation(cb: Function): void {
-        this._errors = this._a.checkAutomaton();
+        const result = this.getPath();
 
-        //Step every 1s
-        this._interval = setInterval(() => {
-            const result = this.stepForward(true);
-            if (!result.success && !result.finalStep) {
-                this._a.highlightErrorNode(this._currentNode.id);
-                cb(result);
+        if (result.errors && result.errors.length > 0) {
+            cb({
+                success: false,
+                message: `Please fix the following errors to run the simulation:<br/>${result.errors
+                    .map((e) => e.message)
+                    .join('<br/>')}`,
+            });
+            return;
+        }
+
+        const iteration = () => {
+            const node = result.path[this._currentStep];
+
+            if (this._currentStep >= this._word.length) {
+                // This is the last step, so we highlight the node and stop the simulation
                 clearInterval(this._interval);
+                this._a.highlightNode(node);
+                cb({
+                    success: result.accepted,
+                    message: `Finished simulation on <b>${node.label}</b>.<br />The Automaton <b>${
+                        result.accepted ? 'accepts' : 'rejects'
+                    }</b> the word <b>${this._word.join('')}</b>.<br />Path: ${result.path
+                        .map((n: Node) => `<b>${n.label}</b>`)
+                        .join(', ')}`,
+                    wordPosition: this._word.length,
+                });
                 return;
             }
 
-            if (result.finalStep) {
-                clearInterval(this._interval);
-                cb(result);
-                return;
-            }
+            const transition = this._a.getTransitionsFromNode(node).find((t) => t.symbols.includes(this._word[this._currentStep]))!;
+            this._a.flashHighlightNode(node, this._speed / 2);
+            setTimeout(() => this._a.flashHighlightTransition(transition, this._speed / 2), this._speed / 2);
 
             cb({
                 success: undefined,
-                message: '',
+                message: `<br />Path: ${result.path.slice(0, this._currentStep + 1)
+                .map((n: Node) => `<b>${n.label}</b>`)
+                .join(', ')}`,
                 wordPosition: this._currentStep,
             });
-        }, 1000);
+            this._currentNode = node;
+            this._currentStep++;
+        }
+
+        iteration();
+        this._interval = setInterval(iteration, this._speed);
     }
 
     public pauseAnimation(cb: Function): void {
@@ -167,7 +230,31 @@ class DFASimulator extends Simulator {
         });
     }
 
-    public initStepByStep(): { graphInteraction: boolean } {
+    public initStepByStep(_: Graph, callback: Function): { graphInteraction: boolean } {
+        console.log('Initializing step-by-step mode');
+
+        this._stepByStepPath = this.getPath();
+        this._currentStep = 0;
+        this._currentNode = this._a.getInitialNode();
+
+        if (this._stepByStepPath.errors && this._stepByStepPath.errors.length > 0) {
+            callback({
+                success: false,
+                message: `Please fix the following errors:<br/>${this._stepByStepPath.errors
+                    .map((e) => e.message)
+                    .join('<br/>')}`,
+            });
+            return { graphInteraction: false };
+        }
+
+        callback({
+            success: true,
+            message: `Current step: ${this._currentStep}/${this._word.length}<br/>Path: ${this._stepByStepPath.path
+                .map((n: Node) => `<b>${n.label}</b>`)
+                .join(', ')}`,
+            wordPosition: this._currentStep,
+        })
+
         return { graphInteraction: false };
     }
 
@@ -177,47 +264,69 @@ class DFASimulator extends Simulator {
         message: string;
         wordPosition: number;
     } {
-        if (this._currentStep >= this._word.length) {
+        if (!this._stepByStepPath) {
             return {
-                success: this._currentNode.final,
-                finalStep: true,
-                message: `Simulation already finished on <b>${this._currentNode.label}</b>`,
+                success: false,
+                message: 'Error: No path calculated',
                 wordPosition: this._currentStep,
             };
         }
 
-        if (this._errors.some((e) => e.node?.id === this._currentNode?.id)) {
-            const nodeErrors = this._errors.filter((e) => e.node?.id === this._currentNode?.id);
-            if (highlight) {
-                this._a.highlightErrorNode(this._currentNode.id);
-            }
+        if (this._stepByStepPath.errors && this._stepByStepPath.errors.length > 0) {
             return {
                 success: false,
-                message: `Simulation stopped on <b>${this._currentNode.label}</b><br/>${nodeErrors
+                message: `Please fix the following errors:<br/>${this._stepByStepPath.errors
                     .map((e) => e.message)
                     .join('<br/>')}`,
                 wordPosition: this._currentStep,
             };
         }
 
+        if (this._currentStep >= this._word.length) {
+            const finalNode = this._stepByStepPath.path[this._stepByStepPath.path.length - 1];
+            return {
+                success: finalNode.final,
+                finalStep: true,
+                message: `Simulation already finished on <b>${finalNode.label}</b>`,
+                wordPosition: this._currentStep,
+            };
+        }
+
+        this._currentNode = this._stepByStepPath.path[this._currentStep];
+        const nextNode = this._stepByStepPath.path[this._currentStep + 1];
+        
         const letter = this._word[this._currentStep];
-        const transition = this._a.getTransitionsFromNode(this._currentNode).find((t) => t.symbols.includes(letter))!;
-        this._currentNode = this._a.getNode(transition.to) as Node;
+        const transition = this._a.getTransitionsFromNode(this._currentNode).find((t) => 
+            t.symbols.includes(letter) && t.to === nextNode.id
+        );
 
         this._currentStep++;
 
         if (highlight) {
             this._a.redrawNodes();
-            this._a.highlightNode(this._currentNode);
+            this._stepByStepHightlightTimeouts.forEach((timeout) => clearTimeout(timeout));
+            this._stepByStepHightlightTimeouts = [];
+            this._a.clearHighlights();
+            if (transition) {
+                this._a.flashHighlightTransition(transition, this._speed / 2);
+                this._stepByStepHightlightTimeouts.push(setTimeout(() => {
+                    this._a.highlightNode(nextNode);
+                }, this._speed / 2));
+            } else {
+                this._a.highlightNode(nextNode);
+            }
         }
 
         if (this._currentStep >= this._word.length) {
+            const finalNode = this._stepByStepPath.path[this._stepByStepPath.path.length - 1];
             return {
-                success: this._currentNode.final,
+                success: finalNode.final,
                 finalStep: true,
-                message: `Finished simulation on <b>${this._currentNode.label}</b><br/>The Automaton <b>${
-                    this._currentNode.final ? 'accepts' : 'rejects'
-                }</b> the word <b>${this._word.join('')}</b>`,
+                message: `Finished simulation on <b>${finalNode.label}</b><br/>The Automaton <b>${
+                    finalNode.final ? 'accepts' : 'rejects'
+                }</b> the word <b>${this._word.join('')}</b><br/>Path: ${this._stepByStepPath.path
+                    .map((n: Node) => `<b>${n.label}</b>`)
+                    .join(', ')}`,
                 wordPosition: this._currentStep,
             };
         }
@@ -225,21 +334,66 @@ class DFASimulator extends Simulator {
         return {
             success: true,
             finalStep: false,
-            message: '',
+            message: `Current step: ${this._currentStep}/${this._word.length}<br/>Path: ${this._stepByStepPath.path
+                .slice(0, this._currentStep + 1)
+                .map((n: Node) => `<b>${n.label}</b>`)
+                .join(', ')}`,
             wordPosition: this._currentStep,
         };
     }
 
-    public stepBackward(): {
+    public stepBackward(highlight: boolean): {
         success: boolean;
         message: string;
         wordPosition: number;
     } {
+        if (!this._stepByStepPath) {
+            return {
+                success: false,
+                message: 'No path calculated. Please initialize step-by-step mode first.',
+                wordPosition: this._currentStep,
+            };
+        }
+
+        if (this._currentStep <= 0) {
+            this._currentStep = 0;
+            this._currentNode = this._a.getInitialNode();
+            return {
+                success: true,
+                message: 'Already at the beginning of simulation',
+                wordPosition: this._currentStep,
+            };
+        }
+
         this._currentStep--;
+        this._currentNode = this._stepByStepPath.path[this._currentStep];
+
+        const letter = this._word[this._currentStep];
+        const transition = this._a.getTransitionsFromNode(this._currentNode).find((t) => 
+            t.symbols.includes(letter)
+        );
+
+        if (highlight) {
+            this._a.redrawNodes();
+            this._stepByStepHightlightTimeouts.forEach((timeout) => clearTimeout(timeout));
+            this._stepByStepHightlightTimeouts = [];
+            this._a.clearHighlights();
+            if (transition) {
+                this._a.flashHighlightTransition(transition, this._speed / 2);
+                this._stepByStepHightlightTimeouts.push(setTimeout(() => {
+                    this._a.highlightNode(this._currentNode);
+                }, this._speed / 2));
+            } else {
+                this._a.highlightNode(this._currentNode);
+            }
+        }
 
         return {
             success: true,
-            message: '',
+            message: `Current step: ${this._currentStep}/${this._word.length}<br/>Path: ${this._stepByStepPath.path
+                .slice(0, this._currentStep + 1)
+                .map((n: Node) => `<b>${n.label}</b>`)
+                .join(', ')}`,
             wordPosition: this._currentStep,
         };
     }
@@ -249,6 +403,7 @@ class DFASimulator extends Simulator {
         this._currentNode = this._a.getInitialNode();
         this._a.redrawNodes();
         this._errors = this._a.checkAutomaton();
+        this._stepByStepPath = undefined;
         this.stopAnimation(() => {});
     }
 }

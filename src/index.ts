@@ -403,6 +403,8 @@ export class AutomatonComponent extends LitElementWw {
      * @param mode - The mode to set. Can be either 'edit' or 'simulate'.
      */
     private setMode(mode: 'edit' | 'simulate') {
+        this._graph.network.unselectAll();
+        this.automaton.clearHighlights();
         this._mode = mode;
 
         if (this._mode === 'edit') {
@@ -416,7 +418,6 @@ export class AutomatonComponent extends LitElementWw {
             this.automaton.redrawNodes();
             this.simulatorMenu.init();
             this._graph.setInteractive(false);
-            this.automaton.highlightNode(this.automaton.getInitialNode());
             if (this.automaton.extension) this.automaton.extension.contentEditable = 'false';
         }
     }

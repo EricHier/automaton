@@ -6,6 +6,7 @@ import SlButton from '@shoelace-style/shoelace/dist/components/button/button.com
 import SlBadge from '@shoelace-style/shoelace/dist/components/badge/badge.component.js';
 import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js';
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
+import SlButtonGroup from '@shoelace-style/shoelace/dist/components/button-group/button-group.component.js';
 
 import {
     biSkipStart,
@@ -76,6 +77,7 @@ export class SimulatorMenu extends LitElementWw {
             'sl-tooltip': SlTooltip,
             'sl-badge': SlBadge,
             'sl-input': SlInput,
+            'sl-button-group': SlButtonGroup,
         };
     }
 
@@ -136,7 +138,7 @@ export class SimulatorMenu extends LitElementWw {
         return html`<sl-button-group
                 class="simulator_buttons"
                 style=${styleMap({
-                    display: this._mode === 'idle' ? 'flex' : 'none',
+                    display: this._mode === 'idle' ? 'initial' : 'none',
                 })}
             >
                 <sl-tooltip content="Animate" placement="top">
@@ -334,7 +336,6 @@ export class SimulatorMenu extends LitElementWw {
         this._toggleButton.disabled = false;
         this._stopButton.disabled = false;
 
-        this._automaton.highlightNode(this._automaton.getInitialNode());
         this.requestUpdate();
     }
 
@@ -376,13 +377,13 @@ export class SimulatorMenu extends LitElementWw {
         if (!result.success) {
             this._nextButton.disabled = true;
             this._backButton.disabled = true;
-            this.result = result;
         }
 
         if (result.finalStep) {
             this._nextButton.disabled = true;
-            this.result = result;
         }
+
+        this.result = result;
 
         this.requestUpdate();
     }
@@ -392,8 +393,9 @@ export class SimulatorMenu extends LitElementWw {
 
         if (result.firstStep) {
             this._backButton.disabled = true;
-            this.result = result;
         }
+
+        this.result = result;
 
         this.requestUpdate();
     }
