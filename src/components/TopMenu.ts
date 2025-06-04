@@ -168,7 +168,7 @@ export class TopMenu extends LitElementWw {
                 </sl-popup>
             </div>
             <div class="topmenu__button_group">
-                <sl-popup placement="bottom-end" distance="8" arrow>
+                <sl-popup placement="bottom-end" distance="8" arrow style="--arrow-color: var(--sl-panel-border-color)">
                     <sl-button
                         slot="anchor"
                         class="topmenu__button"
@@ -182,15 +182,19 @@ export class TopMenu extends LitElementWw {
                         >${biCodeSlash}</sl-button
                     >
                     <div class="topmenu__popup">
-                        <sl-tab-group placement="bottom">
-                            <sl-tab slot="nav" panel="def" ?disabled=${this.component.showFromalDefinition == 'false'}
+                        <sl-tab-group placement="top">
+                            <sl-tab slot="nav" panel="def" 
+                                ?disabled=${this.component.showFromalDefinition == 'false'}
+                                ?active=${this.component.showFromalDefinition == 'true'}
                                 >Definition</sl-tab
                             >
-                            <sl-tab slot="nav" panel="table" ?disabled=${this.component.showTransitionsTable == 'false'}
+                            <sl-tab slot="nav" panel="table" 
+                                ?disabled=${this.component.showTransitionsTable == 'false'}
+                                ?active=${this.component.showTransitionsTable == 'true' && this.component.showFromalDefinition == 'false'}
                                 >Table</sl-tab
                             >
 
-                            <sl-tab-panel name="def" ?active=${this.component.showFromalDefinition == 'true'}>
+                            <sl-tab-panel name="def" ?active=${this.component.showFromalDefinition == 'true'} style="--padding: 1em">
                                 <label>Alphabet: </label>${formalDefinition.alphabet}
                                 <br />
                                 <label>States: </label>${formalDefinition.nodes}
@@ -205,6 +209,7 @@ export class TopMenu extends LitElementWw {
                                 name="table"
                                 ?active=${this.component.showTransitionsTable == 'true' &&
                                 this.component.showFromalDefinition == 'false'}
+                                style="--padding: 0"
                             >
                                 ${this.getTransitionsTable()}
                             </sl-tab-panel>
@@ -282,10 +287,10 @@ export class TopMenu extends LitElementWw {
         const transitions = this._component.automaton.transitions
             .get()
             .filter((t) => t.from !== Graph.initialGhostNode.id);
-        const alphabet = this._component.automaton.getFormalDefinition().alphabet.split(', ');
+        const alphabet = this._component.automaton.getFormalDefinition().alphabet.split(', ').sort();
         const nodes = this._component.automaton.nodes.get().filter((n) => n.id !== Graph.initialGhostNode.id);
 
-        const table = html`<table>
+        const table = html`<table class="topmenu__popup__table">
             <thead>
                 <tr>
                     <th></th>

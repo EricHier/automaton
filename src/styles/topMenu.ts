@@ -52,6 +52,24 @@ export const topMenuStyles = css`
     .topmenu__popup {
         max-width: 400px;
         background-color: white;
-        outline: 1px solid black;
+        outline: 1px solid var(--sl-panel-border-color);
+        border-radius: var(--sl-border-radius-medium);
+        font-size: 1rem;
+        overflow: hidden;
+    }
+
+    .topmenu__popup label {
+        font-weight: var(--sl-font-weight-semibold);
+    }
+
+    .topmenu__popup__table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .topmenu__popup__table th, .topmenu__popup__table td {
+        padding: 0.25em 0.5em;
+        border: 1px solid var(--sl-panel-border-color);
+        text-align: center;
     }
 `;
