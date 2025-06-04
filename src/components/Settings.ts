@@ -30,7 +30,6 @@ export class Settings {
     private set permissions(permissions: typeof this._permissions) {
         this._permissions = permissions;
         this.parentComponent.permissions = this.permissionsToNumberString();
-        console.log(this.permissionsToNumberString());
     }
     public get permissions() {
         return this._permissions;
@@ -51,7 +50,7 @@ export class Settings {
                         <td>Node</td>
                         <td>
                             <sl-checkbox
-                                checked=${live(this.permissions.node.add)}
+                                ?checked=${live(this.permissions.node.add)}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
@@ -64,7 +63,7 @@ export class Settings {
                         </td>
                         <td>
                             <sl-checkbox
-                                checked=${this.permissions.node.delete}
+                                ?checked=${this.permissions.node.delete}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
@@ -77,7 +76,7 @@ export class Settings {
                         </td>
                         <td>
                             <sl-checkbox
-                                checked=${this.permissions.node.change}
+                                ?checked=${this.permissions.node.change}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
@@ -93,7 +92,7 @@ export class Settings {
                         <td>Edge</td>
                         <td>
                             <sl-checkbox
-                                checked=${this.permissions.edge.add}
+                                ?checked=${this.permissions.edge.add}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
@@ -106,7 +105,7 @@ export class Settings {
                         </td>
                         <td>
                             <sl-checkbox
-                                checked=${this.permissions.edge.delete}
+                                ?checked=${this.permissions.edge.delete}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
@@ -119,7 +118,7 @@ export class Settings {
                         </td>
                         <td>
                             <sl-checkbox
-                                checked=${this.permissions.edge.change}
+                                ?checked=${this.permissions.edge.change}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
@@ -135,7 +134,7 @@ export class Settings {
                         <td>Stack</td>
                         <td>
                             <sl-checkbox
-                                checked=${this.permissions.stack.add}
+                                ?checked=${this.permissions.stack.add}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
@@ -148,7 +147,7 @@ export class Settings {
                         </td>
                         <td>
                             <sl-checkbox
-                                checked=${this.permissions.stack.delete}
+                                ?checked=${this.permissions.stack.delete}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
@@ -161,7 +160,7 @@ export class Settings {
                         </td>
                         <td>
                             <sl-checkbox
-                                checked=${this.permissions.stack.change}
+                                ?checked=${this.permissions.stack.change}
                                 @sl-input=${(e: SlChangeEvent) => {
                                     const c = e.target as SlCheckbox;
                                     this.permissions = {
