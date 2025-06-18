@@ -3,6 +3,7 @@ import { html } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { biDatabase, biDatabaseAdd, biDatabaseDash, biDatabaseSlash, biTrash } from '../styles/icons';
 import { AutomatonComponent } from 'index';
+import { classMap } from 'lit/directives/class-map.js';
 
 /**
  * Represents a context menu component that provides options for interacting with nodes and edges.
@@ -43,9 +44,7 @@ export class ContextMenu {
         >
             ${this.selected?.type === 'Node' ? this.nodeContextMenu() : null}
             ${this.selected?.type === 'Transition'
-                ? (this.selected.data as Transition).stackOperations
-                    ? this.pdaEdgeContextMenu()
-                    : this.edgeContextMenu()
+                ? this.edgeContextMenu(!!(this.selected.data as Transition).stackOperations)
                 : null}
         </div>`;
     }
@@ -104,8 +103,9 @@ export class ContextMenu {
         `;
     }
 
-    private edgeContextMenu() {
+    private edgeContextMenu(isPda: boolean = false) {
         let transition = this.selected?.data as Transition;
+        let stackOperations = transition.stackOperations as StackOperation[] || [];
 
         return html`
             <div class="context-menu__header">
@@ -125,7 +125,7 @@ export class ContextMenu {
                 >
             </div>
             <sl-divider style="--spacing: var(--sl-spacing-x-small)"></sl-divider>
-            <div class="context-menu__inputs">
+            <div class=${classMap({"context-menu__inputs": true, "context-menu__inputs--pda": isPda})}>
                 ${transition.symbols.map(
                     (symbol, i) => html`
                         <div class="context-menu__inputs__group">
@@ -165,6 +165,115 @@ export class ContextMenu {
                                         }}
                                     ></sl-input>
                                 `}
+                            ${isPda ? html`
+                                <sl-input
+                                    placeholder="Stack"
+                                    value=${stackOperations[i].symbol}
+                                    size="small"
+                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change || stackOperations[i].operation === 'empty' || stackOperations[i].operation === 'none'}
+                                    @sl-input=${(e: any) => {
+                                        const operation = {
+                                            operation: stackOperations[i].operation,
+                                            symbol: e.target.value,
+                                            condition: stackOperations[i].condition,
+                                        };
+                                        stackOperations[i] = operation as StackOperation;
+                                        this.selected.updateFn({ ...transition, stackOperations: stackOperations });
+                                        transition = { ...transition, stackOperations: stackOperations };
+                                    }}
+                                ></sl-input>
+                                <sl-input
+                                    placeholder="If"
+                                    value=${stackOperations[i].condition}
+                                    size="small"
+                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change || stackOperations[i].operation === 'empty'}
+                                    @sl-input=${(e: any) => {
+                                        const operation = {
+                                            operation: stackOperations[i].operation,
+                                            symbol: stackOperations[i].symbol,
+                                            condition: e.target.value,
+                                        };
+                                        stackOperations[i] = operation as StackOperation;
+                                        this.selected.updateFn({ ...transition, stackOperations: stackOperations });
+                                        transition = { ...transition, stackOperations: stackOperations };
+                                    }}
+                                ></sl-input>
+
+                                <sl-button-group label="Stack Actions">
+                                    <sl-tooltip content="Push" placement="top">
+                                        <sl-button
+                                            variant=${stackOperations[i].operation == 'push' ? 'primary' : 'default'}
+                                            size="small"
+                                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                                            @click=${() => {
+                                                const operation = {
+                                                    operation: 'push',
+                                                    symbol: stackOperations[i].symbol,
+                                                    condition: stackOperations[i].condition,
+                                                };
+                                                stackOperations[i] = operation as StackOperation;
+                                                this.selected.updateFn({ ...transition, stackOperations: stackOperations });
+                                                transition = { ...transition, stackOperations: stackOperations };
+                                            }}
+                                            >${biDatabaseAdd}</sl-button
+                                        >
+                                    </sl-tooltip>
+                                    <sl-tooltip content="Pop" placement="top">
+                                        <sl-button
+                                            variant=${stackOperations[i].operation == 'pop' ? 'primary' : 'default'}
+                                            size="small"
+                                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                                            @click=${() => {
+                                                const operation = {
+                                                    operation: 'pop',
+                                                    symbol: stackOperations[i].symbol,
+                                                    condition: stackOperations[i].condition,
+                                                };
+                                                stackOperations[i] = operation as StackOperation;
+                                                this.selected.updateFn({ ...transition, stackOperations: stackOperations });
+                                                transition = { ...transition, stackOperations: stackOperations };
+                                            }}
+                                            >${biDatabaseDash}</sl-button
+                                        >
+                                    </sl-tooltip>
+                                    <sl-tooltip content="Empty Check" placement="top">
+                                        <sl-button
+                                            variant=${stackOperations[i].operation == 'empty' ? 'primary' : 'default'}
+                                            size="small"
+                                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                                            @click=${() => {
+                                                const operation = {
+                                                    operation: 'empty',
+                                                    symbol: '',
+                                                    condition: '',
+                                                };
+                                                stackOperations[i] = operation as StackOperation;
+                                                this.selected.updateFn({ ...transition, stackOperations: stackOperations });
+                                                transition = { ...transition, stackOperations: stackOperations };
+                                            }}
+                                            >${biDatabaseSlash}</sl-button
+                                        >
+                                    </sl-tooltip>
+                                    <sl-tooltip content="Keep" placement="top">
+                                        <sl-button
+                                            variant=${stackOperations[i].operation == 'none' ? 'primary' : 'default'}
+                                            size="small"
+                                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
+                                            @click=${() => {
+                                                const operation = {
+                                                    operation: 'none',
+                                                    symbol: '',
+                                                    condition: stackOperations[i].condition,
+                                                };
+                                                stackOperations[i] = operation as StackOperation;
+                                                this.selected.updateFn({ ...transition, stackOperations: stackOperations });
+                                                transition = { ...transition, stackOperations: stackOperations };
+                                            }}
+                                            >${biDatabase}</sl-button
+                                        >
+                                    </sl-tooltip>
+                                </sl-button-group>
+                            ` : ''}
                             <sl-button
                                 class="context-menu__button"
                                 circle
@@ -194,8 +303,15 @@ export class ContextMenu {
                     @click=${() => {
                         const symbols = transition.symbols;
                         symbols.push('');
-                        this.selected.updateFn({ ...transition, symbols });
-                        transition = { ...transition, symbols };
+
+                        if (isPda) {
+                            stackOperations.push({ operation: 'none', symbol: '', condition: '' });
+                            this.selected.updateFn({ ...transition, stackOperations, symbols });
+                            transition = { ...transition, stackOperations, symbols };
+                        } else {
+                            this.selected.updateFn({ ...transition, symbols });
+                            transition = { ...transition, symbols };
+                        }
                     }}
                     style=${styleMap({
                         display: this.parentComponent.settings.permissions.edge.add ? 'block' : 'none',
@@ -235,196 +351,6 @@ export class ContextMenu {
                     }}
                 ></sl-range>`
             }
-        `;
-    }
-
-    private pdaEdgeContextMenu() {
-        let transition = this.selected?.data as Transition;
-        let stackOperations = transition.stackOperations as StackOperation[];
-
-        return html`
-            <div class="context-menu__header context-menu__header--pda">
-                PDA Edge ${transition.label}
-                <sl-button
-                    class="context-menu__button"
-                    circle
-                    size="small"
-                    @click=${() => {
-                        this.selected.deleteFn();
-                        this.hide();
-                    }}
-                    style=${styleMap({
-                        display: this.parentComponent.settings.permissions.edge.delete ? 'block' : 'none',
-                    })}
-                    >${biTrash}</sl-button
-                >
-            </div>
-            ${transition.symbols.map(
-                (symbol, i) => html`
-                    <div class="context-menu__inputs__group">
-                        <sl-input
-                            placeholder="Symbol"
-                            value=${symbol}
-                            size="small"
-                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                            @sl-input=${(e: any) => {
-                                console.log(e.target.value);
-                                const symbols = transition.symbols;
-                                symbols[i] = e.target.value;
-                                this.selected.updateFn({ ...transition, symbols });
-                                transition = { ...transition, symbols };
-                            }}
-                        ></sl-input>
-                        <sl-input
-                            placeholder="Stack"
-                            value=${stackOperations[i].symbol}
-                            size="small"
-                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                            @sl-input=${(e: any) => {
-                                const operation = {
-                                    operation: stackOperations[i].operation,
-                                    symbol: e.target.value,
-                                    condition: stackOperations[i].condition,
-                                };
-                                stackOperations[i] = operation as StackOperation;
-                                this.selected.updateFn({ ...transition, stackOperations: stackOperations });
-                                transition = { ...transition, stackOperations: stackOperations };
-                            }}
-                        ></sl-input>
-                        <sl-input
-                            palceholder="If"
-                            value=${stackOperations[i].condition}
-                            size="small"
-                            ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                            @sl-input=${(e: any) => {
-                                const operation = {
-                                    operation: stackOperations[i].operation,
-                                    symbol: stackOperations[i].symbol,
-                                    condition: e.target.value,
-                                };
-                                stackOperations[i] = operation as StackOperation;
-                                this.selected.updateFn({ ...transition, stackOperations: stackOperations });
-                                transition = { ...transition, stackOperations: stackOperations };
-                            }}
-                        ></sl-input>
-
-                        <sl-button-group label="Stack Actions">
-                            <sl-tooltip content="Push" placement="top">
-                                <sl-button
-                                    variant=${stackOperations[i].operation == 'push' ? 'primary' : 'default'}
-                                    size="small"
-                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                                    @click=${() => {
-                                        const operation = {
-                                            operation: 'push',
-                                            symbol: stackOperations[i].symbol,
-                                            condition: stackOperations[i].condition,
-                                        };
-                                        stackOperations[i] = operation as StackOperation;
-                                        this.selected.updateFn({ ...transition, stackOperations: stackOperations });
-                                        transition = { ...transition, stackOperations: stackOperations };
-                                    }}
-                                    >${biDatabaseAdd}</sl-button
-                                >
-                            </sl-tooltip>
-                            <sl-tooltip content="Pop" placement="top">
-                                <sl-button
-                                    variant=${stackOperations[i].operation == 'pop' ? 'primary' : 'default'}
-                                    size="small"
-                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                                    @click=${() => {
-                                        const operation = {
-                                            operation: 'pop',
-                                            symbol: stackOperations[i].symbol,
-                                            condition: stackOperations[i].condition,
-                                        };
-                                        stackOperations[i] = operation as StackOperation;
-                                        this.selected.updateFn({ ...transition, stackOperations: stackOperations });
-                                        transition = { ...transition, stackOperations: stackOperations };
-                                    }}
-                                    >${biDatabaseDash}</sl-button
-                                >
-                            </sl-tooltip>
-                            <sl-tooltip content="Empty Check" placement="top">
-                                <sl-button
-                                    variant=${stackOperations[i].operation == 'empty' ? 'primary' : 'default'}
-                                    size="small"
-                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                                    @click=${() => {
-                                        const operation = {
-                                            operation: 'empty',
-                                            symbol: '',
-                                            condition: '',
-                                        };
-                                        stackOperations[i] = operation as StackOperation;
-                                        this.selected.updateFn({ ...transition, stackOperations: stackOperations });
-                                        transition = { ...transition, stackOperations: stackOperations };
-                                    }}
-                                    >${biDatabaseSlash}</sl-button
-                                >
-                            </sl-tooltip>
-                            <sl-tooltip content="Keep" placement="top">
-                                <sl-button
-                                    variant=${stackOperations[i].operation == 'none' ? 'primary' : 'default'}
-                                    size="small"
-                                    ?disabled=${!this.parentComponent.settings.permissions.edge.change}
-                                    @click=${() => {
-                                        const operation = {
-                                            operation: 'none',
-                                            symbol: '',
-                                            condition: stackOperations[i].condition,
-                                        };
-                                        stackOperations[i] = operation as StackOperation;
-                                        this.selected.updateFn({ ...transition, stackOperations: stackOperations });
-                                        transition = { ...transition, stackOperations: stackOperations };
-                                    }}
-                                    >${biDatabase}</sl-button
-                                >
-                            </sl-tooltip>
-                        </sl-button-group>
-
-                        <sl-button
-                            class="context-menu__button"
-                            circle
-                            size="small"
-                            @click=${() => {
-                                const symbols = transition.symbols;
-                                symbols.splice(i, 1);
-                                this.selected.updateFn({ ...transition, symbols });
-                                transition = { ...transition, symbols };
-
-                                if (symbols.length === 0) {
-                                    this.selected.deleteFn();
-                                    this.hide();
-                                }
-                            }}
-                            style=${styleMap({
-                                display: this.parentComponent.settings.permissions.edge.delete ? 'block' : 'none',
-                            })}
-                            >${biTrash}</sl-button
-                        >
-                    </div>
-                `
-            )}
-            <sl-range
-                label="Bend"
-                min="-100"
-                max="100"
-                style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);--track-active-offset: 50%;"
-                value=${(transition.smooth as any)?.roundness ? (transition.smooth as any).roundness * 100 : 0}
-                @sl-input=${(e: any) => {
-                    const value = e.target.value;
-                    this.selected.updateFn({
-                        ...transition,
-                        smooth: {
-                            type: value < 0 ? 'curvedCCW' : 'curvedCW',
-                            roundness: Math.abs(value / 100),
-                        },
-                    });
-
-                    console.log(e.target.value);
-                }}
-            ></sl-range>
         `;
     }
 
