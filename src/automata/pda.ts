@@ -1,6 +1,6 @@
 import { AutomatonComponent } from '../';
-import { Automaton, AutomatonInfo, Node, SimulationFeedback, Simulator, Transition } from './';
-import { PropertyValueMap, TemplateResult, html } from 'lit';
+import { Automaton, AutomatonInfo, Node, SimulationResult, Transition } from './';
+import { TemplateResult, html } from 'lit';
 import { DataSet } from 'vis-data';
 import { LitElementWw } from '@webwriter/lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
@@ -10,11 +10,11 @@ import SlButton from '@shoelace-style/shoelace/dist/components/button/button.com
 import SlInput from '@shoelace-style/shoelace/dist/components/input/input.component.js';
 import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js';
 import { biTrash } from '../styles/icons';
-import { Graph } from '../graph';
 import { styleMap } from 'lit/directives/style-map.js';
+import { ManualAutoSimulator } from './manual-auto-simulator';
 
 export class PDA extends Automaton {
-    public simulator: Simulator;
+    public simulator: PDASimulator;
     public type: string = 'pda';
 
     public extension = document.createElement('stack-extension') as StackExtension;
@@ -75,34 +75,222 @@ export class PDA extends Automaton {
 
         return transition.symbols.join(', ');
     }
+
+    public displayStack(stack: string[]): void {
+        this.extension.setStack(stack);
+        this.extension.requestUpdate();
+    }
 }
 
-class PDASimulator extends Simulator {
-    private _currentNode: Node;
-
-    private _previousTransitions: {
-        node: Node;
-        transitionSymbol: string;
-        stackOperation: { operation: string; symbol: string };
-    }[] = [];
-
-    private _mode: 'simulation' | 'stepByStep' = 'simulation';
-    private _graph: Graph | undefined;
-
-    private _currentStep: number = 0;
-    private _currentWordPosition: number = 0;
-
-    private _interval: number | undefined;
-
+class PDASimulator extends ManualAutoSimulator {
     private _initialStack: string[] = [];
+    private _currentStack: string[] = [];
 
     constructor(protected _a: PDA) {
         super(_a);
         this._currentNode = this._a.getInitialNode();
         this._initialStack = this._a.extension.getStack();
+        this._currentStack = [...this._initialStack];
+        this._previousTransitions = {
+            accepted: this._currentNode.final,
+            path: {
+                nodes: [this._currentNode],
+                transitions: [],
+                stacks: [this._currentStack]
+            }
+        };
     }
 
-    public simulate(): { success: boolean; message: string } {
+    protected getPath(): SimulationResult {
+        this._errors = this._a.checkAutomaton();
+        if (this._errors.length > 0) {
+            return { accepted: false, path: { nodes: [], transitions: [] }, errors: this._errors };
+        }
+
+        type PathTransition = { transition: Transition; symbol: string };
+
+        // Necessary for performance: track visited states
+        const visitedStates = new Set<string>();
+        const generateStateKey =
+            (node: Node, wordIndex: number, stack: string[]): string => `${node.id}-${wordIndex}-${stack.join(',')}`;
+
+        // Cache the epsilon closure computations for performance
+        const epsilonClosures = new Map<string, Set<{ nodes: Node[]; transitions: PathTransition[]; stacks: string[][] }>>();
+
+        const getEpsilonClosure = (
+            node: Node,
+            stack: string[]
+        ): Set<{ nodes: Node[]; transitions: PathTransition[]; stacks: string[][] }> => {
+            // TODO: Use truly unique keys for closures
+            const generateKey = (n: Node, s: string[]): string => `${n.id}-${s.join(',')}`;
+
+            if (epsilonClosures.has(generateKey(node, stack))) {
+                return epsilonClosures.get(generateKey(node, stack))!;
+            }
+
+            const closure = new Set<{ nodes: Node[]; transitions: PathTransition[]; stacks: string[][] }>();
+            const visited = new Set<string>();
+            const queue: { nodes: Node[]; transitions: PathTransition[]; stacks: string[][] }[] = [
+                { nodes: [node], transitions: [], stacks: [stack] }
+            ];
+
+            while (queue.length > 0) {
+                const current = queue.shift()!;
+                const currentNode = current.nodes[current.nodes.length - 1];
+                const currentStack = current.stacks[current.stacks.length - 1];
+                if (visited.has(generateKey(currentNode, currentStack))) continue;
+
+                visited.add(generateKey(currentNode, currentStack));
+                closure.add(current);
+
+                const currentEpsilonTransitions = this._a.getTransitionsFromNode(currentNode).filter((t) => t.symbols.includes(''));
+
+                for (const transition of currentEpsilonTransitions) {
+                    const targetNode = this._a.getNode(transition.to);
+
+                    // Handle stack operations
+                    if (!transition.stackOperations || transition.stackOperations.length === 0) {
+                        continue;
+                    }
+                    for (let i = 0; i < transition.stackOperations.length; i++) {
+                        const stackOperation = transition.stackOperations[i];
+                        const currentSymbol = transition.symbols[i];
+
+                        if (currentSymbol !== '') continue;
+                        if (stackOperation.condition && stackOperation.condition !== stack[stack.length - 1]) continue;
+
+                        const newStack = [...currentStack];
+
+                        if (stackOperation.operation === 'push') {
+                            newStack.push(stackOperation.symbol);
+                        } else if (stackOperation.operation === 'pop') {
+                            if (newStack.length > 0 && newStack[newStack.length - 1] === stackOperation.symbol) {
+                                newStack.pop();
+                            } else {
+                                continue;
+                            }
+                        } else if (stackOperation.operation === 'empty') {
+                            if (newStack.length !== 0) {
+                                continue;
+                            }
+                        }
+
+                        // Add the new stack state to the history
+                        const newStackHistory = [...current.stacks, newStack];
+
+                        if (targetNode && !visited.has(generateKey(targetNode, newStack))) {
+                            queue.push({
+                                nodes: [...current.nodes, targetNode],
+                                transitions: [...current.transitions, { transition, symbol: '' }],
+                                stacks: newStackHistory
+                            });
+                        }
+                    }
+                }
+            }
+
+            epsilonClosures.set(generateKey(node, stack), closure);
+            return closure;
+        };
+
+        const initialNode = this._a.getInitialNode();
+        if (!initialNode) {
+            return { accepted: false, path: { nodes: [], transitions: [], stacks: [] } };
+        }
+
+        type SearchState = {
+            node: Node;
+            wordIndex: number;
+            stack: string[];
+            path: { nodes: Node[]; transitions: PathTransition[]; stacks: string[][] };
+        };
+
+        // Start with epsilon closure of initial node
+        const initialClosure = getEpsilonClosure(initialNode, this._initialStack);
+        const queue: SearchState[] = Array.from(initialClosure).map((closurePath) => ({
+            node: closurePath.nodes[closurePath.nodes.length - 1],
+            wordIndex: 0,
+            stack: closurePath.stacks[closurePath.stacks.length - 1],
+            path: closurePath
+        }));
+
+        while (queue.length > 0) {
+            const { node, wordIndex, stack, path } = queue.shift()!;
+
+            // Check if we have already visited this state
+            const stateKey = generateStateKey(node, wordIndex, stack);
+            if (visitedStates.has(stateKey)) {
+                continue;
+            }
+            visitedStates.add(stateKey);
+
+            if (wordIndex >= this._word.length) {
+                if (node.final) {
+                    return { accepted: true, path };
+                }
+                continue;
+            }
+
+            const currentLetter = this._word[wordIndex];
+            const transitions = this._a.getTransitionsFromNode(node);
+
+            for (const transition of transitions) {
+                if (!transition.symbols.includes(currentLetter)) continue;
+
+                const targetNode = this._a.getNode(transition.to);
+                if (!targetNode) continue;
+
+                // Handle stack operations
+                if (!transition.stackOperations || transition.stackOperations.length !== transition.symbols.length)
+                    continue;
+                for (let i = 0; i < transition.stackOperations.length; i++) {
+                    const stackOperation = transition.stackOperations[i];
+                    const currentSymbol = transition.symbols[i];
+
+                    if (currentSymbol !== currentLetter) continue;
+                    if (stackOperation.condition && stackOperation.condition !== stack[stack.length - 1]) continue;
+
+                    const newStack = [...stack];
+
+                    if (stackOperation.operation === 'push') {
+                        newStack.push(stackOperation.symbol);
+                    } else if (stackOperation.operation === 'pop') {
+                        if (newStack.length > 0 && newStack[newStack.length - 1] === stackOperation.symbol) {
+                            newStack.pop();
+                        } else {
+                            continue;
+                        }
+                    } else if (stackOperation.operation === 'empty') {
+                        if (newStack.length !== 0) continue;
+                    }
+
+                    const targetClosure = getEpsilonClosure(targetNode, [...newStack]);
+
+                    for (const closurePath of targetClosure) {
+                        const newPathNodes = [...path.nodes, ...closurePath.nodes];
+                        const newPathTransitions = [
+                            ...path.transitions,
+                            { transition, symbol: currentLetter },
+                            ...closurePath.transitions
+                        ];
+                        const newPathStackHistory = [...path.stacks, ...closurePath.stacks];
+
+                        queue.push({
+                            node: closurePath.nodes[closurePath.nodes.length - 1],
+                            wordIndex: wordIndex + 1,
+                            stack: closurePath.stacks[closurePath.stacks.length - 1],
+                            path: { nodes: newPathNodes, transitions: newPathTransitions, stacks: newPathStackHistory }
+                        });
+                    }
+                }
+            }
+        }
+
+        // No accepting path found
+        return { accepted: false, path: { nodes: [], transitions: [], stacks: [] } };
+    }
+
+    public simulateOld(): { success: boolean; message: string } {
         console.log('Simulating PDA', this._word);
         this._initialStack = this._a.extension.getStack();
         const word = this._word;
@@ -114,7 +302,7 @@ class PDASimulator extends Simulator {
             success: result.success,
             message: `Finished simulation on <b>${lastNode.label}</b>.<br />Path: ${result.path
                 .map((n) => `<b>${n.node.label}</b>`)
-                .join(',')}`,
+                .join(',')}`
         };
     }
 
@@ -147,7 +335,7 @@ class PDASimulator extends Simulator {
             return {
                 success: state.final,
                 message: state.final ? 'Accepted' : 'Rejected',
-                path: [{ node: state, symbol: '', stack }],
+                path: [{ node: state, symbol: '', stack }]
             };
         }
 
@@ -197,7 +385,7 @@ class PDASimulator extends Simulator {
                     return {
                         success: true,
                         message: 'Accepted',
-                        path: [{ node: state, symbol, stack }, ...result.path],
+                        path: [{ node: state, symbol, stack }, ...result.path]
                     };
                 }
             }
@@ -205,270 +393,190 @@ class PDASimulator extends Simulator {
 
         return { success: false, message: 'Rejected', path: [{ node: state, symbol: '', stack }] };
     }
-    public init() {
+
+    public reset(): void {
+        super.reset();
+        this._a.redrawNodes();
         this._initialStack = this._a.extension.getStack();
-    }
-
-    public startAnimation(callback: (result: SimulationFeedback) => void): void {
-        let { success, path } = this.simulationFromState(this._word, this._a.getInitialNode() as Node, [
-            ...this._initialStack,
-        ]);
-
-        if (!success) {
-            callback({ success, message: 'No valid path found', wordPosition: 0 });
-            return;
-        }
-
-        console.log('Path', path);
-
-        this._interval = setInterval(() => {
-            this._currentStep++;
-            this._currentNode = path[this._currentStep]?.node;
-            this._a.clearHighlights();
-
-            if (this._currentStep >= path.length) {
-                clearInterval(this._interval);
-                this._a.highlightNode(path[path.length - 1].node);
-                callback({ success: true, message: 'Finished', wordPosition: 0 });
-                return;
+        this._currentStack = [...this._initialStack];
+        this._a.extension.setStack(this._initialStack);
+        this._previousTransitions = {
+            accepted: this._currentNode.final,
+            path: {
+                nodes: [this._currentNode],
+                transitions: [],
+                stacks: [this._currentStack]
             }
-
-            this._a.highlightNode(path[this._currentStep]?.node);
-            this._a.extension.setStack(path[this._currentStep]?.stack);
-
-            if (path[this._currentStep - 1]?.symbol !== '') {
-                this._currentWordPosition++;
-            }
-
-            callback({
-                success: undefined,
-                message: '',
-                wordPosition: this._currentWordPosition,
-            });
-        }, 1000);
-    }
-    public stopAnimation(callback: (result: SimulationFeedback) => void): void {
-        clearInterval(this._interval);
-        callback({
-            success: false,
-            message: `Simulation stopped on <b>${this._currentNode.label}</b>`,
-            wordPosition: this._currentStep,
-        });
-    }
-    public pauseAnimation(callback: (result: SimulationFeedback) => void): void {
-        clearInterval(this._interval);
-        callback({
-            success: false,
-            message: `Simulation paused on <b>${this._currentNode.label}</b>`,
-            wordPosition: this._currentStep,
-        });
-    }
-
-    public initStepByStep(graph: Graph, cb: Function): { graphInteraction: boolean } {
-        this._currentNode = this._a.getInitialNode() as Node;
-        this._currentStep = 0;
-        this._currentWordPosition = 0;
-
-        this._mode = 'stepByStep';
-
-        this.highlightPossibleTransitions(this._currentNode);
-
-        if (this._graph !== graph) {
-            this._graph = graph;
-
-            this._graph?.network.on('selectEdge', (e) => {
-                this._graph?.network.selectEdges([]);
-                if (this._mode !== 'stepByStep') return;
-
-                const transition = this._a.getTransition(e.edges[0]);
-
-                if (!transition) return;
-                if (!this.isValidTransition(transition)) return;
-
-                const posibleSymbols = transition.symbols.filter(
-                    (s) => s == '' || s == this._word[this._currentWordPosition]
-                );
-
-                if (posibleSymbols.length > 1) {
-                    const dialog = document.createElement('dialog');
-
-                    const buttons = posibleSymbols.map((s, i) => {
-                        const button = document.createElement('button');
-                        button.innerHTML = s === '' ? 'ε' : s;
-                        button.addEventListener('click', () => {
-                            dialog.close();
-                            this._a.clearHighlights();
-
-                            const stackOperation = transition.stackOperations![i];
-
-                            if (stackOperation.operation === 'push') {
-                                this._a.extension.push(stackOperation.symbol);
-                            }
-
-                            if (stackOperation.operation === 'pop') {
-                                stackOperation.symbol = this._a.extension.getTopItem();
-                                this._a.extension.pop();
-                            }
-
-                            this._previousTransitions.push({
-                                node: this._currentNode,
-                                transitionSymbol: s,
-                                stackOperation,
-                            });
-
-                            this._currentNode = this._a.getNode(transition.to) as Node;
-                            this._currentStep++;
-
-                            if (s !== '') {
-                                this._currentWordPosition++;
-                            }
-
-                            this._a.highlightNode(this._currentNode);
-                            this.highlightPossibleTransitions(this._currentNode);
-                            cb({
-                                success:
-                                    this._currentWordPosition >= this._word.length
-                                        ? this._currentNode.final
-                                        : undefined,
-                                message: '',
-                                wordPosition: this._currentWordPosition,
-                            });
-                            dialog.remove();
-                        });
-                        return button;
-                    });
-
-                    dialog.append(...buttons);
-                    graph.component.shadowRoot?.appendChild(dialog);
-                    dialog.showModal();
-                    return;
-                }
-
-                const stackOperation = transition.stackOperations![transition.symbols.indexOf(posibleSymbols[0])];
-
-                if (stackOperation.operation === 'push') {
-                    this._a.extension.push(stackOperation.symbol);
-                }
-
-                if (stackOperation.operation === 'pop') {
-                    stackOperation.symbol = this._a.extension.getTopItem();
-                    this._a.extension.pop();
-                }
-
-                const to = this._a.getNode(transition.to) as Node;
-
-                this._previousTransitions.push({
-                    node: this._currentNode,
-                    transitionSymbol: posibleSymbols[0],
-                    stackOperation,
-                });
-
-                this._currentNode = to;
-                this._currentStep++;
-
-                if (posibleSymbols[0] !== '') {
-                    this._currentWordPosition++;
-                }
-
-                this._a.clearHighlights();
-                this._a.highlightNode(to);
-                this.highlightPossibleTransitions(to);
-                cb({
-                    success: undefined,
-                    message: '',
-                    wordPosition: this._currentWordPosition,
-                });
-            });
-        }
-
-        return { graphInteraction: true };
-    }
-    public stepForward(): SimulationFeedback {
-        throw new Error('Method not implemented.');
-    }
-    public stepBackward(): SimulationFeedback {
-        console.log('StepBackward', this._previousTransitions, this._currentStep, this._currentWordPosition);
-
-        this._a.clearHighlights();
-        if (this._previousTransitions[this._currentStep - 1].transitionSymbol !== '') {
-            this._currentWordPosition--;
-        }
-
-        this._currentNode = this._previousTransitions[this._currentStep - 1].node;
-        this._a.highlightNode(this._currentNode);
-        this.highlightPossibleTransitions(this._currentNode);
-
-        if (this._previousTransitions[this._currentStep - 1].stackOperation.operation === 'push') {
-            this._a.extension.pop();
-        }
-
-        if (this._previousTransitions[this._currentStep - 1].stackOperation.operation === 'pop') {
-            this._a.extension.push(this._previousTransitions[this._currentStep - 1].stackOperation.symbol);
-        }
-
-        this._previousTransitions.pop();
-
-        this._currentStep--;
-        return {
-            success: undefined,
-            message: '',
-            wordPosition: this._currentWordPosition,
-            firstStep: this._currentStep === 0,
         };
     }
 
-    private isValidTransition(transition: Transition): boolean {
-        const validSymbol =
-            transition.symbols.includes(this._word[this._currentWordPosition]) || transition.symbols.includes('');
+    protected isValidTransition(transition: Transition): boolean {
+        const currentSymbol = this._word[this._currentWordPosition] || '';
         const validFrom = transition.from === this._currentNode.id;
+        if (!validFrom) return false;
 
-        return validSymbol && validFrom;
+        for (let i = 0; i < transition.symbols.length; i++) {
+            const symbol = transition.symbols[i];
+            if (symbol !== currentSymbol && symbol !== '') continue;
+
+            const stackOp = transition.stackOperations?.[i];
+            if (!stackOp) continue;
+
+            const topOfStack = this._currentStack.length > 0 ? this._currentStack[this._currentStack.length - 1] : undefined;
+
+            if (stackOp.condition && stackOp.condition !== topOfStack) continue;
+            if (stackOp.operation === 'pop' && (this._currentStack.length === 0 || stackOp.symbol !== topOfStack))
+                continue;
+            if (stackOp.operation === 'empty' && this._currentStack.length > 0) continue;
+
+            return true;
+        }
+
+        return false;
     }
 
-    private highlightPossibleTransitions(node: Node): void {
+    protected highlightPossibleTransitions(node: Node): boolean {
         const transitions = this._a.getTransitionsFromNode(node);
-        const currentSymbol = this._word[this._currentWordPosition];
-        const stack = this._a.extension.getStack();
+        const currentSymbol = this._word[this._currentWordPosition] || '';
 
-        console.log(stack);
+        const validTransitions = transitions.filter((t) => {
+            if (t.from !== node.id) return false;
 
-        let validTransitions = transitions.filter((t) => t.symbols.includes(currentSymbol) || t.symbols.includes(''));
-        validTransitions = validTransitions.filter((t) => {
-            for (let i = 0; i < t.stackOperations!.length; i++) {
+            for (let i = 0; i < t.symbols.length; i++) {
                 const symbol = t.symbols[i];
-                const stackOperation = t.stackOperations![i];
+                if (symbol !== currentSymbol && symbol !== '') continue;
 
-                let validStackOperation: boolean = false;
-                if (stackOperation.operation === 'none') validStackOperation = true;
-                if (stackOperation.operation === 'push') validStackOperation = true;
-                if (stackOperation.operation === 'pop' && stack[0] === stackOperation.symbol)
-                    validStackOperation = true;
-                if (stackOperation.operation === 'empty' && stack.length === 0) validStackOperation = true;
+                const stackOp = t.stackOperations?.[i];
+                if (!stackOp) continue;
 
-                if (validStackOperation && (symbol == currentSymbol || symbol == '')) return true;
+                const topOfStack =
+                    this._currentStack.length > 0 ? this._currentStack[this._currentStack.length - 1] : undefined;
+
+                if (stackOp.condition && stackOp.condition !== topOfStack) continue;
+                if (stackOp.operation === 'pop' && (this._currentStack.length === 0 || stackOp.symbol !== topOfStack))
+                    continue;
+                if (stackOp.operation === 'empty' && this._currentStack.length > 0) continue;
+
+                return true;
             }
-
             return false;
         });
 
-        validTransitions.forEach((t) => {
-            this._a.highlightTransition(t);
+        this._a.clearHighlights();
+        this._graph?.network.setSelection({ edges: [] });
+
+        if (validTransitions.length === 0) {
+            this._a.highlightNode(node);
+            return false;
+        }
+        for (const transition of validTransitions) {
+            this._a.highlightTransition(transition);
+        }
+        this._a.highlightNode(node);
+        return true;
+    }
+
+    protected async getManualMove(
+        transition: Transition
+    ): Promise<{ to: Node; symbol: string; stackOpIndex: number; transition: Transition } | null> {
+        const currentSymbol = this._word[this._currentWordPosition] || '';
+        const to = this._a.getNode(transition.to) as Node;
+
+        const validOps: { symbol: string; stackOpIndex: number }[] = [];
+
+        for (let i = 0; i < transition.symbols.length; i++) {
+            const symbol = transition.symbols[i];
+            if (symbol !== currentSymbol && symbol !== '') continue;
+
+            const stackOp = transition.stackOperations?.[i];
+            if (!stackOp) continue;
+
+            const topOfStack =
+                this._currentStack.length > 0 ? this._currentStack[this._currentStack.length - 1] : undefined;
+
+            if (stackOp.condition && stackOp.condition !== topOfStack) continue;
+            if (stackOp.operation === 'pop' && (this._currentStack.length === 0 || stackOp.symbol !== topOfStack))
+                continue;
+            if (stackOp.operation === 'empty' && this._currentStack.length > 0) continue;
+
+            validOps.push({ symbol, stackOpIndex: i });
+        }
+
+        if (validOps.length === 0) {
+            return null;
+        }
+
+        if (validOps.length === 1) {
+            return { to, symbol: validOps[0].symbol, stackOpIndex: validOps[0].stackOpIndex, transition };
+        }
+
+        return new Promise((resolve) => {
+            const dialog = document.createElement('dialog');
+            dialog.style.position = 'absolute';
+            dialog.style.top = '50%';
+            dialog.style.left = '50%';
+            dialog.style.transform = 'translate(-50%, -50%)';
+            dialog.style.zIndex = '1000';
+
+            const p = document.createElement('p');
+            p.innerText = 'Choose a move:';
+            dialog.appendChild(p);
+
+            const buttons = validOps.map(({ symbol, stackOpIndex }) => {
+                const button = document.createElement('button');
+                const stackOp = transition.stackOperations![stackOpIndex];
+                let opLabel = '';
+                switch (stackOp.operation) {
+                    case 'push':
+                        opLabel = `push ${stackOp.symbol}`;
+                        break;
+                    case 'pop':
+                        opLabel = `pop ${stackOp.symbol}`;
+                        break;
+                    case 'empty':
+                        opLabel = `empty`;
+                        break;
+                    default:
+                        opLabel = `none`;
+                        break;
+                }
+                button.innerHTML = `${symbol === '' ? 'ε' : symbol}, ${opLabel}`;
+                button.addEventListener('click', () => {
+                    dialog.close();
+                    dialog.remove();
+                    resolve({ to, symbol, stackOpIndex, transition });
+                });
+                return button;
+            });
+
+            dialog.append(...buttons);
+            this._graph?.component.shadowRoot?.appendChild(dialog);
+            dialog.showModal();
         });
     }
 
-    public reset(): void {
-        this._a.clearHighlights();
-        this._currentStep = 0;
-        this._currentWordPosition = 0;
-        this._currentNode = this._a.getInitialNode();
-        this._a.redrawNodes();
-        this._errors = this._a.checkAutomaton();
+    protected updateStateAfterManualMove(move: { to: Node; symbol: string; stackOpIndex: number; transition: Transition }): void {
+        const stackOp = move.transition.stackOperations![move.stackOpIndex];
 
-        this._a.extension.setStack(this._initialStack);
+        const newStack = [...this._currentStack];
+        if (stackOp.operation === 'push') {
+            newStack.push(stackOp.symbol);
+        } else if (stackOp.operation === 'pop') {
+            newStack.pop();
+        }
 
-        this.stopAnimation(() => {});
+        this._previousTransitions.path!.stacks!.push(newStack);
+
+        this._currentStack = newStack;
+        (this._a as PDA).displayStack(this._currentStack);
+    }
+
+    protected updateStateAfterGoToStep(step: number): void {
+        this._currentStack = this._previousTransitions.path!.stacks![step];
+        (this._a as PDA).displayStack(this._currentStack);
     }
 }
+
 
 type StackItem = {
     id: number;
@@ -525,7 +633,7 @@ export class StackExtension extends LitElementWw {
 
     public setStack(stack: string[]): void {
         this._stack.clear();
-        this._stack.add(stack.reverse().map((s, i) => ({ id: i, symbol: s })));
+        this._stack.add([...stack].reverse().map((s, i) => ({ id: i, symbol: s })));
     }
 
     public push(symbol: string): void {

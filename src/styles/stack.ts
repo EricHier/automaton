@@ -20,6 +20,9 @@ export const stackStyles = css`
 
         border: 1px solid lightgray;
         border-radius: 5px;
+        background-color: white;
+
+        z-index: 1400;
     }
 
     .pda__stack sl-button::part(base),

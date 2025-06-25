@@ -1,13 +1,8 @@
-import { Network } from 'vis-network';
-import { AutomatonComponent } from '../';
-import { Automaton, AutomatonInfo, Node, SimulationFeedback, Simulator, Transition } from '../automata';
-import { html } from 'lit';
-import { Graph } from '../graph';
-import SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
-import SlButton from '@shoelace-style/shoelace/dist/components/button/button.js';
+import { Automaton, AutomatonInfo, SimulationResult, Node, Transition } from '../automata';
+import { ManualAutoSimulator } from './manual-auto-simulator';
 
 export class NFA extends Automaton {
-    public simulator: Simulator;
+    public simulator: NFASimulator;
 
     public type = 'nfa';
 
@@ -45,244 +40,121 @@ export class NFA extends Automaton {
     }
 }
 
-class NFASimulator extends Simulator {
-    private _currentNode: Node;
-
-    private _previousTransitions: {
-        node: Node;
-        transitionSymbol: string;
-    }[] = [];
-
-    private _mode: 'simulation' | 'stepByStep' = 'simulation';
-    private _graph: Graph | undefined;
-
-    private _currentStep: number = 0;
-    private _currentWordPosition: number = 0;
-
-    private _interval: number | undefined;
-
-    public simulate(): { success: boolean; message: string } {
-        console.log('Simulating NFA', this._word);
-        const word = this._word;
-        const result = this.simulationFromState(word, this._a.getInitialNode() as Node);
-        console.log('Result', result);
-        const lastNode = result.path[result.path.length - 1].node;
-        this._a.highlightNode(lastNode);
-        return {
-            success: result.success,
-            message: `Finished simulation on <b>${lastNode.label}</b>.<br />Path: ${result.path
-                .map((n) => `<b>${n.node.label}</b>`)
-                .join(',')}`,
-        };
-    }
-
+export class NFASimulator extends ManualAutoSimulator {
     constructor(automaton: NFA) {
         super(automaton);
-        this._currentNode = this._a.getInitialNode() as Node;
     }
 
-    private simulationFromState(
-        word: string[],
-        state: Node
-    ): { success: boolean; message: string; path: { node: Node; symbol: string }[] } {
-        const transitions = this._a.getTransitionsFromNode(state);
-        let validTransitions = transitions.filter((t) => t.symbols.includes(word[0]) || t.symbols.includes(''));
-
-        if (word.length === 0 && validTransitions.length === 0) {
-            return {
-                success: state.final,
-                message: state.final ? 'Accepted' : 'Rejected',
-                path: [{ node: state, symbol: '' }],
-            };
+    protected getPath(): SimulationResult {
+        this._errors = this._a.checkAutomaton();
+        if (this._errors.length > 0) {
+            return { accepted: false, path: { nodes: [], transitions: [] }, errors: this._errors };
         }
 
-        if (word.length === 0 && state.final) {
-            return { success: true, message: 'Accepted', path: [{ node: state, symbol: '' }] };
-        }
+        type PathTransition = { transition: Transition; symbol: string };
 
-        AutomatonComponent.log(
-            'Simulating from state',
-            [state.label],
-            'with word',
-            [word.join('')],
-            'valid transitions',
-            validTransitions.map((t) => t.symbols.map((s) => (s === '' ? 'ε' : s)).join(',')).flat()
-        );
-        for (const transition of validTransitions) {
-            const to = this._a.getNode(transition.to) as Node;
+        // Cache the epsilon closure computations for performance
+        const epsilonClosures = new Map<string, Set<{ nodes: Node[]; transitions: PathTransition[] }>>();
 
-            for (const symbol of transition.symbols) {
-                if (symbol !== word[0] && symbol !== '') continue;
-
-                if (symbol === '') {
-                    const result = this.simulationFromState(word, to);
-                    if (result.success) {
-                        return { success: true, message: 'Accepted', path: [{ node: state, symbol }, ...result.path] };
-                    }
-                } else {
-                    const result = this.simulationFromState(word.slice(1), to);
-                    if (result.success) {
-                        return { success: true, message: 'Accepted', path: [{ node: state, symbol }, ...result.path] };
-                    }
-                }
-            }
-        }
-
-        return { success: false, message: 'Rejected', path: [{ node: state, symbol: '' }] };
-    }
-
-    public startAnimation(
-        callback: (result: { success: boolean | undefined; message: string; wordPosition: number }) => void
-    ): void {
-        let { success, path } = this.simulationFromState(this._word, this._a.getInitialNode() as Node);
-
-        if (!success) {
-            callback({ success, message: 'No valid path found', wordPosition: 0 });
-            return;
-        }
-
-        console.log('Path', path);
-
-        this._interval = setInterval(() => {
-            this._currentStep++;
-            this._currentNode = path[this._currentStep]?.node;
-            this._a.clearHighlights();
-
-            if (this._currentStep >= path.length) {
-                clearInterval(this._interval);
-                this._a.highlightNode(path[path.length - 1].node);
-                callback({ success: true, message: 'Finished', wordPosition: 0 });
-                return;
+        const getEpsilonClosure = (node: Node): Set<{ nodes: Node[]; transitions: PathTransition[] }> => {
+            if (epsilonClosures.has(node.id)) {
+                return epsilonClosures.get(node.id)!;
             }
 
-            this._a.highlightNode(path[this._currentStep]?.node);
+            const closure = new Set<{ nodes: Node[]; transitions: PathTransition[] }>();
+            const visited = new Set<string>();
+            const queue: { nodes: Node[]; transitions: PathTransition[] }[] = [{ nodes: [node], transitions: [] }];
 
-            if (path[this._currentStep - 1]?.symbol !== '') {
-                this._currentWordPosition++;
-            }
+            while (queue.length > 0) {
+                const current = queue.shift()!;
+                const currentNode = current.nodes[current.nodes.length - 1];
+                if (visited.has(currentNode.id)) continue;
 
-            callback({
-                success: undefined,
-                message: '',
-                wordPosition: this._currentWordPosition,
-            });
-        }, 1000);
-    }
-    public stopAnimation(
-        callback: (result: { success: boolean | undefined; message: string; wordPosition: number }) => void
-    ): void {
-        clearInterval(this._interval);
-        callback({
-            success: false,
-            message: `Simulation stopped on <b>${this._currentNode.label}</b>`,
-            wordPosition: this._currentStep,
-        });
-    }
-    public pauseAnimation(
-        callback: (result: { success: boolean | undefined; message: string; wordPosition: number }) => void
-    ): void {
-        clearInterval(this._interval);
-        callback({
-            success: false,
-            message: `Simulation paused on <b>${this._currentNode.label}</b>`,
-            wordPosition: this._currentStep,
-        });
-    }
+                visited.add(currentNode.id);
+                closure.add(current);
 
-    public init() {}
+                const currentEpsilonTransitions = this._a
+                    .getTransitionsFromNode(currentNode)
+                    .filter((t) => t.symbols.includes(''));
 
-    public initStepByStep(graph: Graph, cb: Function): { graphInteraction: boolean } {
-        this._currentNode = this._a.getInitialNode() as Node;
-        this._currentStep = 0;
-        this._currentWordPosition = 0;
-
-        this._mode = 'stepByStep';
-
-        this.highlightPossibleTransitions(this._currentNode);
-
-        if (this._graph !== graph) {
-            this._graph = graph;
-
-            this._graph?.network.on('selectEdge', (e) => {
-                if (this._mode !== 'stepByStep') return;
-
-                const transition = this._a.getTransition(e.edges[0]);
-
-                if (!transition) return;
-                if (!this.isValidTransition(transition)) return;
-
-                const posibleSymbols = transition.symbols.filter(
-                    (s) => s == '' || s == this._word[this._currentWordPosition]
-                );
-                if (posibleSymbols.length > 1) {
-                    const dialog = document.createElement('dialog');
-
-                    const buttons = posibleSymbols.map((s) => {
-                        const button = document.createElement('button');
-                        button.innerHTML = s === '' ? 'ε' : s;
-                        button.addEventListener('click', () => {
-                            dialog.close();
-                            this._a.clearHighlights();
-
-                            this._previousTransitions.push({
-                                node: this._currentNode,
-                                transitionSymbol: s,
-                            });
-
-                            this._currentNode = this._a.getNode(transition.to) as Node;
-                            this._currentStep++;
-
-                            if (s !== '') {
-                                this._currentWordPosition++;
-                            }
-
-                            this._a.highlightNode(this._currentNode);
-                            this.highlightPossibleTransitions(this._currentNode);
-                            cb({
-                                success: undefined,
-                                message: '',
-                                wordPosition: this._currentWordPosition,
-                            });
-                            dialog.remove();
+                for (const transition of currentEpsilonTransitions) {
+                    const targetNode = this._a.getNode(transition.to);
+                    if (targetNode && !visited.has(targetNode.id)) {
+                        queue.push({
+                            nodes: [...current.nodes, targetNode],
+                            transitions: [...current.transitions, { transition, symbol: '' }]
                         });
-                        return button;
-                    });
-
-                    dialog.append(...buttons);
-                    graph.component.shadowRoot?.appendChild(dialog);
-                    dialog.showModal();
-                    return;
+                    }
                 }
+            }
 
-                const to = this._a.getNode(transition.to) as Node;
+            epsilonClosures.set(node.id, closure);
+            return closure;
+        };
 
-                this._previousTransitions.push({
-                    node: this._currentNode,
-                    transitionSymbol: posibleSymbols[0],
-                });
-
-                this._currentNode = to;
-                this._currentStep++;
-
-                if (posibleSymbols[0] !== '') {
-                    this._currentWordPosition++;
-                }
-
-                this._a.clearHighlights();
-                this._a.highlightNode(to);
-                this.highlightPossibleTransitions(to);
-                cb({
-                    success: undefined,
-                    message: '',
-                    wordPosition: this._currentWordPosition,
-                });
-            });
+        const initialNode = this._a.getInitialNode();
+        if (!initialNode) {
+            return { accepted: false, path: { nodes: [], transitions: [] } };
         }
 
-        return { graphInteraction: true };
+        type SearchState = {
+            node: Node;
+            wordIndex: number;
+            path: { nodes: Node[]; transitions: PathTransition[] };
+        };
+
+        // Start with epsilon closure of initial node
+        const initialClosure = getEpsilonClosure(initialNode);
+        const queue: SearchState[] = Array.from(initialClosure).map((closurePath) => ({
+            node: closurePath.nodes[closurePath.nodes.length - 1],
+            wordIndex: 0,
+            path: closurePath
+        }));
+
+        while (queue.length > 0) {
+            const { node, wordIndex, path } = queue.shift()!;
+
+            // Check if we have processed the entire word
+            if (wordIndex >= this._word.length) {
+                if (node.final) {
+                    return { accepted: true, path };
+                }
+                continue;
+            }
+
+            const currentLetter = this._word[wordIndex];
+            const transitions = this._a.getTransitionsFromNode(node);
+
+            for (const transition of transitions) {
+                if (!transition.symbols.includes(currentLetter)) continue;
+
+                const targetNode = this._a.getNode(transition.to);
+                if (!targetNode) continue;
+
+                const targetClosure = getEpsilonClosure(targetNode);
+
+                for (const closurePath of targetClosure) {
+                    const newPathNodes = [...path.nodes, ...closurePath.nodes];
+                    const newPathTransitions = [
+                        ...path.transitions,
+                        { transition, symbol: currentLetter },
+                        ...closurePath.transitions
+                    ];
+
+                    queue.push({
+                        node: closurePath.nodes[closurePath.nodes.length - 1],
+                        wordIndex: wordIndex + 1,
+                        path: { nodes: newPathNodes, transitions: newPathTransitions }
+                    });
+                }
+            }
+        }
+
+        // No accepting path found
+        return { accepted: false, path: { nodes: [], transitions: [] } };
     }
 
-    private isValidTransition(transition: Transition): boolean {
+    protected isValidTransition(transition: Transition): boolean {
         const validSymbol =
             transition.symbols.includes(this._word[this._currentWordPosition]) || transition.symbols.includes('');
         const validFrom = transition.from === this._currentNode.id;
@@ -290,53 +162,69 @@ class NFASimulator extends Simulator {
         return validSymbol && validFrom;
     }
 
-    private highlightPossibleTransitions(node: Node): void {
+    protected highlightPossibleTransitions(node: Node): boolean {
         const transitions = this._a.getTransitionsFromNode(node);
         const currentSymbol = this._word[this._currentWordPosition];
-        const validTransitions = transitions.filter((t) => t.symbols.includes(currentSymbol) || t.symbols.includes(''));
-
-        validTransitions.forEach((t) => {
-            this._a.highlightTransition(t);
-        });
-    }
-
-    public stepForward(): {
-        success: boolean;
-        message: string;
-        wordPosition: number;
-        finalStep?: boolean | undefined;
-    } {
-        throw new Error('Method not implemented.');
-    }
-    public stepBackward(): SimulationFeedback {
-        console.log('StepBackward', this._previousTransitions, this._currentStep, this._currentWordPosition);
+        const validTransitions = transitions.filter(
+            (t) => t.symbols.includes(currentSymbol) || t.symbols.includes('')
+        );
 
         this._a.clearHighlights();
-        if (this._previousTransitions[this._currentStep - 1].transitionSymbol !== '') {
-            this._currentWordPosition--;
+
+        // reset selected transitions
+        this._graph?.network.setSelection({ edges: [] });
+
+        if (validTransitions.length === 0) {
+            return false;
+        }
+        for (const transition of validTransitions) {
+            this._a.highlightTransition(transition);
+        }
+        this._a.highlightNode(node);
+        return true;
+    }
+
+    protected async getManualMove(transition: Transition): Promise<{ to: Node; symbol: string } | null> {
+        const possibleSymbols = transition.symbols.filter(
+            (s) => s === '' || s === this._word[this._currentWordPosition]
+        );
+
+        if (possibleSymbols.length === 0) {
+            return null;
         }
 
-        this._currentNode = this._previousTransitions[this._currentStep - 1].node;
-        this._a.highlightNode(this._currentNode);
-        this.highlightPossibleTransitions(this._currentNode);
+        const to = this._a.getNode(transition.to) as Node;
 
-        this._previousTransitions.pop();
+        if (possibleSymbols.length > 1) {
+            return new Promise((resolve) => {
+                const dialog = document.createElement('dialog');
 
-        this._currentStep--;
-        return {
-            success: undefined,
-            message: '',
-            wordPosition: this._currentWordPosition,
-            firstStep: this._currentStep === 0,
-        };
+                const buttons = possibleSymbols.map((s) => {
+                    const button = document.createElement('button');
+                    button.innerHTML = s === '' ? 'ε' : s;
+                    button.addEventListener('click', () => {
+                        dialog.close();
+                        dialog.remove();
+                        resolve({ to, symbol: s });
+                    });
+                    return button;
+                });
+
+                dialog.append(...buttons);
+                this._graph?.component.shadowRoot?.appendChild(dialog);
+                dialog.showModal();
+            });
+        }
+
+        return { to, symbol: possibleSymbols[0] };
     }
-    public reset(): void {
-        this._a.clearHighlights();
-        this._currentStep = 0;
-        this._currentWordPosition = 0;
-        this._currentNode = this._a.getInitialNode();
-        this._a.redrawNodes();
-        this._errors = this._a.checkAutomaton();
-        this.stopAnimation(() => {});
+
+    protected updateStateAfterManualMove(move: { to: Node; symbol: string }): void {
+        // do nothing
+        // win
+    }
+
+    protected updateStateAfterGoToStep(_step: number): void {
+        // NFA has no additional state to update
     }
 }

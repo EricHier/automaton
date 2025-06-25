@@ -13,8 +13,8 @@ export const contextMenuStyles = css`
         border-radius: var(--sl-border-radius-medium);
     }
 
-    .context-menu:has(.context-menu__header--pda) {
-        max-width: none;
+    .context-menu:has(.context-menu__inputs--pda) {
+        max-width: 400px;
     }
  
     .context-menu sl-button::part(base),

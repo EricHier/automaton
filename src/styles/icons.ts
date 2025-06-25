@@ -142,6 +142,19 @@ export const biSkipStart = html`<svg
     />
 </svg>`;
 
+export const biCursor = html`<svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    fill="currentColor"
+    class="bi bi-cursor" 
+    viewBox="0 0 16 16"
+>
+    <path 
+        d="M14.082 2.182a.5.5 0 0 1 .103.557L8.528 15.467a.5.5 0 0 1-.917-.007L5.57 10.694.803 8.652a.5.5 0 0 1-.006-.916l12.728-5.657a.5.5 0 0 1 .556.103zM2.25 8.184l3.897 1.67a.5.5 0 0 1 .262.263l1.67 3.897L12.743 3.52z"
+    />
+</svg>`;
+
 export const biTrash = html`<svg
     xmlns="http://www.w3.org/2000/svg"
     width="16"
@@ -280,6 +293,18 @@ export const biFullscreen = html`<svg
 >
     <path
         d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5M.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5m15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5"
+    />
+</svg>`;
+
+export const biArrowRight = html`<svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    class="bi bi-arrow-right" 
+    viewBox="0 0 16 16" 
+    id="arrow-right"
+>
+    <path 
+        fill-rule="evenodd" 
+        d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"
     />
 </svg>`;
 

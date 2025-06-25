@@ -46,6 +46,19 @@ export interface AutomatonInfo {
     transition?: Transition;
 }
 
+export type SimulationResult = {
+    accepted: boolean;
+    path?: {
+        nodes: Node[];
+        transitions: {
+            transition: Transition;
+            symbol: string;
+        }[];
+        stacks?: string[][];
+    };
+    errors?: AutomatonInfo[];
+}
+
 export abstract class Automaton {
     public nodes: DataSet<Node> = new DataSet<Node>();
     public transitions: DataSet<Transition> = new DataSet<Transition>();
@@ -415,12 +428,27 @@ export abstract class Automaton {
     }
 }
 
+export const SimulationStatus = Object.freeze({
+    IDLE: 'idle',
+    ERROR: 'error',
+    NO_PATH: 'no_path',
+    RUNNING: 'running',
+    PAUSED: 'paused',
+    ACCEPTED: 'accepted',
+    REJECTED: 'rejected',
+    NO_MOVES: 'no_moves',
+    STOPPED: 'stopped',
+});
+export type SimulationStatus = (typeof SimulationStatus)[keyof typeof SimulationStatus];
+
 export type SimulationFeedback = {
-    success: boolean | undefined;
-    message: string;
+    status: SimulationStatus;
+    message?: string;
     finalStep?: boolean;
     firstStep?: boolean;
     wordPosition: number;
+    step?: number;
+    simulationResult?: SimulationResult;
 };
 
 export abstract class Simulator {
@@ -447,8 +475,9 @@ export abstract class Simulator {
     }
 
     public abstract simulate(): {
-        success: boolean;
-        message: string;
+        status: SimulationStatus;
+        message?: string;
+        simulationResult?: SimulationResult;
     };
 
     public abstract initStepByStep(graph: Graph, callback: Function): { graphInteraction: boolean };
@@ -457,8 +486,9 @@ export abstract class Simulator {
     public abstract stopAnimation(callback: (result: SimulationFeedback) => void): void;
     public abstract pauseAnimation(callback: (result: SimulationFeedback) => void): void;
 
-    public abstract stepForward(highlight: boolean): SimulationFeedback;
-    public abstract stepBackward(highlight: boolean): SimulationFeedback;
+    public abstract stepForward(): SimulationFeedback;
+    public abstract stepBackward(): SimulationFeedback;
+    public abstract goToStep(step: number): SimulationFeedback;
 
     public abstract reset(): void;
     public abstract init(): void;
