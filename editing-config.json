@@ -1,0 +1,42 @@
+{
+  ".": {
+    "description": {
+      "de": ""
+    }
+  },
+  "./widgets/webwriter-automaton": {
+    "label": {
+      "de": ""
+    }
+  },
+  "./snippets/dfa-simple": {
+    "label": {
+      "de": ""
+    }
+  },
+  "./snippets/dfa-complex": {
+    "label": {
+      "de": ""
+    }
+  },
+  "./snippets/nfa-simple": {
+    "label": {
+      "de": ""
+    }
+  },
+  "./snippets/nfa-complex": {
+    "label": {
+      "de": ""
+    }
+  },
+  "./snippets/pda-simple": {
+    "label": {
+      "de": ""
+    }
+  },
+  "./snippets/pda-complex": {
+    "label": {
+      "de": ""
+    }
+  }
+}

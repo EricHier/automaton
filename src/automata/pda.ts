@@ -12,6 +12,7 @@ import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.
 import { biTrash } from '../styles/icons';
 import { styleMap } from 'lit/directives/style-map.js';
 import { ManualAutoSimulator } from './manual-auto-simulator';
+import { msg } from '@lit/localize';
 
 export class PDA extends Automaton {
     public simulator: PDASimulator;
@@ -560,7 +561,7 @@ export class StackExtension extends LitElementWw {
 
     public render(): TemplateResult {
         return html`<div class="pda__stack">
-            <div class="pda__stack-title">Stack</div>
+            <div class="pda__stack-title">${msg("Stack")}</div>
             <sl-button
                 class="pda__stack-button"
                 style=${styleMap({ display: this.isEditable() ? 'block' : 'none' })}
@@ -654,7 +655,7 @@ export class StackExtension extends LitElementWw {
             ` : html`
             <div class="pda__stack-items" id="pda__stack-items">
                 <div class="pda__stack-item pda__stack-item--empty">
-                empty
+                ${msg("empty")}
                 </div>
             </div>
             `}

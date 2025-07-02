@@ -1,4 +1,4 @@
-import { LitElement, PropertyValueMap, html } from 'lit';
+import { PropertyValueMap, html } from 'lit';
 import { customElement, property } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 import { biLock, biNodePlus, biPlus, biShare, biUnlock } from '../styles/icons';
@@ -10,6 +10,7 @@ import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.
 import { Graph } from '../graph';
 import { toolMenuStyles } from '../styles/toolMenu';
 import { LitElementWw } from '@webwriter/lit';
+import { msg } from '@lit/localize';
 
 @customElement('webwriter-automaton-toolmenu')
 export class ToolMenu extends LitElementWw {
@@ -87,7 +88,7 @@ export class ToolMenu extends LitElementWw {
         >
             <sl-button class="toolmenu__button" @click=${this.toggleToolbar} circle size="large">${biPlus}</sl-button>
             <div class="toolmenu__buttons" style=${styleMap({ display: this._visible ? 'flex' : 'none' })}>
-                <sl-tooltip content="Add node" placement="right">
+                <sl-tooltip content=${msg("Add node")} placement="right">
                     <sl-button
                         class="toolmenu__button"
                         @click=${this.addNode}
@@ -109,7 +110,7 @@ export class ToolMenu extends LitElementWw {
                         >
                     </sl-button>
                 </sl-tooltip>
-                <sl-tooltip content="Add edge" placement="right">
+                <sl-tooltip content=${msg("Add edge")} placement="right">
                     <sl-button
                         class="toolmenu__button"
                         @click=${this.addEdge}

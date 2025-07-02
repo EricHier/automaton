@@ -158,6 +158,7 @@ export abstract class AutoSimulator extends Simulator {
                 message: `Please fix the following errors:<br/>${this._stepByStepPath.errors
                     .map((e) => e.message)
                     .join('<br/>')}`,
+                simulationResult: this._stepByStepPath,
             });
             return { graphInteraction: false };
         }

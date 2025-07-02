@@ -1,13 +1,11 @@
-import { LitElement, PropertyValueMap, html } from 'lit';
+import { PropertyValueMap, html } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
-import { styleMap } from 'lit/directives/style-map.js';
 import {
     biArrowLeftRight,
     biClipboard,
     biCodeSlash,
     biFullscreen,
     biFullscreenExit,
-    biGear,
     biQuestionLg,
 } from '../styles/icons';
 
@@ -24,13 +22,13 @@ import { AutomatonComponent } from '../index';
 import { topMenuStyles } from '../styles/topMenu';
 import { transformations } from '../utils/transformations';
 import { LitElementWw } from '@webwriter/lit';
-import { SimulatorMenu } from './SimulatorMenu';
 import { Graph } from '../graph';
 import { stripNode, stripTransition } from '../utils/updates';
 import RandExp from 'randexp';
 import { SimulationStatus } from 'automata';
 import { NFA } from 'automata/nfa';
 import { PDA } from 'automata/pda';
+import { msg } from '@lit/localize';
 
 @customElement('webwriter-automaton-topmenu')
 export class TopMenu extends LitElementWw {
@@ -132,7 +130,7 @@ export class TopMenu extends LitElementWw {
                         ${biClipboard}</sl-button
                     >
                     <div class="topmenu__popup">
-                        <b>Language: </b>${this.component.testLanguage}
+                        <b>${msg("Language:")} </b>${this.component.testLanguage}
                         <br />
                         <sl-button
                             @click=${(e: Event) => {
@@ -151,7 +149,7 @@ export class TopMenu extends LitElementWw {
 
                                 (e.target as SlButton).variant = accepted ? 'success' : 'danger';
                             }}
-                            >Check Automaton</sl-button
+                            >${msg("Check Automaton")}</sl-button
                         >
 
                         ${this.component.testWords.map(
@@ -189,24 +187,24 @@ export class TopMenu extends LitElementWw {
                             <sl-tab slot="nav" panel="def" 
                                 ?disabled=${this.component.showFromalDefinition == 'false'}
                                 ?active=${this.component.showFromalDefinition == 'true'}
-                                >Definition</sl-tab
+                                >${msg("Definition")}</sl-tab
                             >
                             <sl-tab slot="nav" panel="table" 
                                 ?disabled=${this.component.showTransitionsTable == 'false'}
                                 ?active=${this.component.showTransitionsTable == 'true' && this.component.showFromalDefinition == 'false'}
-                                >Table</sl-tab
+                                >${msg("Table")}</sl-tab
                             >
 
                             <sl-tab-panel name="def" ?active=${this.component.showFromalDefinition == 'true'} style="--padding: 1em">
-                                <label>Alphabet: </label>${formalDefinition.alphabet}
+                                <label>${msg("Alphabet:")} </label>${formalDefinition.alphabet}
                                 <br />
-                                <label>States: </label>${formalDefinition.nodes}
+                                <label>${msg("States:")} </label>${formalDefinition.nodes}
                                 <br />
-                                <label>Transitions: </label>${formalDefinition.transitions}
+                                <label>${msg("Transitions:")} </label>${formalDefinition.transitions}
                                 <br />
-                                <label>Initial State: </label>${formalDefinition.initialNode}
+                                <label>${msg("Initial State:")} </label>${formalDefinition.initialNode}
                                 <br />
-                                <label>Final States: </label>${formalDefinition.finalNodes}
+                                <label>${msg("Final States:")} </label>${formalDefinition.finalNodes}
                             </sl-tab-panel>
                             <sl-tab-panel
                                 name="table"
@@ -230,55 +228,57 @@ export class TopMenu extends LitElementWw {
                 >
                 <!-- </sl-tooltip> -->
                 <div class="topmenu__buttons">
-                    <sl-tooltip content="Add Sinkstate" placement="left">
+                    <sl-tooltip content=${msg("Add Sinkstate")} placement="left">
                         <sl-button
                             class="topmenu__button"
                             size="small"
-                            circle
+                            ?circle=${msg("Sink").length <= 4}
                             ?disabled=${!this._component.allowedTransformations.includes('sink')}
                             @click=${() => {
                                 transformations.AddSinkstateToDFA(this._component.automaton);
                             }}
-                            >Sink</sl-button
+                            >${msg("Sink")}</sl-button
                         >
                     </sl-tooltip>
                 </div>
             </div>
             <div class="topmenu__button_group" ?disabled=${this._component.allowedTypes.length == 0}>
-                <sl-tooltip content="Automaton Type" placement="left">
+                <sl-tooltip content=${msg("Automaton Type")} placement="left">
                     <sl-button class="topmenu__button" circle ?disabled=${this._component.allowedTypes.length == 0}>
-                        ${this._component.automaton.type.toUpperCase()}
+                        ${this._component.automaton.type === 'dfa'
+                            ? msg('DFA') : this._component.automaton.type === 'nfa'
+                            ? msg('NFA') : msg('PDA')}
                     </sl-button>
                 </sl-tooltip>
                 <div class="topmenu__buttons">
-                    <sl-tooltip content="DFA" placement="left">
+                    <sl-tooltip content=${msg("DFA")} placement="left">
                         <sl-button
                             class="topmenu__button"
                             size="small"
                             @click=${() => this.switchAutomatonType('dfa')}
                             circle
                             ?disabled=${!this._component.allowedTypes.includes('dfa')}
-                            >DFA</sl-button
+                            >${msg("DFA")}</sl-button
                         >
                     </sl-tooltip>
-                    <sl-tooltip content="NFA" placement="left">
+                    <sl-tooltip content=${msg("NFA")} placement="left">
                         <sl-button
                             class="topmenu__button"
                             size="small"
                             @click=${() => this.switchAutomatonType('nfa')}
                             circle
                             ?disabled=${!this._component.allowedTypes.includes('nfa')}
-                            >NFA</sl-button
+                            >${msg("NFA")}</sl-button
                         >
                     </sl-tooltip>
-                    <sl-tooltip content="PDA" placement="left">
+                    <sl-tooltip content=${msg("PDA")} placement="left">
                         <sl-button
                             class="topmenu__button"
                             size="small"
                             @click=${() => this.switchAutomatonType('pda')}
                             circle
                             ?disabled=${!this._component.allowedTypes.includes('pda')}
-                            >PDA</sl-button
+                            >${msg("PDA")}</sl-button
                         >
                     </sl-tooltip>
                 </div>

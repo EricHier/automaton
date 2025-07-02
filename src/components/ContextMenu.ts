@@ -4,6 +4,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { biDatabase, biDatabaseAdd, biDatabaseDash, biDatabaseSlash, biTrash } from '../styles/icons';
 import { AutomatonComponent } from 'index';
 import { classMap } from 'lit/directives/class-map.js';
+import { msg } from '@lit/localize';
 
 /**
  * Represents a context menu component that provides options for interacting with nodes and edges.
@@ -52,7 +53,7 @@ export class ContextMenu {
     private nodeContextMenu() {
         return html`
             <div class="context-menu__header">
-                <span class="context-menu__header__label">Node ${this.selected?.data.label}</span>
+                <span class="context-menu__header__label">${msg("Node")} ${this.selected?.data.label}</span>
                 <sl-button
                     class="context-menu__button"
                     circle
@@ -69,7 +70,7 @@ export class ContextMenu {
             </div>
             <sl-divider style="--spacing: var(--sl-spacing-x-small)"></sl-divider>
             <sl-input
-                placeholder="Label"
+                placeholder=${msg("Label")}
                 value=${this.selected?.data.label || ''}
                 @sl-input=${(e: any) => {
                     this.selected.updateFn({ ...this.selected.data, label: e.target.value });
@@ -88,7 +89,7 @@ export class ContextMenu {
                         this.selected.updateFn({ ...this.selected.data, initial: e.target.checked });
                         this.selected.data = { ...this.selected.data, initial: e.target.checked };
                     }}
-                    >Initial</sl-checkbox
+                    >${msg("Initial")}</sl-checkbox
                 >
                 <sl-checkbox
                     ?checked=${(this.selected?.data as Node).final}
@@ -97,7 +98,7 @@ export class ContextMenu {
                         this.selected.updateFn({ ...this.selected.data, final: e.target.checked });
                         this.selected.data = { ...this.selected.data, final: e.target.checked };
                     }}
-                    >Final</sl-checkbox
+                    >${msg("Final")}</sl-checkbox
                 >
             </div>
         `;
@@ -109,7 +110,7 @@ export class ContextMenu {
 
         return html`
             <div class="context-menu__header">
-                <span class="context-menu__header__label">Edge ${transition.label}</span>
+                <span class="context-menu__header__label">${msg("Edge")} ${transition.label}</span>
                 <sl-button
                     class="context-menu__button"
                     circle
@@ -132,7 +133,7 @@ export class ContextMenu {
                             ${this.parentComponent.forcedAlphabet.length > 0
                                 ? html`
                                     <sl-select
-                                        placeholder="Symbol"
+                                        placeholder=${msg("Symbol")}
                                         value=${symbol}
                                         size="small"
                                         ?disabled=${!this.parentComponent.settings.permissions.edge.change}
@@ -151,7 +152,7 @@ export class ContextMenu {
                                 `
                                 : html`
                                     <sl-input
-                                        placeholder="Symbol"
+                                        placeholder=${msg("Symbol")}
                                         value=${symbol}
                                         size="small"
                                         maxlength="1"
@@ -167,7 +168,7 @@ export class ContextMenu {
                                 `}
                             ${isPda ? html`
                                 <sl-input
-                                    placeholder="Stack"
+                                    placeholder=${msg("Stack")}
                                     value=${stackOperations[i].symbol}
                                     size="small"
                                     ?disabled=${!this.parentComponent.settings.permissions.edge.change || stackOperations[i].operation === 'empty' || stackOperations[i].operation === 'none'}
@@ -183,7 +184,7 @@ export class ContextMenu {
                                     }}
                                 ></sl-input>
                                 <sl-input
-                                    placeholder="If"
+                                    placeholder=${msg("If")}
                                     value=${stackOperations[i].condition}
                                     size="small"
                                     ?disabled=${!this.parentComponent.settings.permissions.edge.change || stackOperations[i].operation === 'empty'}
@@ -199,8 +200,8 @@ export class ContextMenu {
                                     }}
                                 ></sl-input>
 
-                                <sl-button-group label="Stack Actions">
-                                    <sl-tooltip content="Push" placement="top">
+                                <sl-button-group label=${msg("Stack Actions")}>
+                                    <sl-tooltip content=${msg("Push")} placement="top">
                                         <sl-button
                                             variant=${stackOperations[i].operation == 'push' ? 'primary' : 'default'}
                                             size="small"
@@ -218,7 +219,7 @@ export class ContextMenu {
                                             >${biDatabaseAdd}</sl-button
                                         >
                                     </sl-tooltip>
-                                    <sl-tooltip content="Pop" placement="top">
+                                    <sl-tooltip content=${msg("Pop")} placement="top">
                                         <sl-button
                                             variant=${stackOperations[i].operation == 'pop' ? 'primary' : 'default'}
                                             size="small"
@@ -236,7 +237,7 @@ export class ContextMenu {
                                             >${biDatabaseDash}</sl-button
                                         >
                                     </sl-tooltip>
-                                    <sl-tooltip content="Empty Check" placement="top">
+                                    <sl-tooltip content=${msg("Empty Check")} placement="top">
                                         <sl-button
                                             variant=${stackOperations[i].operation == 'empty' ? 'primary' : 'default'}
                                             size="small"
@@ -254,7 +255,7 @@ export class ContextMenu {
                                             >${biDatabaseSlash}</sl-button
                                         >
                                     </sl-tooltip>
-                                    <sl-tooltip content="Keep" placement="top">
+                                    <sl-tooltip content=${msg("Keep")} placement="top">
                                         <sl-button
                                             variant=${stackOperations[i].operation == 'none' ? 'primary' : 'default'}
                                             size="small"
@@ -316,13 +317,13 @@ export class ContextMenu {
                     style=${styleMap({
                         display: this.parentComponent.settings.permissions.edge.add ? 'block' : 'none',
                     })}>
-                    Add symbol
+                    ${msg("Add symbol")}
                 </sl-button>
             </div>
             <sl-divider style="--spacing: var(--sl-spacing-x-small)"></sl-divider>
             ${transition.from === transition.to ? html`
                 <sl-range
-                    label="Position"
+                    label=${msg("Position")}
                     min="0"
                     max="360"
                     style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);"
@@ -337,7 +338,7 @@ export class ContextMenu {
                 ></sl-range>`
             : html`
                 <sl-range
-                    label="Bend"
+                    label=${msg("Bend")}
                     min="-100"
                     max="100"
                     style="--track-color-active: var(--sl-color-primary-600);--track-color-inactive: var(--sl-color-primary-100);--track-active-offset: 50%;"

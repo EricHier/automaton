@@ -48,6 +48,9 @@ import { PDA, StackExtension } from './automata/pda';
 
 import { debounce } from 'lodash';
 
+import LOCALIZE from "../localization/generated";
+import { msg } from "@lit/localize";
+
 @customElement('webwriter-automaton')
 /**
  * Represents an Automaton Component.
@@ -59,6 +62,8 @@ export class AutomatonComponent extends LitElementWw {
     @query('#simulatorMenu') private accessor simulatorMenu!: SimulatorMenu;
     @query('#infoMenu') private accessor infoMenu!: InfoMenu;
     @query('#topMenu') private accessor topMenu!: TopMenu;
+
+    localize = LOCALIZE;
 
     @property({
         type: Array,
@@ -315,41 +320,41 @@ export class AutomatonComponent extends LitElementWw {
         return html`
             <div class="help-backdrop"></div>
             <div class="help-overlay">
-                <sl-tag size="small" style="top:50px;left:10px">Mode Switch</sl-tag>
+                <sl-tag size="small" style="top:50px;left:10px">${msg("Mode Switch")}</sl-tag>
 
-                <sl-tag size="small" style="top: 228px;right:10px">Fullscreen</sl-tag>
+                <sl-tag size="small" style="top: 228px;right:10px">${msg("Fullscreen")}</sl-tag>
                 <div class="line" style="top: 55px;right: 30px;height: 164px;"></div>
 
-                <sl-tag size="small" style="top:18px;right:325px">Type</sl-tag>
+                <sl-tag size="small" style="top:18px;right:325px">${msg("Type")}</sl-tag>
                 <div class="line" style="top:28px;right:310px;width:10px"></div>
 
-                <sl-tag size="small" style="top:60px;right:325px">Transformations</sl-tag>
+                <sl-tag size="small" style="top:60px;right:325px">${msg("Transformations")}</sl-tag>
                 <div class="line" style="top:55px;right:230px;width:90px;height:15px"></div>
 
-                <sl-tag size="small" style="top: 186px;right: 325px;">Help</sl-tag>
+                <sl-tag size="small" style="top: 186px;right: 325px;">${msg("Help")}</sl-tag>
                 <div class="line" style="top: 55px;right: 80px;width: 240px;height: 141px;"></div>
 
-                <sl-tag size="small" style="top: 144px;right: 325px;">Test Cases</sl-tag>
+                <sl-tag size="small" style="top: 144px;right: 325px;">${msg("Test Cases")}</sl-tag>
                 <div class="line" style="top: 55px;right: 130px;width: 190px;height: 99px;"></div>
 
-                <sl-tag size="small" style="top: 102px;right: 325px;">Definition</sl-tag>
+                <sl-tag size="small" style="top: 102px;right: 325px;">${msg("Definition")}</sl-tag>
                 <div class="line" style="top: 55px;right: 180px;width: 140px;height: 57px;"></div>
             </div>
 
             <div class="help-overlay" style=${styleMap({ display: this._mode === 'edit' ? 'block' : 'none' })}>
-                <sl-tag size="small" style="bottom: 77px;left: 80px;">Add Node by click</sl-tag>
-                <sl-tag size="small" style="bottom: 128px;left: 80px;">Add Transition by drag and drop</sl-tag>
+                <sl-tag size="small" style="bottom: 77px;left: 80px;">${msg("Add Node by click")}</sl-tag>
+                <sl-tag size="small" style="bottom: 128px;left: 80px;">${msg("Add Transition by drag and drop")}</sl-tag>
 
-                <sl-tag size="small" style="bottom: 110px;right: 30px;">Move the elements by drag and drop</sl-tag>
-                <sl-tag size="small" style="bottom: 70px;right: 30px;">To edit a node right click the node</sl-tag>
+                <sl-tag size="small" style="bottom: 110px;right: 30px;">${msg("Move the elements by drag and drop")}</sl-tag>
+                <sl-tag size="small" style="bottom: 70px;right: 30px;">${msg("To edit a node right click the node")}</sl-tag>
                 <sl-tag size="small" style="bottom: 30px;right: 30px;"
-                    >To edit a transition right click the transition</sl-tag
+                    >${msg("To edit a transition right click the transition")}</sl-tag
                 >
             </div>
 
             <div class="help-overlay" style=${styleMap({ display: this._mode === 'simulate' ? 'block' : 'none' })}>
-                <sl-tag size="small" style="bottom: 60px;left: 10px;">Input word</sl-tag>
-                <sl-tag size="small" style="bottom: 60px;left: 10px;">Simulation Controls</sl-tag>
+                <sl-tag size="small" style="bottom: 60px;left: 10px;">${msg("Input word")}</sl-tag>
+                <sl-tag size="small" style="bottom: 60px;left: 10px;">${msg("Simulation Controls")}</sl-tag>
             </div>
         `;
     }
@@ -379,8 +384,8 @@ export class AutomatonComponent extends LitElementWw {
                 }}
             >
                 <span slot="prefix">${this._mode === 'edit' ? biPencil : biBoxes}</span>
-                <sl-option value=${'edit'} selected> <span slot="prefix">${biPencil}</span> Edit </sl-option>
-                <sl-option value=${'simulate'}> <span slot="prefix">${biBoxes}</span> Simulate </sl-option>
+                <sl-option value=${'edit'} selected> <span slot="prefix">${biPencil}</span> ${msg("Edit")} </sl-option>
+                <sl-option value=${'simulate'}> <span slot="prefix">${biBoxes}</span> ${msg("Simulate")} </sl-option>
             </sl-select>
             <div
                 class="mode_switch__error_indicator"

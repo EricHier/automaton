@@ -107,6 +107,7 @@ export abstract class Automaton {
                     .filter((e) => e.symbols?.length > 0)
                     .map((t) => t.symbols)
                     .flat()
+                    .filter((s) => s !== '')
             ),
         ];
     }
@@ -146,10 +147,10 @@ export abstract class Automaton {
                 .filter((n) => n.label !== '')
                 .map((n) => n.label)
                 .join(', '),
-            alphabet: this.getAlphabet().join(', '),
+            alphabet: this.getAlphabet().sort().join(', '),
             transitions: this.getTransitions()
                 .filter((t) => t.label !== '')
-                .map((t) => t.symbols.map((s) => `(${this.getNodeLabel(t.from)},${s}): ${this.getNodeLabel(t.to)}`))
+                .map((t) => t.symbols.map((s) => `(${this.getNodeLabel(t.from)},${s || "ε"}): ${this.getNodeLabel(t.to)}`))
                 .flat()
                 .join('; '),
             initialNode: this.getInitialNode()?.label,

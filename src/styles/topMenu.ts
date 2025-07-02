@@ -26,6 +26,11 @@ export const topMenuStyles = css`
         flex-direction: column;
         align-items: center;
         gap: 10px;
+        position: absolute;
+        padding-top: 50px;
+        top: 0;
+        right: 0;
+        left: 0;
     }
 
     .topmenu__button_group:not([disabled]):hover .topmenu__buttons {
@@ -36,6 +41,7 @@ export const topMenuStyles = css`
         display: flex;
         gap: 10px;
         flex-direction: column;
+        position: relative;
     }
 
     .topmenu__button {

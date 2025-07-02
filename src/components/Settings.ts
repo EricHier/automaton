@@ -4,6 +4,7 @@ import { html } from 'lit';
 import { SlChangeEvent, SlCheckbox, SlInput, SlSelect } from '@shoelace-style/shoelace';
 
 import { live } from 'lit/directives/live.js';
+import { msg } from '@lit/localize';
 
 export class Settings {
     constructor(private parentComponent: AutomatonComponent) {
@@ -36,18 +37,18 @@ export class Settings {
     }
 
     render() {
-        return html`<h2>${biGear} Settings</h2>
+        return html`<h2>${biGear} ${msg("Settings")}</h2>
             <hr />
-            <sl-details summary="Editing">
+            <sl-details summary=${msg("Editing")}>
                 <table>
                     <tr>
                         <th></th>
-                        <th>Add</th>
-                        <th>Delete</th>
-                        <th>Change</th>
+                        <th>${msg("Add")}</th>
+                        <th>${msg("Delete")}</th>
+                        <th>${msg("Change")}</th>
                     </tr>
                     <tr>
-                        <td>Node</td>
+                        <td>${msg("Node")}</td>
                         <td>
                             <sl-checkbox
                                 ?checked=${live(this.permissions.node.add)}
@@ -89,7 +90,7 @@ export class Settings {
                         </td>
                     </tr>
                     <tr>
-                        <td>Edge</td>
+                        <td>${msg("Edge")}</td>
                         <td>
                             <sl-checkbox
                                 ?checked=${this.permissions.edge.add}
@@ -131,7 +132,7 @@ export class Settings {
                         </td>
                     </tr>
                     <tr>
-                        <td>Stack</td>
+                        <td>${msg("Stack")}</td>
                         <td>
                             <sl-checkbox
                                 ?checked=${this.permissions.stack.add}
@@ -174,7 +175,7 @@ export class Settings {
                     </tr>
                 </table>
                 <sl-select
-                    label="Automaton Types"
+                    label=${msg("Automaton Types")}
                     .value=${this.parentComponent.allowedTypes}
                     value=${this.parentComponent.allowedTypes.join(' ')}
                     multiple
@@ -183,12 +184,12 @@ export class Settings {
                         this.parentComponent.requestUpdate();
                     }}
                 >
-                    <sl-option value="nfa">NFA</sl-option>
-                    <sl-option value="dfa">DFA</sl-option>
-                    <sl-option value="pda">PDA</sl-option>
+                    <sl-option value="nfa">${msg("NFA")}</sl-option>
+                    <sl-option value="dfa">${msg("DFA")}</sl-option>
+                    <sl-option value="pda">${msg("PDA")}</sl-option>
                 </sl-select>
                 <sl-select
-                    label="Transformations"
+                    label=${msg("Transformations")}
                     .value=${this.parentComponent.allowedTransformations}
                     value=${this.parentComponent.allowedTransformations.join(' ')}
                     multiple
@@ -197,10 +198,10 @@ export class Settings {
                         this.parentComponent.requestUpdate();
                     }}
                 >
-                    <sl-option value="sink">Sinkstate</sl-option>
+                    <sl-option value="sink">${msg("Sinkstate")}</sl-option>
                 </sl-select>
             </sl-details>
-            <sl-details summary="View">
+            <sl-details summary=${msg("View")}>
                 <sl-switch
                     value=${this.parentComponent.showHelp == 'true' ? true : false}
                     ?checked=${this.parentComponent.showHelp == 'true' ? true : false}
@@ -209,7 +210,7 @@ export class Settings {
                         this.parentComponent.automaton.showErrors = (e.target as SlCheckbox).checked;
                         this.parentComponent.requestUpdate();
                     }}
-                    >Show Help</sl-switch
+                    >${msg("Show Help")}</sl-switch
                 >
                 <sl-switch
                     value=${this.parentComponent.showFromalDefinition == 'true' ? true : false}
@@ -218,7 +219,7 @@ export class Settings {
                         this.parentComponent.showFromalDefinition = (e.target as SlCheckbox).checked ? 'true' : 'false';
                         this.parentComponent.requestUpdate();
                     }}
-                    >Show Formal Definition</sl-switch
+                    >${msg("Show Formal Definition")}</sl-switch
                 >
                 <sl-switch
                     value=${this.parentComponent.showTransitionsTable == 'true' ? true : false}
@@ -227,17 +228,17 @@ export class Settings {
                         this.parentComponent.showTransitionsTable = (e.target as SlCheckbox).checked ? 'true' : 'false';
                         this.parentComponent.requestUpdate();
                     }}
-                    >Show Transitions Table</sl-switch
+                    >${msg("Show Transitions Table")}</sl-switch
                 >
 
-                <sl-select label="PDA Label Style">
+                <sl-select label=${msg("PDA Label Style")}>
                     <sl-option>a, X|aX</sl-option>
                     <!-- <sl-option>a -> aa|a</sl-option> -->
                 </sl-select>
             </sl-details>
-            <sl-details summary="Automation">
+            <sl-details summary=${msg("Automation")}>
                 <sl-input
-                    label="Test Language"
+                    label=${msg("Test Language")}
                     value=${this.parentComponent.testLanguage}
                     @sl-input=${(e: SlChangeEvent) => {
                         this.parentComponent.testLanguage = (e.target as SlInput).value;
@@ -245,7 +246,7 @@ export class Settings {
                     }}
                 ></sl-input>
                 <sl-input
-                    label="Test Words"
+                    label=${msg("Test Words")}
                     value=${this.parentComponent.testWords.join(',')}
                     @sl-input=${(e: SlChangeEvent) => {
                         if ((e.target as SlInput).value === '') {
@@ -258,7 +259,7 @@ export class Settings {
                     }}
                 ></sl-input>
                 <sl-input
-                    label="Predefined Alphabet"
+                    label=${msg("Predefined Alphabet")}
                     value=${this.parentComponent.forcedAlphabet.join(',')}
                     @sl-input=${(e: SlChangeEvent) => {
                         if ((e.target as SlInput).value === '') {
@@ -274,8 +275,8 @@ export class Settings {
                     }}
                 ></sl-input>
             </sl-details>
-            <sl-details summary="Advanced">
-                <sl-checkbox>Verbose</sl-checkbox>
+            <sl-details summary=${msg("Advanced")}>
+                <sl-checkbox>${msg("Verbose")}</sl-checkbox>
             </sl-details>`;
     }
 

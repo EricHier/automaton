@@ -62,6 +62,7 @@ export const contextMenuStyles = css`
     .context-menu__checkboxes {
         display: flex;
         justify-content: space-between;
-        gap: var(--sl-spacing-small);
+        gap: 0 var(--sl-spacing-small);
+        flex-wrap: wrap;
     }
 `;
