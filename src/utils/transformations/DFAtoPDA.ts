@@ -1,3 +1,4 @@
+import { StackOperation } from 'automata';
 import { DFA } from '../../automata/dfa';
 import { PDA } from '../../automata/pda';
 
@@ -7,8 +8,8 @@ export function DFAtoPDA(a: DFA) {
         a.transitions.get().map((t) => {
             return {
                 ...t,
-                stackOperations: t.symbols.map((s) => {
-                    return { symbol: '', operation: 'none' };
+                stackOperations: t.symbols.map(() => {
+                    return { symbol: '', operation: 'none', condition: '' } as StackOperation;
                 }),
             };
         })

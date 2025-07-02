@@ -101,6 +101,11 @@ class PDASimulator extends ManualAutoSimulator {
         };
     }
 
+    public init(): void {
+        this._initialStack = this._a.extension.getStack();
+        this._currentStack = [...this._initialStack];
+    }
+
     protected getPath(): SimulationResult {
         this._errors = this._a.checkAutomaton();
         if (this._errors.length > 0) {
@@ -290,116 +295,11 @@ class PDASimulator extends ManualAutoSimulator {
         return { accepted: false, path: { nodes: [], transitions: [], stacks: [] } };
     }
 
-    public simulateOld(): { success: boolean; message: string } {
-        console.log('Simulating PDA', this._word);
-        this._initialStack = this._a.extension.getStack();
-        const word = this._word;
-        const result = this.simulationFromState(word, this._a.getInitialNode() as Node, [...this._initialStack]);
-        console.log('Result', result);
-        const lastNode = result.path[result.path.length - 1].node;
-        this._a.highlightNode(lastNode);
-        return {
-            success: result.success,
-            message: `Finished simulation on <b>${lastNode.label}</b>.<br />Path: ${result.path
-                .map((n) => `<b>${n.node.label}</b>`)
-                .join(',')}`
-        };
-    }
-
-    private simulationFromState(
-        word: string[],
-        state: Node,
-        stack: string[]
-    ): { success: boolean; message: string; path: { node: Node; symbol: string; stack: string[] }[] } {
-        const transitions = this._a.getTransitionsFromNode(state) as Transition[];
-        let validTransitions = transitions.filter((t) => t.symbols.includes(word[0]) || t.symbols.includes(''));
-        validTransitions = validTransitions.filter((t) => {
-            for (let i = 0; i < t.stackOperations!.length; i++) {
-                const symbol = t.symbols[i];
-                const stackOperation = t.stackOperations![i];
-
-                let validStackOperation: boolean = false;
-                if (stackOperation.operation === 'none') validStackOperation = true;
-                if (stackOperation.operation === 'push') validStackOperation = true;
-                if (stackOperation.operation === 'pop' && stack[stack.length - 1] === stackOperation.symbol)
-                    validStackOperation = true;
-                if (stackOperation.operation === 'empty' && stack.length === 0) validStackOperation = true;
-
-                if (validStackOperation && (symbol == word[0] || symbol == '')) return true;
-            }
-
-            return false;
-        });
-
-        if (word.length === 0 && validTransitions.length === 0) {
-            return {
-                success: state.final,
-                message: state.final ? 'Accepted' : 'Rejected',
-                path: [{ node: state, symbol: '', stack }]
-            };
-        }
-
-        if (word.length === 0 && state.final) {
-            return { success: true, message: 'Accepted', path: [{ node: state, symbol: '', stack }] };
-        }
-
-        AutomatonComponent.log(
-            'Simulating from state',
-            [state.label],
-            'with word',
-            [word.join('')],
-            'and stack',
-            [stack.join(',')],
-            'valid transitions',
-            validTransitions.map((t) => t.symbols.map((s) => (s === '' ? 'ε' : s)).join(',')).flat()
-        );
-        for (const transition of validTransitions) {
-            const to = this._a.getNode(transition.to) as Node;
-
-            for (let i = 0; i < transition.symbols.length; i++) {
-                const symbol = transition.symbols[i];
-                const stackOperation = transition.stackOperations![i];
-
-                if (symbol !== word[0] && symbol !== '') continue;
-                if (stackOperation.condition && stackOperation.condition !== stack[stack.length - 1]) continue;
-
-                const newStack = [...stack];
-
-                if (stackOperation.operation == 'push') newStack.push(stackOperation.symbol);
-                if (stackOperation.operation == 'pop') newStack.pop();
-
-                AutomatonComponent.log(
-                    'Take transition from',
-                    state.label,
-                    'with',
-                    symbol == '' ? 'ε' : symbol,
-                    'with stack',
-                    newStack.join(',')
-                );
-
-                let result;
-                if (symbol === '') result = this.simulationFromState(word, to as Node, newStack);
-                else result = this.simulationFromState(word.slice(1), to as Node, newStack);
-
-                if (result.success) {
-                    return {
-                        success: true,
-                        message: 'Accepted',
-                        path: [{ node: state, symbol, stack }, ...result.path]
-                    };
-                }
-            }
-        }
-
-        return { success: false, message: 'Rejected', path: [{ node: state, symbol: '', stack }] };
-    }
-
     public reset(): void {
         super.reset();
         this._a.redrawNodes();
-        this._initialStack = this._a.extension.getStack();
         this._currentStack = [...this._initialStack];
-        this._a.extension.setStack(this._initialStack);
+        this._a.displayStack(this._initialStack);
         this._previousTransitions = {
             accepted: this._currentNode.final,
             path: {
@@ -568,12 +468,12 @@ class PDASimulator extends ManualAutoSimulator {
         this._previousTransitions.path!.stacks!.push(newStack);
 
         this._currentStack = newStack;
-        (this._a as PDA).displayStack(this._currentStack);
+        this._a.displayStack(this._currentStack);
     }
 
     protected updateStateAfterGoToStep(step: number): void {
         this._currentStack = this._previousTransitions.path!.stacks![step];
-        (this._a as PDA).displayStack(this._currentStack);
+        this._a.displayStack(this._currentStack);
     }
 }
 
@@ -589,13 +489,13 @@ export class StackExtension extends LitElementWw {
 
     @property({ type: Array }) public accessor stack: StackItem[] = [];
 
-    @property({ type: String, attribute: true, reflect: true })
+    @property({ type: Boolean, attribute: true, reflect: true })
     public accessor add: boolean = true;
 
-    @property({ type: String, attribute: true, reflect: true })
+    @property({ type: Boolean, attribute: true, reflect: true })
     public accessor delete: boolean = true;
 
-    @property({ type: String, attribute: true, reflect: true })
+    @property({ type: Boolean, attribute: true, reflect: true })
     public accessor change: boolean = true;
 
     static get styles() {
@@ -628,10 +528,11 @@ export class StackExtension extends LitElementWw {
     }
 
     public getStack(): string[] {
-        return this._stack.get().map((s) => s.symbol);
+        return this._stack.get().map((s) => s.symbol).reverse();
     }
 
     public setStack(stack: string[]): void {
+        console.log('Setting stack:', stack);
         this._stack.clear();
         this._stack.add([...stack].reverse().map((s, i) => ({ id: i, symbol: s })));
     }
@@ -685,6 +586,7 @@ export class StackExtension extends LitElementWw {
                 }}
                 >${this._dragging && this.delete ? biTrash : '+'}</sl-button
             >
+            ${this.stack.length > 0 ? html`
             <div
                 class="pda__stack-items"
                 id="pda__stack-items"
@@ -749,6 +651,13 @@ export class StackExtension extends LitElementWw {
                     `
                 )}
             </div>
+            ` : html`
+            <div class="pda__stack-items" id="pda__stack-items">
+                <div class="pda__stack-item pda__stack-item--empty">
+                empty
+                </div>
+            </div>
+            `}
         </div>`;
     }
 

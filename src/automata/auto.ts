@@ -68,12 +68,14 @@ export abstract class AutoSimulator extends Simulator {
         if (result.errors && result.errors.length > 0) {
             cb({
                 status: SimulationStatus.ERROR,
-                message: `Please fix the following errors to run the simulation:<br/>${result.errors
-                    .map((e) => e.message)
-                    .join('<br/>')}`,
                 wordPosition: 0,
                 simulationResult: result,
             });
+            return;
+        }
+        
+        if (result.path!.nodes.length === 0) {
+            cb({ status: SimulationStatus.NO_PATH, wordPosition: 0, simulationResult: result  });
             return;
         }
 

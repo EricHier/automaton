@@ -28,6 +28,9 @@ import { SimulatorMenu } from './SimulatorMenu';
 import { Graph } from '../graph';
 import { stripNode, stripTransition } from '../utils/updates';
 import RandExp from 'randexp';
+import { SimulationStatus } from 'automata';
+import { NFA } from 'automata/nfa';
+import { PDA } from 'automata/pda';
 
 @customElement('webwriter-automaton-topmenu')
 export class TopMenu extends LitElementWw {
@@ -141,7 +144,7 @@ export class TopMenu extends LitElementWw {
                                     this.component.automaton.simulator.word = word;
                                     this.component.automaton.simulator.init();
                                     const res = this.component.automaton.simulator.simulate();
-                                    accepted &&= res.success;
+                                    accepted &&= res.status === SimulationStatus.ACCEPTED;
                                 }
                                 this.component.automaton.simulator.word = '';
                                 this.component.automaton.simulator.init();
@@ -157,7 +160,7 @@ export class TopMenu extends LitElementWw {
                                     this.component.automaton.simulator.word = word;
                                     this.component.automaton.simulator.init();
                                     const res = this.component.automaton.simulator.simulate();
-                                    (e.target as SlButton).variant = res.success ? 'success' : 'danger';
+                                    (e.target as SlButton).variant = res.status === SimulationStatus.ACCEPTED ? 'success' : 'danger';
                                     this.component.automaton.simulator.word = '';
                                     this.component.automaton.simulator.init();
                                 }}
@@ -330,12 +333,12 @@ export class TopMenu extends LitElementWw {
                 if (type === 'pda') this._component.automaton = transformations.DFAtoPDA(this._component.automaton);
                 break;
             case 'nfa':
-                if (type === 'dfa') this._component.automaton = transformations.NFAtoDFA(this._component.automaton);
-                if (type === 'pda') this._component.automaton = transformations.NFAtoPDA(this._component.automaton);
+                if (type === 'dfa') this._component.automaton = transformations.NFAtoDFA(this._component.automaton as NFA);
+                if (type === 'pda') this._component.automaton = transformations.NFAtoPDA(this._component.automaton as NFA);
                 break;
             case 'pda':
-                if (type === 'dfa') this._component.automaton = transformations.PDAtoDFA(this._component.automaton);
-                if (type === 'nfa') this._component.automaton = transformations.PDAtoNFA(this._component.automaton);
+                if (type === 'dfa') this._component.automaton = transformations.PDAtoDFA(this._component.automaton as PDA);
+                if (type === 'nfa') this._component.automaton = transformations.PDAtoNFA(this._component.automaton as PDA);
                 break;
         }
 

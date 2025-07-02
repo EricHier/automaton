@@ -18,7 +18,7 @@ import {
     biPause,
     biStop,
     biArrowRight,
-    biCursor,
+    biHandIndexThumb,
 } from '../styles/icons';
 import { Automaton, SimulationFeedback, SimulationResult, SimulationStatus } from '../automata';
 import { classMap } from 'lit/directives/class-map.js';
@@ -212,7 +212,7 @@ export class SimulatorMenu extends LitElementWw {
                         @click=${() => {
                             this.startStepByStep(true);
                         }}
-                        >${biCursor}</sl-button
+                        >${biHandIndexThumb}</sl-button
                     >
                 </sl-tooltip>
                 ` : ''}

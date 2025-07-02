@@ -16,8 +16,6 @@ export const stackStyles = css`
 
         max-height: 378px;
 
-        gap: 10px;
-
         border: 1px solid lightgray;
         border-radius: 5px;
         background-color: white;
@@ -30,6 +28,10 @@ export const stackStyles = css`
         display: flex;
         align-items: center;
         justify-content: center;
+    }
+
+    .pda__stack-button {
+        margin: 8px;
     }
 
     .pda__stack-button.dragover::part(base) {
@@ -82,6 +84,12 @@ export const stackStyles = css`
 
     .pda__stack-item:hover {
         background-color: var(--sl-color-primary-50);
+    }
+
+    .pda__stack-item--empty {
+        font-size: var(--sl-font-size-small);
+        color: var(--sl-color-neutral-500);
+        text-align: center;
     }
 
     .pda__stack-title {

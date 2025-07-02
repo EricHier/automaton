@@ -129,18 +129,7 @@ export abstract class ManualAutoSimulator extends AutoSimulator {
                 step: this._currentStep,
                 simulationResult: this._previousTransitions,
                 firstStep: this._currentStep === 0,
-                finalStep: false
-            };
-        }
-
-        if (step === this._currentStep) {
-            return {
-                status: SimulationStatus.RUNNING,
-                wordPosition: this._currentWordPosition,
-                step: this._currentStep,
-                simulationResult: this._previousTransitions,
-                firstStep: this._currentStep === 0,
-                finalStep: false
+                finalStep: true
             };
         }
 
@@ -150,7 +139,7 @@ export abstract class ManualAutoSimulator extends AutoSimulator {
             0,
             this._currentStep
         );
-        if (this._previousTransitions.path!.stacks) {
+        if (!!this._previousTransitions.path!.stacks) {
             this._previousTransitions.path!.stacks = this._previousTransitions.path!.stacks.slice(0, this._currentStep + 1);
         }
 
@@ -186,7 +175,7 @@ export abstract class ManualAutoSimulator extends AutoSimulator {
             step: this._currentStep,
             simulationResult: this._previousTransitions,
             firstStep: this._currentStep === 0,
-            finalStep: false
+            finalStep: true
         };
     }
 }
