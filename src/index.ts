@@ -49,9 +49,10 @@ import { PDA, StackExtension } from './automata/pda';
 import { debounce } from 'lodash';
 
 import LOCALIZE from "../localization/generated";
-import { msg } from "@lit/localize";
+import { localized, msg } from "@lit/localize";
 
 @customElement('webwriter-automaton')
+@localized()
 /**
  * Represents an Automaton Component.
  * This component is responsible for rendering and managing the automaton editor and simulator.

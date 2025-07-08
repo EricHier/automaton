@@ -1,6 +1,14 @@
 <xliff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 http://docs.oasis-open.org/xliff/v1.2/os/xliff-core-1.2-strict.xsd" xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
   <file original="lit-localize-inputs" datatype="plaintext" source-language="en" target-language="de">
     <body>
+      <trans-unit id="sae4f7c13b7ec18ff">
+        <source>Stack</source>
+        <target>Stapel</target>
+      </trans-unit>
+      <trans-unit id="s904fefb3d01cb2ae">
+        <source>empty</source>
+        <target>leer</target>
+      </trans-unit>
       <trans-unit id="s42b6431842b835b3">
         <source>Language:</source>
         <target>Sprache:</target>
@@ -68,6 +76,14 @@
       <trans-unit id="sceb35fbe10efb7a1">
         <source>Add edge</source>
         <target>Rand hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="s4f6476c3d1856c19">
+        <source>No further moves possible. Try a different path.</source>
+        <target>Keine weiteren Schritte möglich. Versuchen Sie einen anderen Weg.</target>
+      </trans-unit>
+      <trans-unit id="sed72ab193dd16a0a">
+        <source>Simulation paused.</source>
+        <target>Die Simulation wurde unterbrochen.</target>
       </trans-unit>
       <trans-unit id="saad05eab0e59411c">
         <source>Input Word e.g. aaabbb, step;step;stop</source>
@@ -141,10 +157,6 @@
         <source>Edge</source>
         <target>Kante</target>
       </trans-unit>
-      <trans-unit id="sae4f7c13b7ec18ff">
-        <source>Stack</source>
-        <target>Stapel</target>
-      </trans-unit>
       <trans-unit id="s860b83fc8a41ca5c">
         <source>Automaton Types</source>
         <target>Automaten-Typen</target>
@@ -200,58 +212,6 @@
       <trans-unit id="s1b5a859826f8be7d">
         <source>Verbose</source>
         <target>Ausführlich</target>
-      </trans-unit>
-      <trans-unit id="s5590dbf7e425789d">
-        <source>Label</source>
-        <target>Etikett</target>
-      </trans-unit>
-      <trans-unit id="sfb68cae41d749423">
-        <source>Initial</source>
-        <target>Ursprüngliche</target>
-      </trans-unit>
-      <trans-unit id="s8f1034e1a9d93097">
-        <source>Final</source>
-        <target>Finale</target>
-      </trans-unit>
-      <trans-unit id="sd083d3aa96af5af1">
-        <source>Symbol</source>
-        <target>Symbol</target>
-      </trans-unit>
-      <trans-unit id="s09243007b5b91006">
-        <source>If</source>
-        <target>Wenn</target>
-      </trans-unit>
-      <trans-unit id="s3de7bee91528e5cc">
-        <source>Stack Actions</source>
-        <target>Stapel-Aktionen</target>
-      </trans-unit>
-      <trans-unit id="s970d041a28d1067d">
-        <source>Push</source>
-        <target>Schieben Sie</target>
-      </trans-unit>
-      <trans-unit id="s8da37819f40688b0">
-        <source>Pop</source>
-        <target>Pop</target>
-      </trans-unit>
-      <trans-unit id="s66da3efd9a45b25a">
-        <source>Empty Check</source>
-        <target>Leere Prüfung</target>
-      </trans-unit>
-      <trans-unit id="sd60a7dde73859828">
-        <source>Keep</source>
-        <target>Behalten Sie</target>
-      </trans-unit>
-      <trans-unit id="sba6693303903d6b8">
-        <source>Add symbol</source>
-        <target>Symbol hinzufügen</target>
-      </trans-unit>
-      <trans-unit id="sc1611c0558728a2a">
-        <source>Position</source>
-        <target>Position</target>
-      </trans-unit>
-      <trans-unit id="sa0a141a796a5b36a">
-        <source>Bend</source>
-        <target>Biegen Sie</target>
       </trans-unit>
       <trans-unit id="s7df224ba56fb8e1e">
         <source>Mode Switch</source>
@@ -309,17 +269,151 @@
         <source>Simulate</source>
         <target>Simulieren Sie</target>
       </trans-unit>
-      <trans-unit id="s904fefb3d01cb2ae">
-        <source>empty</source>
-        <target>leer</target>
+      <trans-unit id="s5590dbf7e425789d">
+        <source>Label</source>
+        <target>Etikett</target>
       </trans-unit>
-      <trans-unit id="s4f6476c3d1856c19">
-        <source>No further moves possible. Try a different path.</source>
-        <target>Keine weiteren Schritte möglich. Versuchen Sie einen anderen Weg.</target>
+      <trans-unit id="sfb68cae41d749423">
+        <source>Initial</source>
+        <target>Ursprüngliche</target>
       </trans-unit>
-      <trans-unit id="sed72ab193dd16a0a">
-        <source>Simulation paused.</source>
-        <target>Die Simulation wurde unterbrochen.</target>
+      <trans-unit id="s8f1034e1a9d93097">
+        <source>Final</source>
+        <target>Finale</target>
+      </trans-unit>
+      <trans-unit id="sd083d3aa96af5af1">
+        <source>Symbol</source>
+        <target>Symbol</target>
+      </trans-unit>
+      <trans-unit id="s09243007b5b91006">
+        <source>If</source>
+        <target>Wenn</target>
+      </trans-unit>
+      <trans-unit id="s3de7bee91528e5cc">
+        <source>Stack Actions</source>
+        <target>Stapel-Aktionen</target>
+      </trans-unit>
+      <trans-unit id="s970d041a28d1067d">
+        <source>Push</source>
+        <target>Schieben Sie</target>
+      </trans-unit>
+      <trans-unit id="s8da37819f40688b0">
+        <source>Pop</source>
+        <target>Pop</target>
+      </trans-unit>
+      <trans-unit id="s66da3efd9a45b25a">
+        <source>Empty Check</source>
+        <target>Leere Prüfung</target>
+      </trans-unit>
+      <trans-unit id="sd60a7dde73859828">
+        <source>Keep</source>
+        <target>Behalten Sie</target>
+      </trans-unit>
+      <trans-unit id="sba6693303903d6b8">
+        <source>Add symbol</source>
+        <target>Symbol hinzufügen</target>
+      </trans-unit>
+      <trans-unit id="sc1611c0558728a2a">
+        <source>Position</source>
+        <target>Position</target>
+      </trans-unit>
+      <trans-unit id="sa0a141a796a5b36a">
+        <source>Bend</source>
+        <target>Biegen Sie</target>
+      </trans-unit>
+      <trans-unit id="h6c2fe3d409d7ba36">
+        <source>No valid path found. The automaton 
+          <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>rejects
+          <x id="1" equiv-text="&lt;/sl-badge&gt;"/> the word 
+          <x id="2" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.
+        </source>
+        <target>Kein gültiger Pfad gefunden. Der Automat 
+          <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>lehnt  ab.
+          <x id="1" equiv-text="&lt;/sl-badge&gt;"/> das Wort 
+          <x id="2" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.
+        </target>
+      </trans-unit>
+      <trans-unit id="h2e7f32ac617924d0">
+        <source>Missing transition for 
+          <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/>
+        </source>
+        <target>Fehlender Übergang für 
+          <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/>
+        </target>
+      </trans-unit>
+      <trans-unit id="h5130af20b6d54f05">
+        <source>Multiple transitions for 
+          <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/>
+        </source>
+        <target>Mehrere Übergänge für 
+          <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/>
+        </target>
+      </trans-unit>
+      <trans-unit id="s2ea31ea953b32ee5">
+        <source>Transition with empty symbol</source>
+        <target>Übergang mit leerem Symbol</target>
+      </trans-unit>
+      <trans-unit id="s5787e20cab57b383">
+        <source>Unknown error</source>
+        <target>Unbekannter Fehler</target>
+      </trans-unit>
+      <trans-unit id="h56d667fd1fb9d47d">
+        <source>Please fix the following 
+          <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>errors
+          <x id="1" equiv-text="&lt;/sl-badge&gt;"/> to run the simulation:
+        </source>
+        <target>Bitte beheben Sie die folgenden 
+          <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>Fehler
+          <x id="1" equiv-text="&lt;/sl-badge&gt;"/> um die Simulation durchzuführen:
+        </target>
+      </trans-unit>
+      <trans-unit id="h25e62c96f8182fcc">
+        <source>
+          <x id="0" equiv-text="&lt;span&gt;"/>The automaton 
+          <x id="1" equiv-text="&lt;sl-badge variant=&quot;success&quot;&gt;"/>accepts
+          <x id="2" equiv-text="&lt;/sl-badge&gt;"/> the word 
+          <x id="3" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.
+          <x id="4" equiv-text="&lt;/span&gt;"/>
+        </source>
+        <target>
+          <x id="0" equiv-text="&lt;span&gt;"/>Der Automat 
+          <x id="1" equiv-text="&lt;sl-badge variant=&quot;success&quot;&gt;"/>akzeptiert
+          <x id="2" equiv-text="&lt;/sl-badge&gt;"/> das Wort 
+          <x id="3" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.
+          <x id="4" equiv-text="&lt;/span&gt;"/>
+        </target>
+      </trans-unit>
+      <trans-unit id="h28031e78bb7297a9">
+        <source>
+          <x id="0" equiv-text="&lt;span&gt;"/>The automaton 
+          <x id="1" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>rejects
+          <x id="2" equiv-text="&lt;/sl-badge&gt;"/> the word 
+          <x id="3" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.
+          <x id="4" equiv-text="&lt;/span&gt;"/>
+        </source>
+        <target>
+          <x id="0" equiv-text="&lt;span&gt;"/>Der Automat 
+          <x id="1" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>lehnt  ab.
+          <x id="2" equiv-text="&lt;/sl-badge&gt;"/> das Wort 
+          <x id="3" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.
+          <x id="4" equiv-text="&lt;/span&gt;"/>
+        </target>
+      </trans-unit>
+      <trans-unit id="s1b00cf75d5f4f616">
+        <source>Choose a move:</source>
+        <target>Wählen Sie einen Zug:</target>
+      </trans-unit>
+      <trans-unit id="s6c80030e2762459d">
+        <source>push</source>
+        <target>drücken.</target>
+      </trans-unit>
+      <trans-unit id="s779b5819564f2f50">
+        <source>pop</source>
+        <target>pop</target>
+      </trans-unit>
+      <trans-unit id="s3c0d17bad169557b">
+        <source>none</source>
+        <target>keine</target>
       </trans-unit>
     </body>
   </file>

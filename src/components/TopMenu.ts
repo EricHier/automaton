@@ -28,9 +28,10 @@ import RandExp from 'randexp';
 import { SimulationStatus } from 'automata';
 import { NFA } from 'automata/nfa';
 import { PDA } from 'automata/pda';
-import { msg } from '@lit/localize';
+import { localized, msg } from '@lit/localize';
 
 @customElement('webwriter-automaton-topmenu')
+@localized()
 export class TopMenu extends LitElementWw {
     @property({ type: Object, attribute: false })
     private accessor _component!: AutomatonComponent;

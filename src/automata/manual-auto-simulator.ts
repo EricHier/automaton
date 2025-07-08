@@ -112,7 +112,6 @@ export abstract class ManualAutoSimulator extends AutoSimulator {
         status: SimulationStatus;
         firstStep?: boolean;
         finalStep?: boolean;
-        message?: string;
         wordPosition: number;
         step: number;
         simulationResult?: SimulationResult;

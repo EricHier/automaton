@@ -1,6 +1,7 @@
 import { Graph } from '../graph';
-import { Automaton, AutomatonInfo, Node, SimulationResult, Simulator, Transition } from '../automata';
+import { Automaton, Node, SimulationResult, Simulator, Transition } from '../automata';
 import { AutoSimulator } from './auto';
+import { AutomatonError } from '@u/errors';
 
 export class DFA extends Automaton {
     public simulator: Simulator;
@@ -12,25 +13,21 @@ export class DFA extends Automaton {
         this.simulator = new DFASimulator(this);
     }
 
-    checkAutomaton(): AutomatonInfo[] {
+    checkAutomaton(): AutomatonError[] {
         const alphabet = this.getAlphabet();
-        const errors: AutomatonInfo[] = [];
+        const errors: AutomatonError[] = [];
 
         this.resetColors();
 
         for (const node of this.nodes.get()) {
             if (node.id === Graph.initialGhostNode.id) continue;
+            let errorLengthBefore = errors.length;
 
             const transitions = this.getTransitionsFromNode(node);
 
-            let errorText = '';
             for (const letter of alphabet) {
                 if (!transitions.some((t) => t.symbols.includes(letter))) {
-                    errorText += `Missing transition for <b>${letter}</b><br/>`;
-                }
-
-                if (transitions.filter((t) => t.symbols.includes(letter)).length > 1) {
-                    errorText += `Multiple transitions for <b>${letter}</b><br/>`;
+                    errors.push(new AutomatonError('missing-transition', node, undefined, letter));
                 }
 
                 if (
@@ -39,25 +36,20 @@ export class DFA extends Automaton {
                         .flat()
                         .filter((s) => s === letter).length > 1
                 ) {
-                    errorText += `Multiple transitions for <b>${letter}</b><br/>`;
+                    errors.push(new AutomatonError('multiple-transitions', node, undefined, letter));
                 }
             }
 
             if (transitions.some((t) => t.symbols.includes(''))) {
-                errorText += `Transition with empty symbol<br/>`;
+                errors.push(new AutomatonError('empty-transition', node));
             }
 
-            if (errorText !== '') {
-                errors.push({ node, type: 'error', message: errorText });
+            if (errorLengthBefore < errors.length) {
                 this.highlightErrorNode(node.id);
             }
         }
 
-        if (errors.length > 0) {
-            return errors;
-        }
-
-        return [];
+        return errors;
     }
 
     loadAutomaton(data: { nodes: Node[]; transitions: Transition[] }): void {

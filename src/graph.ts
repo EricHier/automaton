@@ -1,15 +1,16 @@
-import { Transition, Node, Automaton, AutomatonInfo } from './automata';
+import { Transition, Node, Automaton } from './automata';
 import { Network, Position } from 'vis-network';
 import { v4 as uuidv4 } from 'uuid';
 import { ContextMenu } from './components/ContextMenu';
 import { ToolMenu } from './components/ToolMenu';
 import { DRAW } from './utils/draw';
-import { html } from 'lit';
+import { html, TemplateResult } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { biExclamationOctagon } from './styles/icons';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { COLORS } from './utils/colors';
 import { AutomatonComponent } from './index';
+import { AutomatonError } from '@u/errors';
 
 /**
  * Represents a graph that combines an automaton, network, and other components.
@@ -47,8 +48,8 @@ export class Graph {
 
     private _keys: Map<string, boolean> = new Map();
 
-    private _errors: AutomatonInfo[] = [];
-    public get errors(): AutomatonInfo[] {
+    private _errors: AutomatonError[] = [];
+    public get errors(): AutomatonError[] {
         return this._errors;
     }
 
@@ -57,7 +58,7 @@ export class Graph {
             x: number;
             y: number;
         };
-        message: string;
+        message: TemplateResult<1>;
     } | null;
 
     private _lastPosition: Position = { x: 0, y: 0 };
@@ -299,7 +300,10 @@ export class Graph {
                         x: (this._hovered?.x as number) + 15,
                         y: (this._hovered?.y as number) + 15,
                     }),
-                    message: this._errors.find((e) => e.node?.id === this._hovered?.id)?.message || '',
+                    message: this._errors.filter((e) => e.node?.id === this._hovered?.id)?.reduce(
+                        (acc, error) => html`${acc}${error.message}<br/>`,
+                        html``
+                    ) || '',
                 };
                 this.requestUpdate();
             }
@@ -446,7 +450,7 @@ export class Graph {
     private displayErrors() {
         this._a.redrawNodes();
         for (const error of this._errors) {
-            if (error.type === 'error' && error.node) {
+            if (error.node) {
                 this._a.highlightErrorNode(error.node.id);
             }
         }
@@ -467,7 +471,7 @@ export class Graph {
                 top: `${this._currentError?.offset.y}px`,
             })}
             open
-            >${biExclamationOctagon} ${unsafeHTML(this._currentError?.message)}</sl-alert
+            >${biExclamationOctagon} ${this._currentError?.message}</sl-alert
         >`;
     }
 }

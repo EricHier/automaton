@@ -1,5 +1,5 @@
 import { AutomatonComponent } from '../';
-import { Automaton, AutomatonInfo, Node, SimulationResult, Transition } from './';
+import { Automaton, Node, SimulationResult, Transition } from './';
 import { TemplateResult, html } from 'lit';
 import { DataSet } from 'vis-data';
 import { LitElementWw } from '@webwriter/lit';
@@ -12,7 +12,8 @@ import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.
 import { biTrash } from '../styles/icons';
 import { styleMap } from 'lit/directives/style-map.js';
 import { ManualAutoSimulator } from './manual-auto-simulator';
-import { msg } from '@lit/localize';
+import { localized, msg } from '@lit/localize';
+import { AutomatonError } from '@u/errors';
 
 export class PDA extends Automaton {
     public simulator: PDASimulator;
@@ -20,7 +21,7 @@ export class PDA extends Automaton {
 
     public extension = document.createElement('stack-extension') as StackExtension;
 
-    public checkAutomaton(): AutomatonInfo[] {
+    public checkAutomaton(): AutomatonError[] {
         return [];
     }
 
@@ -420,7 +421,7 @@ class PDASimulator extends ManualAutoSimulator {
             dialog.style.zIndex = '1000';
 
             const p = document.createElement('p');
-            p.innerText = 'Choose a move:';
+            p.innerText = msg('Choose a move:');
             dialog.appendChild(p);
 
             const buttons = validOps.map(({ symbol, stackOpIndex }) => {
@@ -429,16 +430,16 @@ class PDASimulator extends ManualAutoSimulator {
                 let opLabel = '';
                 switch (stackOp.operation) {
                     case 'push':
-                        opLabel = `push ${stackOp.symbol}`;
+                        opLabel = msg('push') + ' ' + stackOp.symbol;
                         break;
                     case 'pop':
-                        opLabel = `pop ${stackOp.symbol}`;
+                        opLabel = msg('pop') + ' ' + stackOp.symbol;
                         break;
                     case 'empty':
-                        opLabel = `empty`;
+                        opLabel = msg('empty');
                         break;
                     default:
-                        opLabel = `none`;
+                        opLabel = msg('none');
                         break;
                 }
                 button.innerHTML = `${symbol === '' ? 'ε' : symbol}, ${opLabel}`;
@@ -485,6 +486,7 @@ type StackItem = {
 };
 
 @customElement('stack-extension')
+@localized()
 export class StackExtension extends LitElementWw {
     private _stack: DataSet<StackItem> = new DataSet<StackItem>();
 

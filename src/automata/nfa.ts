@@ -1,4 +1,5 @@
-import { Automaton, AutomatonInfo, SimulationResult, Node, Transition } from '../automata';
+import { AutomatonError } from '@u/errors';
+import { Automaton, SimulationResult, Node, Transition } from '../automata';
 import { ManualAutoSimulator } from './manual-auto-simulator';
 
 export class NFA extends Automaton {
@@ -10,7 +11,7 @@ export class NFA extends Automaton {
         super(nodes, transitions);
         this.simulator = new NFASimulator(this);
     }
-    public checkAutomaton(): AutomatonInfo[] {
+    public checkAutomaton(): AutomatonError[] {
         return [];
     }
     public loadAutomaton(data: { nodes: Node[]; transitions: Transition[] }): void {

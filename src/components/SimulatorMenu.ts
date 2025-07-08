@@ -29,9 +29,10 @@ import { simulationMenuStyles } from '../styles/simulationMenu';
 import { LitElementWw } from '@webwriter/lit';
 import { Graph } from '../graph';
 import { ManualAutoSimulator } from 'automata/manual-auto-simulator';
-import { msg } from '@lit/localize';
+import { localized, msg } from '@lit/localize';
 
 @customElement('webwriter-automaton-simulatormenu')
+@localized()
 export class SimulatorMenu extends LitElementWw {
     @state()
     private accessor _automaton!: Automaton;
@@ -45,14 +46,12 @@ export class SimulatorMenu extends LitElementWw {
     @state()
     private accessor _result!: {
         status: SimulationStatus;
-        message?: string;
         wordPosition: number;
         step: number;
     } | null;
-    private set result(result: { status: SimulationStatus; message?: string; wordPosition: number; step?: number }) {
+    private set result(result: { status: SimulationStatus; wordPosition: number; step?: number }) {
         this._result = {
             status: result.status,
-            message: result.message,
             wordPosition: result.wordPosition,
             step: result.step || result.wordPosition,
         };
@@ -106,10 +105,14 @@ export class SimulatorMenu extends LitElementWw {
             return html`<div
                 class="simulator__label">
                     <span>
-                        Please fix the following <sl-badge variant="danger">errors</sl-badge> to run the simulation:
-                        <br/>${ this._simulationResult.errors.map(e => {
-                            return html`${unsafeHTML(e.message)}`;
-                        }) }
+                        ${msg(html`Please fix the following <sl-badge variant="danger">errors</sl-badge> to run the simulation:`)}
+                        <br/>
+                        <div class="simulator__label__errors">${ this._simulationResult.errors.map(e => {
+                            if (e.node) {
+                                return html`${e.node?.label}: ${e.message}<br/>`;
+                            }
+                            return html`${e.message}<br/>`;
+                        }) }</div>
                     </span>
             </div>`;
         }
@@ -117,7 +120,7 @@ export class SimulatorMenu extends LitElementWw {
             return html`<div
                 class="simulator__label">
                     <span>
-                        No valid path found. The automaton <sl-badge variant="danger">rejects</sl-badge> the word <b>${this._automaton.simulator.word}</b>.
+                        ${msg(html`No valid path found. The automaton <sl-badge variant="danger">rejects</sl-badge> the word <b>${this._automaton.simulator.word}</b>.`)}
                     </span>
             </div>`;
         }
@@ -149,9 +152,9 @@ export class SimulatorMenu extends LitElementWw {
             return html`<div
                     class="simulator__label">
                         ${!!this._result?.status && this._result.status === SimulationStatus.ACCEPTED
-                            ? html`<span>The automaton <sl-badge variant="success">accepts</sl-badge> the word <b>${this._automaton.simulator.word}</b>.</span>` // TODO: Translation
+                            ? msg(html`<span>The automaton <sl-badge variant="success">accepts</sl-badge> the word <b>${this._automaton.simulator.word}</b>.</span>`)
                             : !!this._result?.status && this._result.status === SimulationStatus.REJECTED
-                            ? html`<span>The automaton <sl-badge variant="danger">rejects</sl-badge> the word <b>${this._automaton.simulator.word}</b>.</span>` // TODO: Translation
+                            ? msg(html`<span>The automaton <sl-badge variant="danger">rejects</sl-badge> the word <b>${this._automaton.simulator.word}</b>.</span>`)
                             : !!this._result?.status && this._result.status === SimulationStatus.NO_MOVES
                             ? html`<span>${msg("No further moves possible. Try a different path.")}</span>`
                             : !!this._result?.status && this._result.status === SimulationStatus.PAUSED
@@ -334,7 +337,6 @@ export class SimulatorMenu extends LitElementWw {
 
         this.result = {
             status: result.status,
-            message: result.message,
             wordPosition: this._automaton.simulator.word.length,
             step: (result.simulationResult?.path?.nodes.length || 1) - 1,
         };
@@ -411,7 +413,6 @@ export class SimulatorMenu extends LitElementWw {
         this._automaton.simulator.reset();
         this._result = {
             status: SimulationStatus.IDLE,
-            message: '',
             wordPosition: 0,
             step: 0,
         };

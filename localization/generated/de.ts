@@ -2,24 +2,55 @@
     // Do not modify this file by hand!
     // Re-generate this file by running lit-localize
 
-    
+    import {html} from 'lit';
     
 
     /* eslint-disable no-irregular-whitespace */
     /* eslint-disable @typescript-eslint/no-explicit-any */
 
     export const templates = {
-      's033b7cf13e11023b': `Übergänge:`,
+      'h25e62c96f8182fcc': html`
+          <span>Der Automat 
+          <sl-badge variant="success">akzeptiert
+          </sl-badge> das Wort 
+          <b>${0}</b>.
+          </span>
+        `,
+'h28031e78bb7297a9': html`
+          <span>Der Automat 
+          <sl-badge variant="danger">lehnt  ab.
+          </sl-badge> das Wort 
+          <b>${0}</b>.
+          </span>
+        `,
+'h2e7f32ac617924d0': html`Fehlender Übergang für 
+          <b>${0}</b>
+        `,
+'h5130af20b6d54f05': html`Mehrere Übergänge für 
+          <b>${0}</b>
+        `,
+'h56d667fd1fb9d47d': html`Bitte beheben Sie die folgenden 
+          <sl-badge variant="danger">Fehler
+          </sl-badge> um die Simulation durchzuführen:
+        `,
+'h6c2fe3d409d7ba36': html`Kein gültiger Pfad gefunden. Der Automat 
+          <sl-badge variant="danger">lehnt  ab.
+          </sl-badge> das Wort 
+          <b>${0}</b>.
+        `,
+'s033b7cf13e11023b': `Übergänge:`,
 's05c44a5db696fcaf': `Bearbeitung von`,
 's061cc20e3432dead': `Pause`,
 's09243007b5b91006': `Wenn`,
 's09318db807188948': `Sinkstand hinzufügen`,
 's09c6c5bc21d0e1f0': `Um einen Knoten zu bearbeiten, klicken Sie mit der rechten Maustaste auf den Knoten`,
 's0fbf6dc6a1966408': `Weiter`,
+'s1b00cf75d5f4f616': `Wählen Sie einen Zug:`,
 's1b5a859826f8be7d': `Ausführlich`,
 's1c2404542b3e48d9': `Verwandlungen`,
 's21b06c38fc4164db': `Fortgeschrittene`,
 's255857544a9d5ec0': `Zurücksetzen`,
+'s2ea31ea953b32ee5': `Übergang mit leerem Symbol`,
 's2f64461723d3df5d': `Ändern Sie`,
 's3050764b15c8baf0': `Tabelle Übergänge anzeigen`,
 's337a1e9022a8d19f': `Tabelle`,
@@ -27,6 +58,7 @@
 's35f1dd3fd023476a': `Automatisierung`,
 's36494e700fe1e5c6': `Schritt für Schritt`,
 's36dfd719c2d7c63c': `NFA`,
+'s3c0d17bad169557b': `keine`,
 's3de7bee91528e5cc': `Stapel-Aktionen`,
 's3e141c08e0ace321': `Testsprache`,
 's42b6431842b835b3': `Sprache:`,
@@ -35,13 +67,16 @@
 's4f6476c3d1856c19': `Keine weiteren Schritte möglich. Versuchen Sie einen anderen Weg.`,
 's5590dbf7e425789d': `Etikett`,
 's568f5722bc79d077': `Versenkungszustand`,
+'s5787e20cab57b383': `Unbekannter Fehler`,
 's61f0ff0bab2b8310': `Animieren`,
 's64ef2a6c2dd1d3d1': `bearbeiten`,
 's6503256c2de2745c': `Kante`,
 's66bd1cc6d2f6b68d': `Knotenpunkt`,
 's66da3efd9a45b25a': `Leere Prüfung`,
 's6a7a6503441d48ee': `Um einen Übergang zu bearbeiten, klicken Sie mit der rechten Maustaste auf den Übergang`,
+'s6c80030e2762459d': `drücken.`,
 's71813a5a8d63ac81': `Eingangswort`,
+'s779b5819564f2f50': `pop`,
 's78bc8524e7c2d052': `Spülbecken`,
 's7b72a2e6d7ff3291': `Verschieben der Elemente durch Ziehen und Ablegen`,
 's7df224ba56fb8e1e': `Modus-Schalter`,

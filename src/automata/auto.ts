@@ -24,7 +24,6 @@ export abstract class AutoSimulator extends Simulator {
 
     public simulate(): {
         status: SimulationStatus;
-        message?: string;
         simulationResult: SimulationResult;
     } {
         const result = this.getPath();
@@ -34,15 +33,12 @@ export abstract class AutoSimulator extends Simulator {
         if (result.errors && result.errors.length > 0) {
             return {
                 status: SimulationStatus.ERROR,
-                message: `Please fix the following errors to run the simulation:<br/>${result.errors
-                    .map((e) => e.message)
-                    .join('<br/>')}`,
                 simulationResult: result,
             };
         }
 
         if (result.path!.nodes.length === 0) {
-            return { status: SimulationStatus.NO_PATH , message: 'No path found.', simulationResult: result  };
+            return { status: SimulationStatus.NO_PATH, simulationResult: result  };
         }
 
         const lastNode = result.path!.nodes[result.path!.nodes.length - 1];
@@ -155,9 +151,6 @@ export abstract class AutoSimulator extends Simulator {
         if (this._stepByStepPath.errors && this._stepByStepPath.errors.length > 0) {
             callback({
                 status: SimulationStatus.ERROR,
-                message: `Please fix the following errors:<br/>${this._stepByStepPath.errors
-                    .map((e) => e.message)
-                    .join('<br/>')}`,
                 simulationResult: this._stepByStepPath,
             });
             return { graphInteraction: false };
@@ -177,7 +170,6 @@ export abstract class AutoSimulator extends Simulator {
         status: SimulationStatus;
         firstStep?: boolean;
         finalStep?: boolean;
-        message?: string;
         wordPosition: number;
         step: number;
         simulationResult?: SimulationResult;
@@ -185,7 +177,6 @@ export abstract class AutoSimulator extends Simulator {
          if (!this._stepByStepPath) {
             return {
                 status: SimulationStatus.ERROR,
-                message: 'Error: No path calculated',
                 wordPosition: this._currentWordPosition,
                 step: this._currentStep,
                 simulationResult: this._stepByStepPath,
@@ -195,9 +186,6 @@ export abstract class AutoSimulator extends Simulator {
         if (this._stepByStepPath.errors && this._stepByStepPath.errors.length > 0) {
             return {
                 status: SimulationStatus.ERROR,
-                message: `Please fix the following errors:<br/>${this._stepByStepPath.errors
-                    .map((e) => e.message)
-                    .join('<br/>')}`,
                 wordPosition: this._currentWordPosition,
                 step: this._currentStep,
             };
@@ -265,7 +253,6 @@ export abstract class AutoSimulator extends Simulator {
         status: SimulationStatus;
         firstStep?: boolean;
         finalStep?: boolean;
-        message?: string;
         wordPosition: number;
         step: number;
         simulationResult?: SimulationResult;
@@ -277,7 +264,6 @@ export abstract class AutoSimulator extends Simulator {
         status: SimulationStatus;
         firstStep?: boolean;
         finalStep?: boolean;
-        message?: string;
         wordPosition: number;
         step: number;
         simulationResult?: SimulationResult;

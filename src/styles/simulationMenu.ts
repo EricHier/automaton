@@ -36,6 +36,11 @@ export const simulationMenuStyles = css`
         z-index: 1500;
     }
 
+    .simulator__label__errors {
+        max-height: 100px;
+        overflow-y: auto;
+    }
+
     .simulator__label__path {
         display: flex;
         align-items: center;

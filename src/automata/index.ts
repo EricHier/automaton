@@ -1,12 +1,13 @@
 import { Graph } from '../graph';
 import { DataSet } from 'vis-data';
 import { v4 as uuidv4 } from 'uuid';
-import { EdgeOptions, Network, NodeOptions } from 'vis-network';
+import { EdgeOptions, NodeOptions } from 'vis-network';
 import { AddEventPayload, UpdateEventPayload } from 'vis-data/declarations/data-interface';
 import { stripNode, stripTransition } from '../utils/updates';
 import { COLORS } from '../utils/colors';
 import { TemplateResult } from 'lit';
 import { AutomatonComponent } from '../';
+import { AutomatonError } from '@u/errors';
 
 export interface Node extends NodeOptions {
     id: string;
@@ -39,13 +40,6 @@ interface FormalDefinition {
     finalNodes: string;
 }
 
-export interface AutomatonInfo {
-    message: string;
-    type: 'error' | 'warning' | 'info';
-    node?: Node;
-    transition?: Transition;
-}
-
 export type SimulationResult = {
     accepted: boolean;
     path?: {
@@ -56,7 +50,7 @@ export type SimulationResult = {
         }[];
         stacks?: string[][];
     };
-    errors?: AutomatonInfo[];
+    errors?: AutomatonError[];
 }
 
 export abstract class Automaton {
@@ -81,7 +75,7 @@ export abstract class Automaton {
         this.transitions.update(transitions);
     }
 
-    public abstract checkAutomaton(): AutomatonInfo[];
+    public abstract checkAutomaton(): AutomatonError[];
     public abstract simulator: Simulator;
 
     public extension: HTMLElement | null = null;
@@ -444,7 +438,6 @@ export type SimulationStatus = (typeof SimulationStatus)[keyof typeof Simulation
 
 export type SimulationFeedback = {
     status: SimulationStatus;
-    message?: string;
     finalStep?: boolean;
     firstStep?: boolean;
     wordPosition: number;
@@ -454,7 +447,7 @@ export type SimulationFeedback = {
 
 export abstract class Simulator {
     protected _a: Automaton;
-    protected _errors: AutomatonInfo[] = [];
+    protected _errors: AutomatonError[] = [];
 
     protected _word: string[] = [];
     public get word(): string {
@@ -477,7 +470,6 @@ export abstract class Simulator {
 
     public abstract simulate(): {
         status: SimulationStatus;
-        message?: string;
         simulationResult?: SimulationResult;
     };
 

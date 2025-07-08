@@ -10,9 +10,10 @@ import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.
 import { Graph } from '../graph';
 import { toolMenuStyles } from '../styles/toolMenu';
 import { LitElementWw } from '@webwriter/lit';
-import { msg } from '@lit/localize';
+import { localized, msg } from '@lit/localize';
 
 @customElement('webwriter-automaton-toolmenu')
+@localized()
 export class ToolMenu extends LitElementWw {
     @property({ type: Boolean, attribute: false })
     private accessor _visible = false;
