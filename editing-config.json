@@ -37,7 +37,7 @@
   },
   "./widgets/webwriter-automaton": {
     "label": {
-      "de": "Automaten",
+      "de": "Automat",
       "_": "Automaton",
       "bg": "Автомат",
       "fi": "Automaatti",
@@ -73,7 +73,7 @@
   },
   "./snippets/dfa-simple": {
     "label": {
-      "de": "DFA einfach",
+      "de": "DEA einfach",
       "_": "DFA simple",
       "bg": "Прост DFA",
       "fi": "DFA yksinkertainen",
@@ -109,7 +109,7 @@
   },
   "./snippets/dfa-complex": {
     "label": {
-      "de": "DFA-Komplex",
+      "de": "DEA komplex",
       "_": "DFA complex",
       "bg": "Комплекс DFA",
       "fi": "DFA-kompleksi",
@@ -145,7 +145,7 @@
   },
   "./snippets/nfa-simple": {
     "label": {
-      "de": "NFA einfach",
+      "de": "NEA einfach",
       "_": "NFA simple",
       "bg": "NFA просто",
       "fi": "NFA yksinkertainen",
@@ -181,7 +181,7 @@
   },
   "./snippets/nfa-complex": {
     "label": {
-      "de": "NFA-Komplex",
+      "de": "NEA komplex",
       "_": "NFA complex",
       "bg": "Комплекс NFA",
       "fi": "NFA-kompleksi",
@@ -217,7 +217,7 @@
   },
   "./snippets/pda-simple": {
     "label": {
-      "de": "PDA einfach",
+      "de": "KA einfach",
       "_": "PDA simple",
       "bg": "Прост PDA",
       "fi": "PDA yksinkertainen",
@@ -253,7 +253,7 @@
   },
   "./snippets/pda-complex": {
     "label": {
-      "de": "PDA-Komplex",
+      "de": "KA komplex",
       "_": "PDA complex",
       "bg": "Комплекс PDA",
       "fi": "PDA-kompleksi",
