@@ -1,6 +1,7 @@
 import { Graph } from '../../graph';
 import { DFA } from '../../automata/dfa';
 import { v4 as uuidv4 } from 'uuid';
+import { Logger } from '@u/logger';
 
 export function AddSinkstateToDFA(dfa: DFA): void {
     const meanX = dfa.nodes.get().reduce((acc, node) => acc + node.x!, 0) / dfa.nodes.get().length;
@@ -19,7 +20,7 @@ export function AddSinkstateToDFA(dfa: DFA): void {
     });
 
     const alphabet = dfa.getFormalDefinition().alphabet.split(', ');
-    console.log(alphabet);
+    Logger.log(alphabet);
 
     for (const node of dfa.nodes.get()) {
         if (node.id === Graph.initialGhostNode.id) continue;

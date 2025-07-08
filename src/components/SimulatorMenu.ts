@@ -30,6 +30,7 @@ import { LitElementWw } from '@webwriter/lit';
 import { Graph } from '../graph';
 import { ManualAutoSimulator } from 'automata/manual-auto-simulator';
 import { localized, msg } from '@lit/localize';
+import { Logger } from '@u/logger';
 
 @customElement('webwriter-automaton-simulatormenu')
 @localized()
@@ -331,9 +332,9 @@ export class SimulatorMenu extends LitElementWw {
         this.reset();
         this._mode = 'run';
 
-        DEV: console.time('simulation');
+        Logger.time('simulation');
         const result = this._automaton.simulator.simulate();
-        DEV: console.timeEnd('simulation');
+        Logger.timeEnd('simulation');
 
         this.result = {
             status: result.status,
@@ -343,7 +344,7 @@ export class SimulatorMenu extends LitElementWw {
 
         this._simulationResult = result.simulationResult || null;
 
-        console.log('Simulation Result:', this._simulationResult);
+        Logger.log('Simulation Result:', this._simulationResult);
 
         this.requestUpdate();
     }
@@ -440,7 +441,7 @@ export class SimulatorMenu extends LitElementWw {
         }
 
         const { graphInteraction } = this._automaton.simulator.initStepByStep(this.graph, (res: any) => {
-            console.log(res);
+            Logger.log(res);
             this.result = res;
             this._simulationResult = res.simulationResult || null;
 

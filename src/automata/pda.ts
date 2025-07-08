@@ -14,6 +14,7 @@ import { styleMap } from 'lit/directives/style-map.js';
 import { ManualAutoSimulator } from './manual-auto-simulator';
 import { localized, msg } from '@lit/localize';
 import { AutomatonError } from '@u/errors';
+import { Logger } from '@u/logger';
 
 export class PDA extends Automaton {
     public simulator: PDASimulator;
@@ -29,7 +30,7 @@ export class PDA extends Automaton {
         super(nodes, transitions);
         this.simulator = new PDASimulator(this);
 
-        AutomatonComponent.log('Created PDA', this.nodes.get(), this.transitions.get());
+        Logger.log('Created PDA', this.nodes.get(), this.transitions.get());
     }
 
     public loadAutomaton(data: { nodes: Node[]; transitions: Transition[] }): void {
@@ -44,7 +45,7 @@ export class PDA extends Automaton {
             if (node.initial) this.updateNode(node.id, { initial: true });
         }
 
-        console.log('Loaded PDA', this.nodes.get(), this.transitions.get());
+        Logger.log('Loaded PDA', this.nodes.get(), this.transitions.get());
     }
 
     public saveAutomaton(): string {
@@ -535,7 +536,7 @@ export class StackExtension extends LitElementWw {
     }
 
     public setStack(stack: string[]): void {
-        console.log('Setting stack:', stack);
+        Logger.log('Setting stack:', stack);
         this._stack.clear();
         this._stack.add([...stack].reverse().map((s, i) => ({ id: i, symbol: s })));
     }
@@ -620,7 +621,7 @@ export class StackExtension extends LitElementWw {
                                 this._dragging = true;
                             }}
                             @dragend=${(e: DragEvent) => {
-                                console.log(this._draggingElement);
+                                Logger.log(this._draggingElement);
                                 if (this._draggingElement.classList.contains('deleteable')) {
                                     this.deleteStackSymbol(i);
                                 } else {
@@ -679,13 +680,13 @@ export class StackExtension extends LitElementWw {
     }
 
     private changeStackSymbol(index: number, symbol: string): void {
-        console.log('changeStackSymbol', index, symbol);
+        Logger.log('changeStackSymbol', index, symbol);
         this._stack.update({ id: index, symbol });
         this.requestUpdate();
     }
 
     private deleteStackSymbol(index: number): void {
-        console.log('deleteStackSymbol', index, this._stack.get());
+        Logger.log('deleteStackSymbol', index, this._stack.get());
         this._stack.remove(index);
         const symbols = this._stack.get().map((s) => s.symbol);
         this._stack.clear();
@@ -710,7 +711,7 @@ export class StackExtension extends LitElementWw {
 
         if (oldIndex < newIndex) newIndex--;
 
-        console.log('reorderStack', oldIndex, newIndex);
+        Logger.log('reorderStack', oldIndex, newIndex);
 
         const symbols = this._stack.get().map((s) => s.symbol);
         const item = symbols.splice(oldIndex, 1);

@@ -1,5 +1,5 @@
-import { AutomatonComponent } from '../';
 import { Node, StackOperation, Transition } from '../automata';
+import { Logger } from './logger';
 
 /**
  * Checks if the nodes have been updated by comparing the new value with the old value.
@@ -71,7 +71,7 @@ export function stripNode(node: Node): Node {
  * @returns The stripped transition object.
  */
 export function stripTransition(transition: any) {
-    AutomatonComponent.log('stripTransition', transition);
+    Logger.log('stripTransition', transition);
 
     let strippedTransition = {
         id: transition.id,
@@ -115,7 +115,7 @@ export function hasNodeChanged(newData: Node, oldData: Node) {
  * @returns True if the transition has changed, false otherwise.
  */
 export function hasTransitionChanged(newData: Transition, oldData: Transition) {
-    AutomatonComponent.log('hasTransitionChanged', newData, oldData);
+    Logger.log('hasTransitionChanged', newData, oldData);
 
     return (
         newData.id !== oldData.id ||

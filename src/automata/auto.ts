@@ -1,3 +1,4 @@
+import { Logger } from "@u/logger";
 import { Automaton, SimulationResult, Node, Simulator, SimulationFeedback, SimulationStatus } from "automata";
 import { Graph } from "graph";
 
@@ -142,7 +143,7 @@ export abstract class AutoSimulator extends Simulator {
     }
 
     public initStepByStep(_: Graph, callback: Function): { graphInteraction: boolean } {
-        console.log('Initializing step-by-step mode');
+        Logger.log('Initializing step-by-step mode');
 
         this._stepByStepPath = this.getPath();
         this._currentStep = 0;

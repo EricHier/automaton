@@ -5,6 +5,7 @@ import { SlChangeEvent, SlCheckbox, SlInput, SlSelect } from '@shoelace-style/sh
 
 import { live } from 'lit/directives/live.js';
 import { msg } from '@lit/localize';
+import { Logger } from '@u/logger';
 
 export class Settings {
     constructor(private parentComponent: AutomatonComponent) {
@@ -276,7 +277,13 @@ export class Settings {
                 ></sl-input>
             </sl-details>
             <sl-details summary=${msg("Advanced")}>
-                <sl-checkbox>${msg("Verbose")}</sl-checkbox>
+                <sl-checkbox
+                    ?checked=${Logger.verbose}
+                    @sl-change=${(e: SlChangeEvent) => {
+                        Logger.setVerbose((e.target as SlCheckbox).checked);
+                        this.parentComponent.requestUpdate();
+                    }}
+                >${msg("Verbose")}</sl-checkbox>
             </sl-details>`;
     }
 

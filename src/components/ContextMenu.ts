@@ -5,6 +5,7 @@ import { biDatabase, biDatabaseAdd, biDatabaseDash, biDatabaseSlash, biTrash } f
 import { AutomatonComponent } from 'index';
 import { classMap } from 'lit/directives/class-map.js';
 import { msg } from '@lit/localize';
+import { Logger } from '@u/logger';
 
 /**
  * Represents a context menu component that provides options for interacting with nodes and edges.
@@ -85,7 +86,7 @@ export class ContextMenu {
                     ?disabled=${(this.selected?.data as Node).initial ||
                     !this.parentComponent.settings.permissions.node.change}
                     @sl-change=${(e: any) => {
-                        console.log('initial', e.target.checked);
+                        Logger.log('initial', e.target.checked);
                         this.selected.updateFn({ ...this.selected.data, initial: e.target.checked });
                         this.selected.data = { ...this.selected.data, initial: e.target.checked };
                     }}
@@ -138,7 +139,7 @@ export class ContextMenu {
                                         size="small"
                                         ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                                         @sl-change=${(e: any) => {
-                                            console.log(e.target.value);
+                                            Logger.log(e.target.value);
                                             const symbols = transition.symbols;
                                             symbols[i] = e.target.value;
                                             this.selected.updateFn({ ...transition, symbols });
@@ -158,7 +159,7 @@ export class ContextMenu {
                                         maxlength="1"
                                         ?disabled=${!this.parentComponent.settings.permissions.edge.change}
                                         @sl-input=${(e: any) => {
-                                            console.log(e.target.value);
+                                            Logger.log(e.target.value);
                                             const symbols = transition.symbols;
                                             symbols[i] = e.target.value;
                                             this.selected.updateFn({ ...transition, symbols });

@@ -1,6 +1,7 @@
 import { AutomatonError } from '@u/errors';
 import { Automaton, SimulationResult, Node, Transition } from '../automata';
 import { ManualAutoSimulator } from './manual-auto-simulator';
+import { Logger } from '@u/logger';
 
 export class NFA extends Automaton {
     public simulator: NFASimulator;
@@ -26,7 +27,7 @@ export class NFA extends Automaton {
             if (node.initial) this.updateNode(node.id, { initial: true });
         }
 
-        console.log('Loaded NFA', this.nodes.get(), this.transitions.get());
+        Logger.log('Loaded NFA', this.nodes.get(), this.transitions.get());
     }
     public saveAutomaton(): string {
         throw new Error('Method not implemented.');

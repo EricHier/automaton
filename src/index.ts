@@ -28,6 +28,7 @@ import '@shoelace-style/shoelace/dist/themes/light.css';
 import { DFA } from './automata/dfa';
 import { Automaton, Node, Transition } from './automata';
 import { Graph } from './graph';
+import { Logger } from './utils/logger';
 
 import { TopMenu } from './components/TopMenu';
 import { ToolMenu } from './components/ToolMenu';
@@ -99,7 +100,7 @@ export class AutomatonComponent extends LitElementWw {
 
     @property({ type: Boolean, attribute: true, reflect: false })
     public set verbose(v: boolean) {
-        AutomatonComponent.verbose = v;
+        Logger.setVerbose(v);
     }
 
     @property({ type: String, attribute: true, reflect: true })
@@ -119,11 +120,6 @@ export class AutomatonComponent extends LitElementWw {
 
     @property({ type: Array, attribute: true, reflect: true })
     public accessor allowedTransformations: string[] = ['sink'];
-
-    public static verbose: boolean = false;
-    public get verbose() {
-        return AutomatonComponent.verbose;
-    }
 
     @state()
     private accessor _graph!: Graph;
@@ -155,7 +151,7 @@ export class AutomatonComponent extends LitElementWw {
         this.setUpListeners(this._automaton);
         this._graph?.setAutomaton(this._automaton);
         if (this.simulatorMenu) this.simulatorMenu.automaton = this._automaton;
-        AutomatonComponent.log('Automaton set', this._automaton.transitions.get());
+        Logger.log('Automaton set', this._automaton.transitions.get());
     }
     public get automaton() {
         return this._automaton;
@@ -197,10 +193,9 @@ export class AutomatonComponent extends LitElementWw {
 
     constructor() {
         super();
+        Logger.setVerbose(this.verbose);
 
-        AutomatonComponent.verbose = this.verbose;
-
-        AutomatonComponent.log('constructor');
+        Logger.log('constructor');
     }
 
     /**
@@ -227,7 +222,7 @@ export class AutomatonComponent extends LitElementWw {
             (this.automaton.extension as StackExtension).change = this.settings.permissions.stack.change;
         }
 
-        AutomatonComponent.log('first updated');
+        Logger.log('first updated');
     }
 
     /**
@@ -259,7 +254,7 @@ export class AutomatonComponent extends LitElementWw {
             this.automaton.showErrors = this.showHelp === 'true';
         }
 
-        AutomatonComponent.log('will update');
+        Logger.log('will update');
     }
 
     requestUpdate(
@@ -452,15 +447,5 @@ export class AutomatonComponent extends LitElementWw {
 
         a.nodes.on('*', debounce(updateAttributes, 200));
         a.transitions.on('*', debounce(updateAttributes, 200));
-    }
-
-    /**
-     * Logs the provided arguments to the console if the `verbose` flag is set to true.
-     * @param args - The arguments to be logged.
-     */
-    static log(...args: any[]) {
-        if (this.verbose) {
-            DEV: console.log('[webwriter-automaton]', ...args);
-        }
     }
 }

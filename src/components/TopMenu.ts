@@ -29,6 +29,7 @@ import { SimulationStatus } from 'automata';
 import { NFA } from 'automata/nfa';
 import { PDA } from 'automata/pda';
 import { localized, msg } from '@lit/localize';
+import { Logger } from '@u/logger';
 
 @customElement('webwriter-automaton-topmenu')
 @localized()
@@ -87,7 +88,7 @@ export class TopMenu extends LitElementWw {
                             if (this._fullscreen) await document.exitFullscreen();
                             else await this._component.requestFullscreen();
                         } catch (err) {
-                            console.error('Error entering/exiting fullscreen:', err);
+                            Logger.error('Error entering/exiting fullscreen:', err);
                         }
 
                         // Remove and re-append the button to update its hover state
@@ -321,7 +322,7 @@ export class TopMenu extends LitElementWw {
     }
 
     private switchAutomatonType(type: string): void {
-        AutomatonComponent.log(
+        Logger.log(
             'Switching from',
             this._component.automaton.type.toUpperCase(),
             'to',

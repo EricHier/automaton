@@ -2,6 +2,7 @@ import { Graph } from '../graph';
 import { Automaton, Node, SimulationResult, Simulator, Transition } from '../automata';
 import { AutoSimulator } from './auto';
 import { AutomatonError } from '@u/errors';
+import { Logger } from '@u/logger';
 
 export class DFA extends Automaton {
     public simulator: Simulator;
@@ -64,7 +65,7 @@ export class DFA extends Automaton {
             if (node.initial) this.updateNode(node.id, { initial: true });
         }
 
-        console.log('Loaded DFA', this.nodes.get(), this.transitions.get());
+        Logger.log('Loaded DFA', this.nodes.get(), this.transitions.get());
     }
 
     saveAutomaton(): string {

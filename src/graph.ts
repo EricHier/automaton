@@ -7,10 +7,10 @@ import { DRAW } from './utils/draw';
 import { html, TemplateResult } from 'lit';
 import { styleMap } from 'lit/directives/style-map.js';
 import { biExclamationOctagon } from './styles/icons';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { COLORS } from './utils/colors';
 import { AutomatonComponent } from './index';
 import { AutomatonError } from '@u/errors';
+import { Logger } from './utils/logger';
 
 /**
  * Represents a graph that combines an automaton, network, and other components.
@@ -210,7 +210,7 @@ export class Graph {
      * Deletes the selected node or transition from the automaton.
      */
     private deleteSelected() {
-        AutomatonComponent.log('Deleting', this._selected);
+        Logger.log('Deleting', this._selected);
 
         if (this._selectedType === 'Node') {
             if (this._selected.id === Graph.initialGhostNode.id) return;
