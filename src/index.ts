@@ -406,6 +406,7 @@ export class AutomatonComponent extends LitElementWw {
     private setMode(mode: 'edit' | 'simulate') {
         this._graph.network.unselectAll();
         this.automaton.clearHighlights();
+        this._graph.contextMenu.hide();
         this._mode = mode;
 
         if (this._mode === 'edit') {
