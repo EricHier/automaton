@@ -46,8 +46,6 @@ export class Graph {
     private _selected!: Node | Transition;
     private _selectedType!: 'Node' | 'Transition';
 
-    private _keys: Map<string, boolean> = new Map();
-
     private _errors: AutomatonError[] = [];
     public get errors(): AutomatonError[] {
         return this._errors;
@@ -285,6 +283,10 @@ export class Graph {
             this._selected = this._a.getNode(nodeId) as Node;
             this._selectedType = 'Node';
         });
+        this._n.on('deselectNode', () => {
+            this._selected = null as any;
+            this._selectedType = null as any;
+        });
         this._n.on('hoverNode', (e: any) => {
             const nodeId = e.node as string;
             if (nodeId === Graph.initialGhostNode.id) return;
@@ -362,65 +364,80 @@ export class Graph {
                 this._lastPosition = this._n.getViewPosition();
             }
         });
-        this._ac.addEventListener('keyup', (e: KeyboardEvent) => {
-            this._keys.set(e.key, false);
-        });
         this._ac.addEventListener('keydown', (e: KeyboardEvent) => {
-            this._keys.set(e.key, true);
+            if (e.key === 'm' && e.ctrlKey) {
+                e.preventDefault();
+                this._ac.toggleMode();
+            }
 
             if (!this._interactive) return;
 
-            if (this._keys.get('Delete') && this._selected) {
+            if ((e.key === 'Delete' || e.key === 'Backspace') && !this._cm.isVisible() && this._selected) {
+                e.preventDefault();
                 this.deleteSelected();
             }
 
-            if (this._keys.get('Escape')) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this._selected = null as any;
+                this._selectedType = null as any;
+                this._n.unselectAll();
+                this._a.clearHighlights();
+
                 this._cm.blur();
                 this._tm.mode = 'idle';
             }
 
-            if (this._keys.get('Control') && this._keys.get('Tab')) {
-                this._ac.toggleMode();
-            }
-
-            if (this._keys.get('s') && this._keys.get('Control') && !this._keys.get('ShiftLeft')) {
+            if (e.key === 'n' && e.ctrlKey && !e.shiftKey) {
+                e.preventDefault();
                 this._tm.addNode();
                 this._tm.visible = true;
             }
 
-            if (this._keys.get('Control') && this._keys.get('s') && this._keys.get('ShiftLeft')) {
+            if (e.key === 'N' && e.ctrlKey && e.shiftKey) {
+                e.preventDefault();
                 this._tm.lockNodeAdd = !this._tm.lockNodeAdd;
                 this._tm.visible = true;
             }
 
-            if (this._keys.get('t') && this._keys.get('Control') && !this._keys.get('ShiftLeft')) {
+            if (e.key === 'e' && e.ctrlKey && !e.shiftKey) {
+                e.preventDefault();
                 this._tm.addEdge();
                 this._tm.visible = true;
             }
 
-            if (this._keys.get('Control') && this._keys.get('t') && this._keys.get('ShiftLeft')) {
+            if (e.key === 'E' && e.ctrlKey && e.shiftKey) {
+                e.preventDefault();
                 this._tm.lockEdgeAdd = !this._tm.lockEdgeAdd;
                 this._tm.visible = true;
             }
 
-            if (this._keys.get('ArrowLeft') && this._selected && this._selectedType === 'Node') {
+            if (e.key === 'ArrowLeft' && this._selected && this._selectedType === 'Node') {
+                e.preventDefault();
                 const x = (this._selected as Node).x || 0;
                 this.updateSelectedData({ ...this._selected, x: x - 10 });
+                this.updateGhostNodePosition();
             }
 
-            if (this._keys.get('ArrowRight') && this._selected && this._selectedType === 'Node') {
+            if (e.key === 'ArrowRight' && this._selected && this._selectedType === 'Node') {
+                e.preventDefault();
                 const x = (this._selected as Node).x || 0;
                 this.updateSelectedData({ ...this._selected, x: x + 10 });
+                this.updateGhostNodePosition();
             }
 
-            if (this._keys.get('ArrowUp') && this._selected && this._selectedType === 'Node') {
+            if (e.key === 'ArrowUp' && this._selected && this._selectedType === 'Node') {
+                e.preventDefault();
                 const y = (this._selected as Node).y || 0;
                 this.updateSelectedData({ ...this._selected, y: y - 10 });
+                this.updateGhostNodePosition();
             }
 
-            if (this._keys.get('ArrowDown') && this._selected && this._selectedType === 'Node') {
+            if (e.key === 'ArrowDown' && this._selected && this._selectedType === 'Node') {
+                e.preventDefault();
                 const y = (this._selected as Node).y || 0;
                 this.updateSelectedData({ ...this._selected, y: y + 10 });
+                this.updateGhostNodePosition();
             }
         });
     }
