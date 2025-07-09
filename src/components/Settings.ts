@@ -61,6 +61,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.node.add;
                                 }}
+                                name="node-add"
                             ></sl-checkbox>
                         </td>
                         <td>
@@ -74,6 +75,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.node.delete;
                                 }}
+                                name="node-delete"
                             ></sl-checkbox>
                         </td>
                         <td>
@@ -87,6 +89,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.node.change;
                                 }}
+                                name="node-change"
                             ></sl-checkbox>
                         </td>
                     </tr>
@@ -103,6 +106,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.edge.add;
                                 }}
+                                name="edge-add"
                             ></sl-checkbox>
                         </td>
                         <td>
@@ -116,6 +120,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.edge.delete;
                                 }}
+                                name="edge-delete"
                             ></sl-checkbox>
                         </td>
                         <td>
@@ -129,6 +134,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.edge.change;
                                 }}
+                                name="edge-change"
                             ></sl-checkbox>
                         </td>
                     </tr>
@@ -145,6 +151,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.stack.add;
                                 }}
+                                name="stack-add"
                             ></sl-checkbox>
                         </td>
                         <td>
@@ -158,6 +165,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.stack.delete;
                                 }}
+                                name="stack-delete"
                             ></sl-checkbox>
                         </td>
                         <td>
@@ -171,6 +179,7 @@ export class Settings {
                                     };
                                     c.checked = this.permissions.stack.change;
                                 }}
+                                name="stack-change"
                             ></sl-checkbox>
                         </td>
                     </tr>
@@ -184,6 +193,7 @@ export class Settings {
                         this.parentComponent.allowedTypes = (e.target as SlSelect).value as string[];
                         this.parentComponent.requestUpdate();
                     }}
+                    name="automatonTypes"
                 >
                     <sl-option value="nfa">${msg("NFA")}</sl-option>
                     <sl-option value="dfa">${msg("DFA")}</sl-option>
@@ -198,6 +208,7 @@ export class Settings {
                         this.parentComponent.allowedTransformations = (e.target as SlSelect).value as string[];
                         this.parentComponent.requestUpdate();
                     }}
+                    name="transformations"
                 >
                     <sl-option value="sink">${msg("Sinkstate")}</sl-option>
                 </sl-select>
@@ -211,6 +222,7 @@ export class Settings {
                         this.parentComponent.automaton.showErrors = (e.target as SlCheckbox).checked;
                         this.parentComponent.requestUpdate();
                     }}
+                    name="showHelp"
                     >${msg("Show Help")}</sl-switch
                 >
                 <sl-switch
@@ -220,6 +232,7 @@ export class Settings {
                         this.parentComponent.showFromalDefinition = (e.target as SlCheckbox).checked ? 'true' : 'false';
                         this.parentComponent.requestUpdate();
                     }}
+                    name="showFormalDefinition"
                     >${msg("Show Formal Definition")}</sl-switch
                 >
                 <sl-switch
@@ -229,11 +242,12 @@ export class Settings {
                         this.parentComponent.showTransitionsTable = (e.target as SlCheckbox).checked ? 'true' : 'false';
                         this.parentComponent.requestUpdate();
                     }}
+                    name="showTransitionsTable"
                     >${msg("Show Transitions Table")}</sl-switch
                 >
 
-                <sl-select label=${msg("PDA Label Style")}>
-                    <sl-option>a, X|aX</sl-option>
+                <sl-select value="XaX" label=${msg("PDA Label Style")} name="pdalabelstyle">
+                    <sl-option value="XaX">a, X|aX</sl-option>
                     <!-- <sl-option>a -> aa|a</sl-option> -->
                 </sl-select>
             </sl-details>
@@ -283,6 +297,7 @@ export class Settings {
                         Logger.setVerbose((e.target as SlCheckbox).checked);
                         this.parentComponent.requestUpdate();
                     }}
+                    name="verbose"
                 >${msg("Verbose")}</sl-checkbox>
             </sl-details>`;
     }

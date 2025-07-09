@@ -378,6 +378,7 @@ export class AutomatonComponent extends LitElementWw {
                 @sl-change=${(e: SlChangeEvent) => {
                     this.setMode((e.target as SlSelect).value as 'edit' | 'simulate');
                 }}
+                name="mode"
             >
                 <span slot="prefix">${this._mode === 'edit' ? biPencil : biBoxes}</span>
                 <sl-option value=${'edit'} selected> <span slot="prefix">${biPencil}</span> ${msg("Edit")} </sl-option>

@@ -65,7 +65,7 @@ const baseStyles = css`
         width: 100%;
         height: 100%;
 
-        z-index: 1000;
+        z-index: 1900;
     }
 
     .help-overlay {

@@ -90,6 +90,7 @@ export class ContextMenu {
                         this.selected.updateFn({ ...this.selected.data, initial: e.target.checked });
                         this.selected.data = { ...this.selected.data, initial: e.target.checked };
                     }}
+                    name="initial"
                     >${msg("Initial")}</sl-checkbox
                 >
                 <sl-checkbox
@@ -99,6 +100,7 @@ export class ContextMenu {
                         this.selected.updateFn({ ...this.selected.data, final: e.target.checked });
                         this.selected.data = { ...this.selected.data, final: e.target.checked };
                     }}
+                    name="final"
                     >${msg("Final")}</sl-checkbox
                 >
             </div>
@@ -145,6 +147,7 @@ export class ContextMenu {
                                             this.selected.updateFn({ ...transition, symbols });
                                             transition = { ...transition, symbols };
                                         }}
+                                        name="symbol"
                                     >
                                         ${this.parentComponent.forcedAlphabet.map(
                                             (symbol) => html`<sl-option value=${symbol}>${symbol}</sl-option>`

@@ -112,7 +112,7 @@ class PDASimulator extends ManualAutoSimulator {
     protected getPath(): SimulationResult {
         this._errors = this._a.checkAutomaton();
         if (this._errors.length > 0) {
-            return { accepted: false, path: { nodes: [], transitions: [] }, errors: this._errors };
+            return { accepted: false, path: { nodes: [], transitions: [], stacks: [] }, errors: this._errors };
         }
 
         type PathTransition = { transition: Transition; symbol: string };
