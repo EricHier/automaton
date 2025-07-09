@@ -239,7 +239,8 @@ export class Graph {
         this._n.on('click', () => {
             this._cm.blur();
         });
-        this._n.on('oncontext', (e: any) => {
+
+        const oncontext = (e: any) => {
             e.event.preventDefault();
 
             if (!this._interactive) return;
@@ -271,7 +272,9 @@ export class Graph {
                 this._n.selectEdges([this._selected.id]);
             }
             this._cm.show();
-        });
+        };
+        this._n.on('oncontext', oncontext);
+        this._n.on('hold', oncontext);
         this._n.on('selectNode', (e: any) => {
             const nodeId = e.nodes[0];
             
