@@ -3,11 +3,12 @@ import { Automaton, Node, SimulationResult, Simulator, Transition } from '../aut
 import { AutoSimulator } from './auto';
 import { AutomatonError } from '@u/errors';
 import { Logger } from '@u/logger';
+import { AutomatonType } from 'index';
 
 export class DFA extends Automaton {
     public simulator: Simulator;
 
-    public type = 'dfa';
+    public type: AutomatonType = 'dfa';
 
     constructor(nodes: Node[], transitions: Transition[]) {
         super(nodes, transitions);

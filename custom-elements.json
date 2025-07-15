@@ -1,0 +1,502 @@
+{
+  "schemaVersion": "1.0.0",
+  "readme": "",
+  "modules": [
+    {
+      "kind": "javascript-module",
+      "path": "src/index.ts",
+      "declarations": [
+        {
+          "kind": "class",
+          "description": "Represents an Automaton Component.\r\nThis component is responsible for rendering and managing the automaton editor and simulator.",
+          "name": "AutomatonComponent",
+          "members": [
+            {
+              "kind": "field",
+              "name": "graphCanvas",
+              "type": {
+                "text": "HTMLElement"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "toolMenu",
+              "type": {
+                "text": "ToolMenu"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "simulatorMenu",
+              "type": {
+                "text": "SimulatorMenu"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "infoMenu",
+              "type": {
+                "text": "InfoMenu"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "topMenu",
+              "type": {
+                "text": "TopMenu"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "localize",
+              "privacy": "protected",
+              "default": "LOCALIZE"
+            },
+            {
+              "kind": "field",
+              "name": "nodes",
+              "type": {
+                "text": "Node[]"
+              },
+              "privacy": "public",
+              "default": "[]",
+              "description": "The nodes representing the states of the automaton.",
+              "attribute": "nodes",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "transitions",
+              "type": {
+                "text": "Transition[]"
+              },
+              "privacy": "public",
+              "default": "[]",
+              "description": "The transitions of the automaton.",
+              "attribute": "transitions",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "type",
+              "type": {
+                "text": "AutomatonType"
+              },
+              "privacy": "public",
+              "default": "'dfa'",
+              "description": "The type of the automaton. Can be `'dfa'`, `'nfa'`, or `'pda'`.",
+              "attribute": "type",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "testLanguage",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "public",
+              "default": "''",
+              "description": "A regular expression to check the language of the automaton against.",
+              "attribute": "testLanguage",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "forcedAlphabet",
+              "type": {
+                "text": "string[]"
+              },
+              "privacy": "public",
+              "default": "[]",
+              "description": "The alphabet that the automaton is forced to use.",
+              "attribute": "forcedAlphabet",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "testWords",
+              "type": {
+                "text": "string[]"
+              },
+              "privacy": "public",
+              "default": "[]",
+              "description": "Words used for automatically testing the automaton.",
+              "attribute": "testWords",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "_verbose",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "private",
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "verbose",
+              "privacy": "public",
+              "description": "Enables logging of numerous events to the console.",
+              "type": {
+                "text": "boolean"
+              },
+              "attribute": "verbose",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "permissions",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "public",
+              "default": "'777'",
+              "description": "The encoded permissions for the editor.",
+              "attribute": "permissions",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "showHelp",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "public",
+              "default": "'true'",
+              "description": "If true, the widget displays automaton error messages.",
+              "attribute": "showHelp",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "showFormalDefinition",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "public",
+              "default": "'true'",
+              "description": "If true, the widget allows viewing the automaton's formal definition.",
+              "attribute": "showFormalDefinition",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "showTransitionsTable",
+              "type": {
+                "text": "string"
+              },
+              "privacy": "public",
+              "default": "'true'",
+              "description": "If true, the widget allows viewing the automaton's transition table.",
+              "attribute": "showTransitionsTable",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "allowedTypes",
+              "type": {
+                "text": "string[]"
+              },
+              "privacy": "public",
+              "default": "['dfa', 'nfa', 'pda']",
+              "description": "The types of automata that are allowed in the editor.",
+              "attribute": "allowedTypes",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "allowedTransformations",
+              "type": {
+                "text": "string[]"
+              },
+              "privacy": "public",
+              "default": "['sink']",
+              "description": "The transformations that are allowed in the editor.",
+              "attribute": "allowedTransformations",
+              "reflects": true
+            },
+            {
+              "kind": "field",
+              "name": "_graph",
+              "type": {
+                "text": "Graph"
+              },
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "graph",
+              "privacy": "protected"
+            },
+            {
+              "kind": "field",
+              "name": "_automaton",
+              "type": {
+                "text": "Automaton"
+              },
+              "privacy": "private",
+              "default": "new DFA([], [])"
+            },
+            {
+              "kind": "field",
+              "name": "_helpOverlay",
+              "type": {
+                "text": "boolean"
+              },
+              "privacy": "private",
+              "default": "false"
+            },
+            {
+              "kind": "field",
+              "name": "helpOverlay",
+              "privacy": "private"
+            },
+            {
+              "kind": "field",
+              "name": "_mode",
+              "type": {
+                "text": "'edit' | 'simulate'"
+              },
+              "privacy": "private",
+              "default": "'edit'"
+            },
+            {
+              "kind": "field",
+              "name": "scopedElements",
+              "privacy": "protected",
+              "static": true,
+              "readonly": true
+            },
+            {
+              "kind": "method",
+              "name": "renderEditor",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              }
+            },
+            {
+              "kind": "method",
+              "name": "renderSettings",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "description": "Renders the settings section of the component."
+            },
+            {
+              "kind": "method",
+              "name": "renderHelpOverlay",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "description": "Renders the help overlay."
+            },
+            {
+              "kind": "method",
+              "name": "renderModeSwitch",
+              "privacy": "private",
+              "return": {
+                "type": {
+                  "text": "TemplateResult"
+                }
+              },
+              "description": "Renders the mode switch component."
+            },
+            {
+              "kind": "method",
+              "name": "toggleMode",
+              "privacy": "private",
+              "description": "Toggles the mode between 'edit' and 'simulate'."
+            },
+            {
+              "kind": "method",
+              "name": "setMode",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "mode",
+                  "type": {
+                    "text": "'edit' | 'simulate'"
+                  },
+                  "description": "The mode to set. Can be either 'edit' or 'simulate'."
+                }
+              ],
+              "description": "Sets the mode of the automaton."
+            },
+            {
+              "kind": "method",
+              "name": "setUpListeners",
+              "privacy": "private",
+              "parameters": [
+                {
+                  "name": "a",
+                  "type": {
+                    "text": "Automaton"
+                  },
+                  "description": "The automaton object."
+                }
+              ],
+              "description": "Sets up the listeners for the automaton."
+            }
+          ],
+          "attributes": [
+            {
+              "name": "nodes",
+              "type": {
+                "text": "Node[]"
+              },
+              "default": "[]",
+              "description": "The nodes representing the states of the automaton.",
+              "fieldName": "nodes"
+            },
+            {
+              "name": "transitions",
+              "type": {
+                "text": "Transition[]"
+              },
+              "default": "[]",
+              "description": "The transitions of the automaton.",
+              "fieldName": "transitions"
+            },
+            {
+              "name": "type",
+              "type": {
+                "text": "AutomatonType"
+              },
+              "default": "'dfa'",
+              "description": "The type of the automaton. Can be `'dfa'`, `'nfa'`, or `'pda'`.",
+              "fieldName": "type"
+            },
+            {
+              "name": "testLanguage",
+              "type": {
+                "text": "string"
+              },
+              "default": "''",
+              "description": "A regular expression to check the language of the automaton against.",
+              "fieldName": "testLanguage"
+            },
+            {
+              "name": "forcedAlphabet",
+              "type": {
+                "text": "string[]"
+              },
+              "default": "[]",
+              "description": "The alphabet that the automaton is forced to use.",
+              "fieldName": "forcedAlphabet"
+            },
+            {
+              "name": "testWords",
+              "type": {
+                "text": "string[]"
+              },
+              "default": "[]",
+              "description": "Words used for automatically testing the automaton.",
+              "fieldName": "testWords"
+            },
+            {
+              "name": "verbose",
+              "description": "Enables logging of numerous events to the console.",
+              "type": {
+                "text": "boolean"
+              },
+              "fieldName": "verbose"
+            },
+            {
+              "name": "permissions",
+              "type": {
+                "text": "string"
+              },
+              "default": "'777'",
+              "description": "The encoded permissions for the editor.",
+              "fieldName": "permissions"
+            },
+            {
+              "name": "showHelp",
+              "type": {
+                "text": "string"
+              },
+              "default": "'true'",
+              "description": "If true, the widget displays automaton error messages.",
+              "fieldName": "showHelp"
+            },
+            {
+              "name": "showFormalDefinition",
+              "type": {
+                "text": "string"
+              },
+              "default": "'true'",
+              "description": "If true, the widget allows viewing the automaton's formal definition.",
+              "fieldName": "showFormalDefinition"
+            },
+            {
+              "name": "showTransitionsTable",
+              "type": {
+                "text": "string"
+              },
+              "default": "'true'",
+              "description": "If true, the widget allows viewing the automaton's transition table.",
+              "fieldName": "showTransitionsTable"
+            },
+            {
+              "name": "allowedTypes",
+              "type": {
+                "text": "string[]"
+              },
+              "default": "['dfa', 'nfa', 'pda']",
+              "description": "The types of automata that are allowed in the editor.",
+              "fieldName": "allowedTypes"
+            },
+            {
+              "name": "allowedTransformations",
+              "type": {
+                "text": "string[]"
+              },
+              "default": "['sink']",
+              "description": "The transformations that are allowed in the editor.",
+              "fieldName": "allowedTransformations"
+            }
+          ],
+          "superclass": {
+            "name": "LitElementWw",
+            "package": "@webwriter/lit"
+          },
+          "tagName": "webwriter-automaton",
+          "customElement": true
+        }
+      ],
+      "exports": [
+        {
+          "kind": "js",
+          "name": "AutomatonComponent",
+          "declaration": {
+            "name": "AutomatonComponent",
+            "module": "src/index.ts"
+          }
+        },
+        {
+          "kind": "custom-element-definition",
+          "name": "webwriter-automaton",
+          "declaration": {
+            "name": "AutomatonComponent",
+            "module": "src/index.ts"
+          }
+        }
+      ]
+    }
+  ]
+}

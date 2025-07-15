@@ -226,10 +226,10 @@ export class Settings {
                     >${msg("Show Help")}</sl-switch
                 >
                 <sl-switch
-                    value=${this.parentComponent.showFromalDefinition == 'true' ? true : false}
-                    ?checked=${this.parentComponent.showFromalDefinition == 'true' ? true : false}
+                    value=${this.parentComponent.showFormalDefinition == 'true' ? true : false}
+                    ?checked=${this.parentComponent.showFormalDefinition == 'true' ? true : false}
                     @sl-change=${(e: SlChangeEvent) => {
-                        this.parentComponent.showFromalDefinition = (e.target as SlCheckbox).checked ? 'true' : 'false';
+                        this.parentComponent.showFormalDefinition = (e.target as SlCheckbox).checked ? 'true' : 'false';
                         this.parentComponent.requestUpdate();
                     }}
                     name="showFormalDefinition"
@@ -294,7 +294,7 @@ export class Settings {
                 <sl-checkbox
                     ?checked=${Logger.verbose}
                     @sl-change=${(e: SlChangeEvent) => {
-                        Logger.setVerbose((e.target as SlCheckbox).checked);
+                        this.parentComponent.verbose = (e.target as SlCheckbox).checked;
                         this.parentComponent.requestUpdate();
                     }}
                     name="verbose"

@@ -62,6 +62,8 @@ export class Graph {
     private _lastPosition: Position = { x: 0, y: 0 };
     private _nodeCenterPointerOffset: Position = { x: 0, y: 0 };
 
+    public toggleMode: () => void = () => {};
+
     private _requestUpdate: () => void = () => {};
     public set requestUpdate(fn: () => void) {
         this._requestUpdate = () => {
@@ -370,7 +372,7 @@ export class Graph {
         this._ac.addEventListener('keydown', (e: KeyboardEvent) => {
             if (e.key === 'm' && e.ctrlKey) {
                 e.preventDefault();
-                this._ac.toggleMode();
+                this.toggleMode();
             }
 
             if (!this._interactive) return;

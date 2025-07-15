@@ -22,13 +22,12 @@ import {
 } from '../styles/icons';
 import { Automaton, SimulationFeedback, SimulationResult, SimulationStatus } from '../automata';
 import { classMap } from 'lit/directives/class-map.js';
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { SlChangeEvent } from '@shoelace-style/shoelace';
 import { styleMap } from 'lit/directives/style-map.js';
 import { simulationMenuStyles } from '../styles/simulationMenu';
 import { LitElementWw } from '@webwriter/lit';
 import { Graph } from '../graph';
-import { ManualAutoSimulator } from 'automata/manual-auto-simulator';
+import { ManualAutoSimulator } from 'automata/manual-auto';
 import { localized, msg } from '@lit/localize';
 import { Logger } from '@u/logger';
 

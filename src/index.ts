@@ -49,15 +49,18 @@ import { PDA, StackExtension } from './automata/pda';
 
 import { debounce } from 'lodash';
 
+// @ts-ignore
 import LOCALIZE from "../localization/generated";
 import { localized, msg } from "@lit/localize";
 
-@customElement('webwriter-automaton')
-@localized()
-/**
+export type AutomatonType = 'dfa' | 'nfa' | 'pda';
+
+/** 
  * Represents an Automaton Component.
  * This component is responsible for rendering and managing the automaton editor and simulator.
  */
+@customElement('webwriter-automaton')
+@localized()
 export class AutomatonComponent extends LitElementWw {
     @query('#graphCanvas') private accessor graphCanvas!: HTMLElement;
     @query('#toolMenu') private accessor toolMenu!: ToolMenu;
@@ -65,8 +68,9 @@ export class AutomatonComponent extends LitElementWw {
     @query('#infoMenu') private accessor infoMenu!: InfoMenu;
     @query('#topMenu') private accessor topMenu!: TopMenu;
 
-    localize = LOCALIZE;
+    protected localize = LOCALIZE;
 
+    /** The nodes representing the states of the automaton. */
     @property({
         type: Array,
         attribute: true,
@@ -75,6 +79,7 @@ export class AutomatonComponent extends LitElementWw {
     })
     public accessor nodes: Node[] = [];
 
+    /** The transitions of the automaton. */
     @property({
         type: Array,
         attribute: true,
@@ -83,55 +88,71 @@ export class AutomatonComponent extends LitElementWw {
     })
     public accessor transitions: Transition[] = [];
 
-    @property({ type: Object, attribute: false })
-    accessor extension: any;
-
+    /** The type of the automaton. Can be `'dfa'`, `'nfa'`, or `'pda'`. */
     @property({ type: String, attribute: true, reflect: true })
-    public accessor type: string = 'dfa';
+    public accessor type: AutomatonType = 'dfa';
 
+    /** A regular expression to check the language of the automaton against. */
     @property({ type: String, attribute: true, reflect: true })
     public accessor testLanguage: string = '';
 
+    /** The alphabet that the automaton is forced to use. */
     @property({ type: Array, attribute: true, reflect: true })
     public accessor forcedAlphabet: string[] = [];
 
+    /** Words used for automatically testing the automaton. */
     @property({ type: Array, attribute: true, reflect: true })
     public accessor testWords: string[] = [];
 
-    @property({ type: Boolean, attribute: true, reflect: false })
+    private _verbose: boolean = false;
+
+    /** Enables logging of numerous events to the console. */
+    @property({ type: Boolean, attribute: true, reflect: true })
     public set verbose(v: boolean) {
-        Logger.setVerbose(v);
+        this._verbose = v;
+        Logger.verbose = v;
+    }
+    public get verbose(): boolean {
+        return this._verbose;
     }
 
+    /** The encoded permissions for the editor. */
     @property({ type: String, attribute: true, reflect: true })
     public accessor permissions: string = '777';
 
+    /** If true, the widget displays automaton error messages. */
     @property({ type: String, attribute: true, reflect: true })
     public accessor showHelp: string = 'true';
 
+    /** If true, the widget allows viewing the automaton's formal definition. */
     @property({ type: String, attribute: true, reflect: true })
-    public accessor showFromalDefinition: string = 'true';
+    public accessor showFormalDefinition: string = 'true';
 
+    /** If true, the widget allows viewing the automaton's transition table. */
     @property({ type: String, attribute: true, reflect: true })
     public accessor showTransitionsTable: string = 'true';
 
+    /** The types of automata that are allowed in the editor. */
     @property({ type: Array, attribute: true, reflect: true })
     public accessor allowedTypes: string[] = ['dfa', 'nfa', 'pda'];
 
+    /** The transformations that are allowed in the editor. */
     @property({ type: Array, attribute: true, reflect: true })
     public accessor allowedTransformations: string[] = ['sink'];
 
     @state()
     private accessor _graph!: Graph;
-    public set graph(g: Graph) {
+    protected set graph(g: Graph) {
         this._graph = g;
     }
-    public get graph() {
+    protected get graph() {
         return this._graph;
     }
 
+    /** @internal */
     public settings = new Settings(this);
 
+    /** @internal */
     static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
 
     @property({ type: Object, attribute: false })
@@ -140,11 +161,12 @@ export class AutomatonComponent extends LitElementWw {
     @property({ type: Boolean, attribute: false })
     private accessor _helpOverlay: boolean = false;
 
-    public set helpOverlay(h: boolean) {
+    private set helpOverlay(h: boolean) {
         this._helpOverlay = h;
         this.toolMenu.visible = h ? true : this.toolMenu.visible;
     }
 
+    /** @internal */
     public set automaton(a: Automaton) {
         this._automaton = a;
         this.type = a.type;
@@ -153,6 +175,7 @@ export class AutomatonComponent extends LitElementWw {
         if (this.simulatorMenu) this.simulatorMenu.automaton = this._automaton;
         Logger.log('Automaton set', this._automaton.transitions.get());
     }
+    /** @internal */
     public get automaton() {
         return this._automaton;
     }
@@ -164,7 +187,7 @@ export class AutomatonComponent extends LitElementWw {
         return styles;
     }
 
-    public static get scopedElements() {
+    protected static get scopedElements() {
         return {
             'sl-button': SlButton,
             'sl-button-group': SlButtonGroup,
@@ -193,7 +216,7 @@ export class AutomatonComponent extends LitElementWw {
 
     constructor() {
         super();
-        Logger.setVerbose(this.verbose);
+        Logger.verbose = this.verbose;
 
         Logger.log('constructor');
     }
@@ -207,8 +230,13 @@ export class AutomatonComponent extends LitElementWw {
 
         this._graph = new Graph(this.graphCanvas, this.automaton, this.toolMenu, this);
         this._graph.requestUpdate = () => this.requestUpdate();
+        this._graph.toggleMode = () => this.toggleMode();
         this.toolMenu.graph = this._graph;
         this.topMenu.component = this;
+        this.topMenu.graph = this._graph;
+        this.topMenu.setHelpOverlay = (h: boolean) => {
+            this.helpOverlay = h;
+        };
         this.simulatorMenu.automaton = this.automaton;
         this.simulatorMenu.graph = this._graph;
 
@@ -396,7 +424,7 @@ export class AutomatonComponent extends LitElementWw {
     /**
      * Toggles the mode between 'edit' and 'simulate'.
      */
-    public toggleMode() {
+    private toggleMode() {
         this.setMode(this._mode === 'edit' ? 'simulate' : 'edit');
     }
 

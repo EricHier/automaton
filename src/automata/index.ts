@@ -2,11 +2,10 @@ import { Graph } from '../graph';
 import { DataSet } from 'vis-data';
 import { v4 as uuidv4 } from 'uuid';
 import { EdgeOptions, NodeOptions } from 'vis-network';
-import { AddEventPayload, UpdateEventPayload } from 'vis-data/declarations/data-interface';
 import { stripNode, stripTransition } from '../utils/updates';
 import { COLORS } from '../utils/colors';
 import { TemplateResult } from 'lit';
-import { AutomatonComponent } from '../';
+import { AutomatonComponent, AutomatonType } from '../';
 import { AutomatonError } from '@u/errors';
 
 export interface Node extends NodeOptions {
@@ -66,7 +65,7 @@ export abstract class Automaton {
         return this._showErrors;
     }
 
-    public abstract type: string;
+    public abstract type: AutomatonType;
 
     constructor(nodes: Node[], transitions: Transition[]) {
         this.setupListeners();
@@ -348,7 +347,7 @@ export abstract class Automaton {
 
     /* LISTENERS */
     private setupListeners() {
-        this.nodes.on('add', (_, data: AddEventPayload) => {
+        this.nodes.on('add', (_, data: { items: (string | number)[] }) => {
             const initialNodeId = data.items.find((id) => this.nodes.get(id)?.initial);
             if (initialNodeId) this.updateInitialNode(this.nodes.get(initialNodeId) as Node);
 
@@ -356,7 +355,11 @@ export abstract class Automaton {
             this.nodes.update(finalNodeIds.map((id) => ({ id, shape: 'custom' })) as Node[]);
         });
 
-        this.nodes.on('update', (_, data: UpdateEventPayload<Node, 'id'>) => {
+        this.nodes.on('update', (_, data: { 
+                items: (string | number)[], 
+                oldData: (Node & Record<'id', string | number>)[],
+                data: (Node & Record<'id', string | number>)[]
+            }) => {
             for (const item of data.items) {
                 const node = this.nodes.get(item) as Node;
                 const oldNode = data.oldData.find((n) => n.id === item) as Node;
@@ -375,14 +378,18 @@ export abstract class Automaton {
             }
         });
 
-        this.transitions.on('add', (_, data: AddEventPayload) => {
+        this.transitions.on('add', (_, data: { items: (string | number)[] }) => {
             for (const id of data.items) {
                 const transition = this.transitions.get(id) as Transition;
                 this.updateTransition(id.toString(), { label: transition.symbols.join(', ') });
             }
         });
 
-        this.transitions.on('update', (_, data: UpdateEventPayload<Transition, 'id'>) => {
+        this.transitions.on('update', (_, data: { 
+                items: (string | number)[], 
+                oldData: (Transition & Record<'id', string | number>)[],
+                data: (Transition & Record<'id', string | number>)[]
+            }) => {
             for (const id of data.items) {
                 const transition = this.transitions.get(id) as Transition;
 

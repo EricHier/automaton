@@ -49,6 +49,18 @@ export class TopMenu extends LitElementWw {
     @state()
     private accessor _helpOverlay: boolean = false;
 
+    @property({ type: Object, attribute: false })
+    private accessor _graph!: Graph;
+    public set graph(graph: Graph) {
+        this._graph = graph;
+    }
+
+    @property({ type: Object, attribute: false })
+    private accessor _setHelpOverlay!: (visible: boolean) => (void);
+    public set setHelpOverlay(f: (visible: boolean) => (void)) {
+        this._setHelpOverlay = f;
+    }
+
     public static get styles() {
         return topMenuStyles;
     }
@@ -111,7 +123,7 @@ export class TopMenu extends LitElementWw {
                     style="z-index: 2500"
                     @click=${() => {
                         this._helpOverlay = !this._helpOverlay;
-                        this._component.helpOverlay = this._helpOverlay;
+                        this._setHelpOverlay(this._helpOverlay);
                     }}
                     circle
                     >${biQuestionLg}</sl-button
@@ -180,24 +192,24 @@ export class TopMenu extends LitElementWw {
                             const popup = (e.target as HTMLElement).closest('sl-popup') as SlPopup;
                             popup.active = !popup.active;
                         }}
-                        ?disabled=${this.component.showFromalDefinition == 'false' &&
+                        ?disabled=${this.component.showFormalDefinition == 'false' &&
                         this.component.showTransitionsTable == 'false'}
                         >${biCodeSlash}</sl-button
                     >
                     <div class="topmenu__popup">
                         <sl-tab-group placement="top">
                             <sl-tab slot="nav" panel="def" 
-                                ?disabled=${this.component.showFromalDefinition == 'false'}
-                                ?active=${this.component.showFromalDefinition == 'true'}
+                                ?disabled=${this.component.showFormalDefinition == 'false'}
+                                ?active=${this.component.showFormalDefinition == 'true'}
                                 >${msg("Definition")}</sl-tab
                             >
                             <sl-tab slot="nav" panel="table" 
                                 ?disabled=${this.component.showTransitionsTable == 'false'}
-                                ?active=${this.component.showTransitionsTable == 'true' && this.component.showFromalDefinition == 'false'}
+                                ?active=${this.component.showTransitionsTable == 'true' && this.component.showFormalDefinition == 'false'}
                                 >${msg("Table")}</sl-tab
                             >
 
-                            <sl-tab-panel name="def" ?active=${this.component.showFromalDefinition == 'true'} style="--padding: 1em">
+                            <sl-tab-panel name="def" ?active=${this.component.showFormalDefinition == 'true'} style="--padding: 1em">
                                 <label>${msg("Alphabet:")} </label>${formalDefinition.alphabet}
                                 <br />
                                 <label>${msg("States:")} </label>${formalDefinition.nodes}
@@ -211,7 +223,7 @@ export class TopMenu extends LitElementWw {
                             <sl-tab-panel
                                 name="table"
                                 ?active=${this.component.showTransitionsTable == 'true' &&
-                                this.component.showFromalDefinition == 'false'}
+                                this.component.showFormalDefinition == 'false'}
                                 style="--padding: 0"
                             >
                                 ${this.getTransitionsTable()}
@@ -344,7 +356,7 @@ export class TopMenu extends LitElementWw {
                 break;
         }
 
-        this._component.graph.network.setData({
+        this._graph.network.setData({
             nodes: this._component.automaton.nodes,
             edges: this._component.automaton.transitions,
         });

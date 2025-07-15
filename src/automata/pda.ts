@@ -1,4 +1,3 @@
-import { AutomatonComponent } from '../';
 import { Automaton, Node, SimulationResult, Transition } from './';
 import { TemplateResult, html } from 'lit';
 import { DataSet } from 'vis-data';
@@ -11,14 +10,15 @@ import SlInput from '@shoelace-style/shoelace/dist/components/input/input.compon
 import SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.component.js';
 import { biTrash } from '../styles/icons';
 import { styleMap } from 'lit/directives/style-map.js';
-import { ManualAutoSimulator } from './manual-auto-simulator';
+import { ManualAutoSimulator } from './manual-auto';
 import { localized, msg } from '@lit/localize';
 import { AutomatonError } from '@u/errors';
 import { Logger } from '@u/logger';
+import { AutomatonType } from 'index';
 
 export class PDA extends Automaton {
     public simulator: PDASimulator;
-    public type: string = 'pda';
+    public type: AutomatonType = 'pda';
 
     public extension = document.createElement('stack-extension') as StackExtension;
 
@@ -620,7 +620,7 @@ export class StackExtension extends LitElementWw {
                                 e.dataTransfer?.setDragImage(document.createElement('div'), 0, 0);
                                 this._dragging = true;
                             }}
-                            @dragend=${(e: DragEvent) => {
+                            @dragend=${() => {
                                 Logger.log(this._draggingElement);
                                 if (this._draggingElement.classList.contains('deleteable')) {
                                     this.deleteStackSymbol(i);

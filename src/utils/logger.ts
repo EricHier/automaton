@@ -1,7 +1,7 @@
 export class Logger {
     private static _verbose: boolean = false;
     
-    public static setVerbose(verbose: boolean): void {
+    public static set verbose(verbose: boolean) {
         Logger._verbose = verbose;
     }
     

@@ -55,12 +55,12 @@
     "@lit/localize": "^0.12.2",
     "@shoelace-style/shoelace": "^2.20.1",
     "@webwriter/lit": "^2.1.8",
-    "lit": "^3.3.0",
+    "lit": "^3.3.1",
     "lodash": "^4.17.21",
     "randexp": "^0.5.3",
     "uuid": "^11.1.0",
-    "vis-data": "^7.1.10",
-    "vis-network": "^9.1.13"
+    "vis-data": "^8.0.1",
+    "vis-network": "^10.0.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20"
@@ -77,7 +77,8 @@
     "./snippets/pda-simple.html": "./snippets/pda/example-simple.html",
     "./snippets/pda-complex.html": "./snippets/pda/example-complex.html",
     "./icon": "./icon.svg",
-    "./editing-config.json": "./editing-config.json"
+    "./editing-config.json": "./editing-config.json",
+    "./custom-elements.json": "./custom-elements.json"
   },
   "editingConfig": {
     ".": {},
@@ -88,5 +89,6 @@
     "./snippets/nfa-complex": {},
     "./snippets/pda-simple": {},
     "./snippets/pda-complex": {}
-  }
+  },
+  "customElements": "custom-elements.json"
 }

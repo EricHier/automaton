@@ -1,12 +1,13 @@
 import { AutomatonError } from '@u/errors';
 import { Automaton, SimulationResult, Node, Transition } from '../automata';
-import { ManualAutoSimulator } from './manual-auto-simulator';
+import { ManualAutoSimulator } from './manual-auto';
 import { Logger } from '@u/logger';
+import { AutomatonType } from 'index';
 
 export class NFA extends Automaton {
     public simulator: NFASimulator;
 
-    public type = 'nfa';
+    public type: AutomatonType = 'nfa';
 
     constructor(nodes: Node[], transitions: Transition[]) {
         super(nodes, transitions);

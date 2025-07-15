@@ -2,7 +2,7 @@
   ".": {
     "description": {
       "_": "Build, visualize, and interact with different kinds of automata (DFA, NFA, PDA).",
-      "de": "Bauen, visualisieren und interagieren Sie mit verschiedenen Arten von Automaten (DFA, NFA, PDA).",
+      "de": "Bauen, visualisieren und interagieren Sie mit verschiedenen Arten von Automaten (DEA, NEA, KA).",
       "bg": "Изграждане, визуализиране и взаимодействие с различни видове автомати (DFA, NFA, PDA).",
       "fi": "Erilaisten automaattien (DFA, NFA, PDA) rakentaminen, visualisointi ja vuorovaikutus niiden kanssa.",
       "ar": "بناء وتصور والتفاعل مع أنواع مختلفة من الأتمتة (DFA، NFA، PDA).",
