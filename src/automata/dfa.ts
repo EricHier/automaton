@@ -110,6 +110,6 @@ class DFASimulator extends AutoSimulator {
             pathTransitions.push({ transition, symbol: letter });
         }
 
-        return { accepted: currentNode.final, path: { nodes: pathNodes, transitions: pathTransitions } };
+        return { accepted: !!currentNode.final, path: { nodes: pathNodes, transitions: pathTransitions } };
     }
 }

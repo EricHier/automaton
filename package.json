@@ -63,7 +63,11 @@
     "vis-network": "^10.0.1"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.20"
+    "@types/lodash": "^4.17.20",
+    "@types/mocha": "^10.0.10",
+    "@webwriter/build": "^1.8.0",
+    "chai": "^5.2.1",
+    "mocha": "^11.7.1"
   },
   "exports": {
     "./widgets/webwriter-automaton.*": {
@@ -76,6 +80,10 @@
     "./snippets/nfa-complex.html": "./snippets/nfa/example-complex.html",
     "./snippets/pda-simple.html": "./snippets/pda/example-simple.html",
     "./snippets/pda-complex.html": "./snippets/pda/example-complex.html",
+    "./tests/simulation.*": {
+      "source": "./tests/simulation.test.ts",
+      "default": "./dist/tests/simulation.*"
+    },
     "./icon": "./icon.svg",
     "./editing-config.json": "./editing-config.json",
     "./custom-elements.json": "./custom-elements.json"

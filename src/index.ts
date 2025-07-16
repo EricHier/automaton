@@ -92,6 +92,10 @@ export class AutomatonComponent extends LitElementWw {
     @property({ type: String, attribute: true, reflect: true })
     public accessor type: AutomatonType = 'dfa';
 
+    /** The current mode. Can be `'edit'`, or `'simulate'`. */
+    @property({ type: String, attribute: true, reflect: true })
+    public accessor mode: 'edit' | 'simulate' = 'edit';
+
     /** A regular expression to check the language of the automaton against. */
     @property({ type: String, attribute: true, reflect: true })
     public accessor testLanguage: string = '';
@@ -180,9 +184,6 @@ export class AutomatonComponent extends LitElementWw {
         return this._automaton;
     }
 
-    @property({ type: String, attribute: false })
-    private accessor _mode: 'edit' | 'simulate' = 'edit';
-
     public static get styles() {
         return styles;
     }
@@ -267,6 +268,26 @@ export class AutomatonComponent extends LitElementWw {
             if (this.type === 'pda') this.automaton = new PDA(this.nodes, this.transitions);
         }
 
+        if (_changedProperties.has('mode')) {
+            this._graph?.network.unselectAll();
+            this.automaton?.clearHighlights();
+            this._graph?.contextMenu.hide();
+
+            if (this.mode === 'edit') {
+                this.simulatorMenu?.reset();
+                this._graph?.requestUpdate();
+                this._graph?.setInteractive(true);
+                if (this.automaton?.extension) this.automaton.extension.contentEditable = 'true';
+            }
+
+            else if (this.mode === 'simulate') {
+                this.automaton?.redrawNodes();
+                this.simulatorMenu?.init();
+                this._graph?.setInteractive(false);
+                if (this.automaton?.extension) this.automaton.extension.contentEditable = 'false';
+            }
+        }
+
         if (_changedProperties.has('nodes') || _changedProperties.has('transitions')) {
             this.automaton.updateAutomaton(this.nodes, this.transitions);
             if (this._graph) this._graph.updateGhostNodePosition();
@@ -317,11 +338,11 @@ export class AutomatonComponent extends LitElementWw {
                 <webwriter-automaton-topmenu id="topMenu"></webwriter-automaton-topmenu>
                 <webwriter-automaton-simulatormenu
                     id="simulatorMenu"
-                    style=${styleMap({ display: this._mode === 'simulate' ? 'flex' : 'none' })}
+                    style=${styleMap({ display: this.mode === 'simulate' ? 'flex' : 'none' })}
                 ></webwriter-automaton-simulatormenu>
                 <webwriter-automaton-toolmenu
                     id="toolMenu"
-                    style=${styleMap({ display: this._mode === 'edit' ? 'flex' : 'none' })}
+                    style=${styleMap({ display: this.mode === 'edit' ? 'flex' : 'none' })}
                 ></webwriter-automaton-toolmenu>
                 ${guard([this.permissions, this.automaton], () => this.automaton.extension)}
             </div>
@@ -365,7 +386,7 @@ export class AutomatonComponent extends LitElementWw {
                 <div class="line" style="top: 55px;right: 180px;width: 140px;height: 57px;"></div>
             </div>
 
-            <div class="help-overlay" style=${styleMap({ display: this._mode === 'edit' ? 'block' : 'none' })}>
+            <div class="help-overlay" style=${styleMap({ display: this.mode === 'edit' ? 'block' : 'none' })}>
                 <sl-tag size="small" style="bottom: 77px;left: 80px;">${msg("Add Node by click")}</sl-tag>
                 <sl-tag size="small" style="bottom: 128px;left: 80px;">${msg("Add Transition by drag and drop")}</sl-tag>
 
@@ -376,19 +397,11 @@ export class AutomatonComponent extends LitElementWw {
                 >
             </div>
 
-            <div class="help-overlay" style=${styleMap({ display: this._mode === 'simulate' ? 'block' : 'none' })}>
+            <div class="help-overlay" style=${styleMap({ display: this.mode === 'simulate' ? 'block' : 'none' })}>
                 <sl-tag size="small" style="bottom: 60px;left: 10px;">${msg("Input word")}</sl-tag>
                 <sl-tag size="small" style="bottom: 60px;left: 10px;">${msg("Simulation Controls")}</sl-tag>
             </div>
         `;
-    }
-
-    /**
-     * Called when the element is updated.
-     * @param _changedProperties - A map of changed properties.
-     */
-    protected updated(_changedProperties: PropertyValueMap<any> | Map<PropertyKey, unknown>): void {
-        super.updated(_changedProperties);
     }
 
     /**
@@ -400,15 +413,15 @@ export class AutomatonComponent extends LitElementWw {
             <sl-select
                 size="small"
                 class="mode_switch__select"
-                value=${this._mode}
-                .value=${this._mode}
-                defaultValue="${this._mode}"
+                value=${this.mode}
+                .value=${this.mode}
+                defaultValue="${this.mode}"
                 @sl-change=${(e: SlChangeEvent) => {
-                    this.setMode((e.target as SlSelect).value as 'edit' | 'simulate');
+                    this.mode = (e.target as SlSelect).value as 'edit' | 'simulate';
                 }}
                 name="mode"
             >
-                <span slot="prefix">${this._mode === 'edit' ? biPencil : biBoxes}</span>
+                <span slot="prefix">${this.mode === 'edit' ? biPencil : biBoxes}</span>
                 <sl-option value=${'edit'} selected> <span slot="prefix">${biPencil}</span> ${msg("Edit")} </sl-option>
                 <sl-option value=${'simulate'}> <span slot="prefix">${biBoxes}</span> ${msg("Simulate")} </sl-option>
             </sl-select>
@@ -425,32 +438,7 @@ export class AutomatonComponent extends LitElementWw {
      * Toggles the mode between 'edit' and 'simulate'.
      */
     private toggleMode() {
-        this.setMode(this._mode === 'edit' ? 'simulate' : 'edit');
-    }
-
-    /**
-     * Sets the mode of the automaton.
-     * @param mode - The mode to set. Can be either 'edit' or 'simulate'.
-     */
-    private setMode(mode: 'edit' | 'simulate') {
-        this._graph.network.unselectAll();
-        this.automaton.clearHighlights();
-        this._graph.contextMenu.hide();
-        this._mode = mode;
-
-        if (this._mode === 'edit') {
-            this.simulatorMenu.reset();
-            this._graph.requestUpdate();
-            this._graph.setInteractive(true);
-            if (this.automaton.extension) this.automaton.extension.contentEditable = 'true';
-        }
-
-        if (this._mode === 'simulate') {
-            this.automaton.redrawNodes();
-            this.simulatorMenu.init();
-            this._graph.setInteractive(false);
-            if (this.automaton.extension) this.automaton.extension.contentEditable = 'false';
-        }
+        this.mode = this.mode === 'edit' ? 'simulate' : 'edit';
     }
 
     /**

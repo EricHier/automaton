@@ -48,6 +48,7 @@ npm install @webwriter/automaton
 | `nodes` (`nodes`) | `Node[]` | The nodes representing the states of the automaton. | `[]` | ✓ |
 | `transitions` (`transitions`) | `Transition[]` | The transitions of the automaton. | `[]` | ✓ |
 | `type` (`type`) | `AutomatonType` | The type of the automaton. Can be `'dfa'`, `'nfa'`, or `'pda'`. | `'dfa'` | ✓ |
+| `mode` (`mode`) | `'edit' \| 'simulate'` | The current mode. Can be `'edit'`, or `'simulate'`. | `'edit'` | ✓ |
 | `testLanguage` (`testLanguage`) | `string` | A regular expression to check the language of the automaton against. | `''` | ✓ |
 | `forcedAlphabet` (`forcedAlphabet`) | `string[]` | The alphabet that the automaton is forced to use. | `[]` | ✓ |
 | `testWords` (`testWords`) | `string[]` | Words used for automatically testing the automaton. | `[]` | ✓ |

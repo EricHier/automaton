@@ -232,69 +232,74 @@ export class TopMenu extends LitElementWw {
                     </div>
                 </sl-popup>
             </div>
-            <div class="topmenu__button_group" ?disabled=${this._component.allowedTransformations.length == 0}>
+            <div class="topmenu__button_group">
                 <!-- <sl-tooltip content="Transformations" placement="left"> -->
                 <sl-button
                     class="topmenu__button"
                     circle
-                    ?disabled=${this._component.allowedTransformations.length == 0}
+                    ?disabled=${this._component.allowedTransformations.length === 0 || this._component.mode === 'simulate'}
                     >${biArrowLeftRight}</sl-button
                 >
                 <!-- </sl-tooltip> -->
                 <div class="topmenu__buttons">
-                    <sl-tooltip content=${msg("Add Sinkstate")} placement="left">
-                        <sl-button
-                            class="topmenu__button"
-                            size="small"
-                            ?circle=${msg("Sink").length <= 4}
-                            ?disabled=${!this._component.allowedTransformations.includes('sink')}
-                            @click=${() => {
-                                transformations.AddSinkstateToDFA(this._component.automaton);
-                            }}
-                            >${msg("Sink")}</sl-button
-                        >
-                    </sl-tooltip>
+                    ${this._component.allowedTransformations.includes('sink') && this._component.mode !== 'simulate'
+                        ? html`
+                            <sl-tooltip content=${msg("Add Sinkstate")} placement="left">
+                                <sl-button
+                                    class="topmenu__button"
+                                    size="small"
+                                    ?circle=${msg("Sink").length <= 4}
+                                    @click=${() => {
+                                        transformations.AddSinkstateToDFA(this._component.automaton);
+                                    }}
+                                    >${msg("Sink")}</sl-button
+                                >
+                            </sl-tooltip>
+                        ` : ''}
                 </div>
             </div>
-            <div class="topmenu__button_group" ?disabled=${this._component.allowedTypes.length == 0}>
+            <div class="topmenu__button_group">
                 <sl-tooltip content=${msg("Automaton Type")} placement="left">
-                    <sl-button class="topmenu__button" circle ?disabled=${this._component.allowedTypes.length == 0}>
+                    <sl-button class="topmenu__button" circle ?disabled=${this._component.allowedTypes.length === 0 || this._component.mode === 'simulate'}>
                         ${this._component.automaton.type === 'dfa'
                             ? msg('DFA') : this._component.automaton.type === 'nfa'
                             ? msg('NFA') : msg('PDA')}
                     </sl-button>
                 </sl-tooltip>
                 <div class="topmenu__buttons">
-                    <sl-tooltip content=${msg("DFA")} placement="left">
-                        <sl-button
-                            class="topmenu__button"
-                            size="small"
-                            @click=${() => this.switchAutomatonType('dfa')}
-                            circle
-                            ?disabled=${!this._component.allowedTypes.includes('dfa')}
-                            >${msg("DFA")}</sl-button
-                        >
-                    </sl-tooltip>
-                    <sl-tooltip content=${msg("NFA")} placement="left">
-                        <sl-button
-                            class="topmenu__button"
-                            size="small"
-                            @click=${() => this.switchAutomatonType('nfa')}
-                            circle
-                            ?disabled=${!this._component.allowedTypes.includes('nfa')}
-                            >${msg("NFA")}</sl-button
-                        >
-                    </sl-tooltip>
-                    <sl-tooltip content=${msg("PDA")} placement="left">
-                        <sl-button
-                            class="topmenu__button"
-                            size="small"
-                            @click=${() => this.switchAutomatonType('pda')}
-                            circle
-                            ?disabled=${!this._component.allowedTypes.includes('pda')}
-                            >${msg("PDA")}</sl-button
-                        >
-                    </sl-tooltip>
+                    ${this._component.allowedTypes.length > 0 && this._component.mode !== 'simulate'
+                         ? html`
+                            <sl-tooltip content=${msg("DFA")} placement="left">
+                                <sl-button
+                                    class="topmenu__button"
+                                    size="small"
+                                    @click=${() => this.switchAutomatonType('dfa')}
+                                    circle
+                                    ?disabled=${!this._component.allowedTypes.includes('dfa')}
+                                    >${msg("DFA")}</sl-button
+                                >
+                            </sl-tooltip>
+                            <sl-tooltip content=${msg("NFA")} placement="left">
+                                <sl-button
+                                    class="topmenu__button"
+                                    size="small"
+                                    @click=${() => this.switchAutomatonType('nfa')}
+                                    circle
+                                    ?disabled=${!this._component.allowedTypes.includes('nfa')}
+                                    >${msg("NFA")}</sl-button
+                                >
+                            </sl-tooltip>
+                            <sl-tooltip content=${msg("PDA")} placement="left">
+                                <sl-button
+                                    class="topmenu__button"
+                                    size="small"
+                                    @click=${() => this.switchAutomatonType('pda')}
+                                    circle
+                                    ?disabled=${!this._component.allowedTypes.includes('pda')}
+                                    >${msg("PDA")}</sl-button
+                                >
+                            </sl-tooltip>
+                        ` : ''}
                 </div>
             </div>
         </div>`;

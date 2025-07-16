@@ -7,12 +7,12 @@ export abstract class AutoSimulator extends Simulator {
     protected _currentStep: number = 0;
     protected _currentWordPosition: number = 0;
 
-    protected _interval: number | undefined;
+    protected _interval: ReturnType<typeof setInterval> | undefined = undefined;
 
     protected _speed: number = 1000;
 
     protected _stepByStepPath: SimulationResult | undefined = undefined;
-    protected _stepByStepHighlightTimeouts: number[] = [];
+    protected _stepByStepHighlightTimeouts: ReturnType<typeof setTimeout>[] = [];
     
     constructor(automaton: Automaton) {
         super(automaton);

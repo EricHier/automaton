@@ -95,6 +95,18 @@
             },
             {
               "kind": "field",
+              "name": "mode",
+              "type": {
+                "text": "'edit' | 'simulate'"
+              },
+              "privacy": "public",
+              "default": "'edit'",
+              "description": "The current mode. Can be `'edit'`, or `'simulate'`.",
+              "attribute": "mode",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "testLanguage",
               "type": {
                 "text": "string"
@@ -259,15 +271,6 @@
             },
             {
               "kind": "field",
-              "name": "_mode",
-              "type": {
-                "text": "'edit' | 'simulate'"
-              },
-              "privacy": "private",
-              "default": "'edit'"
-            },
-            {
-              "kind": "field",
               "name": "scopedElements",
               "privacy": "protected",
               "static": true,
@@ -324,21 +327,6 @@
             },
             {
               "kind": "method",
-              "name": "setMode",
-              "privacy": "private",
-              "parameters": [
-                {
-                  "name": "mode",
-                  "type": {
-                    "text": "'edit' | 'simulate'"
-                  },
-                  "description": "The mode to set. Can be either 'edit' or 'simulate'."
-                }
-              ],
-              "description": "Sets the mode of the automaton."
-            },
-            {
-              "kind": "method",
               "name": "setUpListeners",
               "privacy": "private",
               "parameters": [
@@ -380,6 +368,15 @@
               "default": "'dfa'",
               "description": "The type of the automaton. Can be `'dfa'`, `'nfa'`, or `'pda'`.",
               "fieldName": "type"
+            },
+            {
+              "name": "mode",
+              "type": {
+                "text": "'edit' | 'simulate'"
+              },
+              "default": "'edit'",
+              "description": "The current mode. Can be `'edit'`, or `'simulate'`.",
+              "fieldName": "mode"
             },
             {
               "name": "testLanguage",
