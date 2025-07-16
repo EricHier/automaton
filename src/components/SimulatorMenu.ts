@@ -152,9 +152,9 @@ export class SimulatorMenu extends LitElementWw {
             return html`<div
                     class="simulator__label">
                         ${!!this._result?.status && this._result.status === SimulationStatus.ACCEPTED
-                            ? msg(html`<span>The automaton <sl-badge variant="success">accepts</sl-badge> the word <b>${this._automaton.simulator.word}</b>.</span>`)
+                            ? msg(html`<span>The automaton <sl-badge variant="success">accepts</sl-badge> the word <b>${this._automaton.simulator.word || "ε"}</b>.</span>`)
                             : !!this._result?.status && this._result.status === SimulationStatus.REJECTED
-                            ? msg(html`<span>The automaton <sl-badge variant="danger">rejects</sl-badge> the word <b>${this._automaton.simulator.word}</b>.</span>`)
+                            ? msg(html`<span>The automaton <sl-badge variant="danger">rejects</sl-badge> the word <b>${this._automaton.simulator.word || "ε"}</b>.</span>`)
                             : !!this._result?.status && this._result.status === SimulationStatus.NO_MOVES
                             ? html`<span>${msg("No further moves possible. Try a different path.")}</span>`
                             : !!this._result?.status && this._result.status === SimulationStatus.PAUSED

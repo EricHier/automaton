@@ -140,6 +140,10 @@ export class AutomatonComponent extends LitElementWw {
     @property({ type: Array, attribute: true, reflect: true })
     public accessor allowedTypes: string[] = ['dfa', 'nfa', 'pda'];
 
+    /** The modes that are allowed in the editor. */
+    @property({ type: Array, attribute: true, reflect: true })
+    public accessor allowedModes: string[] = ['edit', 'simulate'];
+
     /** The transformations that are allowed in the editor. */
     @property({ type: Array, attribute: true, reflect: true })
     public accessor allowedTransformations: string[] = ['sink'];
@@ -268,23 +272,39 @@ export class AutomatonComponent extends LitElementWw {
             if (this.type === 'pda') this.automaton = new PDA(this.nodes, this.transitions);
         }
 
-        if (_changedProperties.has('mode')) {
-            this._graph?.network.unselectAll();
-            this.automaton?.clearHighlights();
-            this._graph?.contextMenu.hide();
-
-            if (this.mode === 'edit') {
-                this.simulatorMenu?.reset();
-                this._graph?.requestUpdate();
-                this._graph?.setInteractive(true);
-                if (this.automaton?.extension) this.automaton.extension.contentEditable = 'true';
+        if (_changedProperties.has('allowedModes')) {
+            if (!this.allowedModes.includes(this.mode) && this.allowedModes.length > 0) {
+                this.mode = this.allowedModes[0] as 'edit' | 'simulate';
             }
+        }
 
-            else if (this.mode === 'simulate') {
-                this.automaton?.redrawNodes();
-                this.simulatorMenu?.init();
-                this._graph?.setInteractive(false);
-                if (this.automaton?.extension) this.automaton.extension.contentEditable = 'false';
+        if (_changedProperties.has('mode')) {
+            if (this.allowedModes.includes(this.mode)) {
+
+                this._graph?.network.unselectAll();
+                this.automaton?.clearHighlights();
+                this._graph?.contextMenu.hide();
+
+                if (this.mode === 'edit') {
+                    this.simulatorMenu?.reset();
+                    this._graph?.requestUpdate();
+                    this._graph?.setInteractive(true);
+                    if (this.automaton?.extension) this.automaton.extension.contentEditable = 'true';
+                }
+
+                else if (this.mode === 'simulate') {
+                    this.automaton?.redrawNodes();
+                    this.simulatorMenu?.init();
+                    this._graph?.setInteractive(false);
+                    if (this.automaton?.extension) this.automaton.extension.contentEditable = 'false';
+                }
+            
+            } else {
+                Logger.warn(`Mode ${this.mode} is not allowed. Allowed modes are: ${this.allowedModes.join(', ')}`);
+                if (this.allowedModes.length > 0) {
+                    Logger.warn(`Switching to first allowed mode: ${this.allowedModes[0]}`);
+                    this.mode = this.allowedModes[0] as 'edit' | 'simulate';
+                }
             }
         }
 
@@ -409,29 +429,32 @@ export class AutomatonComponent extends LitElementWw {
      * @returns {TemplateResult} The rendered mode switch component.
      */
     private renderModeSwitch(): TemplateResult {
-        return html`<sl-button-group class="mode_switch" label="Mode">
-            <sl-select
-                size="small"
-                class="mode_switch__select"
-                value=${this.mode}
-                .value=${this.mode}
-                defaultValue="${this.mode}"
-                @sl-change=${(e: SlChangeEvent) => {
-                    this.mode = (e.target as SlSelect).value as 'edit' | 'simulate';
-                }}
-                name="mode"
-            >
-                <span slot="prefix">${this.mode === 'edit' ? biPencil : biBoxes}</span>
-                <sl-option value=${'edit'} selected> <span slot="prefix">${biPencil}</span> ${msg("Edit")} </sl-option>
-                <sl-option value=${'simulate'}> <span slot="prefix">${biBoxes}</span> ${msg("Simulate")} </sl-option>
-            </sl-select>
+        return html`<div class="mode_switch">
+            <sl-tooltip content=${msg("Switch mode (Ctrl+M)")} placement="right">
+                <sl-select
+                    size="small"
+                    class="mode_switch__select"
+                    value=${this.mode}
+                    .value=${this.mode}
+                    defaultValue="${this.mode}"
+                    ?disabled=${this.allowedModes.length <= 1}
+                    @sl-change=${(e: SlChangeEvent) => {
+                        this.mode = (e.target as SlSelect).value as 'edit' | 'simulate';
+                    }}
+                    name="mode"
+                >
+                    <span slot="prefix">${this.mode === 'edit' ? biPencil : biBoxes}</span>
+                    <sl-option value=${'edit'} selected> <span slot="prefix">${biPencil}</span> ${msg("Edit")} </sl-option>
+                    <sl-option value=${'simulate'}> <span slot="prefix">${biBoxes}</span> ${msg("Simulate")} </sl-option>
+                </sl-select>
+            </sl-tooltip>
             <div
                 class="mode_switch__error_indicator"
                 style=${this._graph?.errors.length > 0 ? 'display: block' : 'display: none'}
             >
                 ${biExclamationTriangle}
             </div>
-        </sl-button-group>`;
+        </div>`;
     }
 
     /**

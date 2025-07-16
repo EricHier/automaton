@@ -2,13 +2,17 @@
   <file original="lit-localize-inputs" datatype="plaintext" source-language="en" target-language="sk">
     <body>
       <trans-unit id="h2e7f32ac617924d0">
-        <source>Missing transition for <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/></source>
+        <source>Missing transition for 
+          <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/>
+        </source>
         <target>Chýbajúci prechod pre 
           <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/>
         </target>
       </trans-unit>
       <trans-unit id="h5130af20b6d54f05">
-        <source>Multiple transitions for <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/></source>
+        <source>Multiple transitions for 
+          <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/>
+        </source>
         <target>Viacnásobné prechody pre 
           <x id="0" equiv-text="&lt;b&gt;${this.letter}&lt;/b&gt;"/>
         </target>
@@ -105,23 +109,22 @@
         <source>PDA</source>
         <target>PDA</target>
       </trans-unit>
-      <trans-unit id="se63c78875f5b2178">
-        <source>Add node</source>
-        <target>Pridať uzol</target>
-      </trans-unit>
-      <trans-unit id="sceb35fbe10efb7a1">
-        <source>Add edge</source>
-        <target>Pridať okraj</target>
-      </trans-unit>
       <trans-unit id="h56d667fd1fb9d47d">
-        <source>Please fix the following <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>errors<x id="1" equiv-text="&lt;/sl-badge&gt;"/> to run the simulation:</source>
+        <source>Please fix the following 
+          <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>errors
+          <x id="1" equiv-text="&lt;/sl-badge&gt;"/> to run the simulation:
+        </source>
         <target>Prosím, opravte nasledujúce 
           <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>chyby
           <x id="1" equiv-text="&lt;/sl-badge&gt;"/> aby ste mohli spustiť simuláciu:
         </target>
       </trans-unit>
       <trans-unit id="h6c2fe3d409d7ba36">
-        <source>No valid path found. The automaton <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>rejects<x id="1" equiv-text="&lt;/sl-badge&gt;"/> the word <x id="2" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.</source>
+        <source>No valid path found. The automaton 
+          <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>rejects
+          <x id="1" equiv-text="&lt;/sl-badge&gt;"/> the word 
+          <x id="2" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.
+        </source>
         <target>Nenašla sa žiadna platná cesta. Automat 
           <x id="0" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>odmietne
           <x id="1" equiv-text="&lt;/sl-badge&gt;"/> slovo 
@@ -129,7 +132,13 @@
         </target>
       </trans-unit>
       <trans-unit id="h25e62c96f8182fcc">
-        <source><x id="0" equiv-text="&lt;span&gt;"/>The automaton <x id="1" equiv-text="&lt;sl-badge variant=&quot;success&quot;&gt;"/>accepts<x id="2" equiv-text="&lt;/sl-badge&gt;"/> the word <x id="3" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.<x id="4" equiv-text="&lt;/span&gt;"/></source>
+        <source>
+          <x id="0" equiv-text="&lt;span&gt;"/>The automaton 
+          <x id="1" equiv-text="&lt;sl-badge variant=&quot;success&quot;&gt;"/>accepts
+          <x id="2" equiv-text="&lt;/sl-badge&gt;"/> the word 
+          <x id="3" equiv-text="&lt;b&gt;${this._automaton.simulator.word || &quot;ε&quot;}&lt;/b&gt;"/>.
+          <x id="4" equiv-text="&lt;/span&gt;"/>
+        </source>
         <target>
           <x id="0" equiv-text="&lt;span&gt;"/>Automat 
           <x id="1" equiv-text="&lt;sl-badge variant=&quot;success&quot;&gt;"/>prijíma
@@ -139,7 +148,13 @@
         </target>
       </trans-unit>
       <trans-unit id="h28031e78bb7297a9">
-        <source><x id="0" equiv-text="&lt;span&gt;"/>The automaton <x id="1" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>rejects<x id="2" equiv-text="&lt;/sl-badge&gt;"/> the word <x id="3" equiv-text="&lt;b&gt;${this._automaton.simulator.word}&lt;/b&gt;"/>.<x id="4" equiv-text="&lt;/span&gt;"/></source>
+        <source>
+          <x id="0" equiv-text="&lt;span&gt;"/>The automaton 
+          <x id="1" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>rejects
+          <x id="2" equiv-text="&lt;/sl-badge&gt;"/> the word 
+          <x id="3" equiv-text="&lt;b&gt;${this._automaton.simulator.word || &quot;ε&quot;}&lt;/b&gt;"/>.
+          <x id="4" equiv-text="&lt;/span&gt;"/>
+        </source>
         <target>
           <x id="0" equiv-text="&lt;span&gt;"/>Automat 
           <x id="1" equiv-text="&lt;sl-badge variant=&quot;danger&quot;&gt;"/>odmieta
@@ -391,6 +406,22 @@
       <trans-unit id="sa0a141a796a5b36a">
         <source>Bend</source>
         <target>Ohyb</target>
+      </trans-unit>
+      <trans-unit id="s261af1b4598fef3f">
+        <source>Allowed modes</source>
+        <target>Povolené režimy</target>
+      </trans-unit>
+      <trans-unit id="s11b075d3731a5194">
+        <source>Add node (Ctrl+Q)</source>
+        <target>Pridanie uzla (Ctrl+Q)</target>
+      </trans-unit>
+      <trans-unit id="s6ea31a50ccf59dcf">
+        <source>Add edge (Ctrl+E)</source>
+        <target>Pridať okraj (Ctrl+E)</target>
+      </trans-unit>
+      <trans-unit id="s9274cd474969c49c">
+        <source>Switch mode (Ctrl+M)</source>
+        <target>Prepnutie režimu (Ctrl+M)</target>
       </trans-unit>
     </body>
   </file>

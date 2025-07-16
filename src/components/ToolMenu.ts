@@ -89,7 +89,7 @@ export class ToolMenu extends LitElementWw {
         >
             <sl-button class="toolmenu__button" @click=${this.toggleToolbar} circle size="large">${biPlus}</sl-button>
             <div class="toolmenu__buttons" style=${styleMap({ display: this._visible ? 'flex' : 'none' })}>
-                <sl-tooltip content=${msg("Add node")} placement="right">
+                <sl-tooltip content=${msg("Add node (Ctrl+Q)")} placement="right">
                     <sl-button
                         class="toolmenu__button"
                         @click=${this.addNode}
@@ -111,7 +111,7 @@ export class ToolMenu extends LitElementWw {
                         >
                     </sl-button>
                 </sl-tooltip>
-                <sl-tooltip content=${msg("Add edge")} placement="right">
+                <sl-tooltip content=${msg("Add edge (Ctrl+E)")} placement="right">
                     <sl-button
                         class="toolmenu__button"
                         @click=${this.addEdge}

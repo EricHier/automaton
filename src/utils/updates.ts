@@ -1,5 +1,4 @@
 import { Node, StackOperation, Transition } from '../automata';
-import { Logger } from './logger';
 
 /**
  * Checks if the nodes have been updated by comparing the new value with the old value.
@@ -71,8 +70,6 @@ export function stripNode(node: Node): Node {
  * @returns The stripped transition object.
  */
 export function stripTransition(transition: any) {
-    Logger.log('stripTransition', transition);
-
     let strippedTransition = {
         id: transition.id,
         from: transition.from,
@@ -115,8 +112,6 @@ export function hasNodeChanged(newData: Node, oldData: Node) {
  * @returns True if the transition has changed, false otherwise.
  */
 export function hasTransitionChanged(newData: Transition, oldData: Transition) {
-    Logger.log('hasTransitionChanged', newData, oldData);
-
     return (
         newData.id !== oldData.id ||
         newData.from !== oldData.from ||
@@ -140,8 +135,8 @@ export function hasTransitionChanged(newData: Transition, oldData: Transition) {
  * @returns A boolean indicating whether the symbols have changed.
  */
 function didSymbolsChange(newSymbols: string[], oldSymbols: string[]) {
-    newSymbols = new Array(...newSymbols);
-    oldSymbols = new Array(...oldSymbols);
+    newSymbols = [...newSymbols];
+    oldSymbols = [...oldSymbols];
     return newSymbols.sort().join(',') !== oldSymbols.sort().join(',');
 }
 

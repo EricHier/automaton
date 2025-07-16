@@ -58,6 +58,7 @@ npm install @webwriter/automaton
 | `showFormalDefinition` (`showFormalDefinition`) | `string` | If true, the widget allows viewing the automaton's formal definition. | `'true'` | ✓ |
 | `showTransitionsTable` (`showTransitionsTable`) | `string` | If true, the widget allows viewing the automaton's transition table. | `'true'` | ✓ |
 | `allowedTypes` (`allowedTypes`) | `string[]` | The types of automata that are allowed in the editor. | `['dfa', 'nfa', 'pda']` | ✓ |
+| `allowedModes` (`allowedModes`) | `string[]` | The modes that are allowed in the editor. | `['edit', 'simulate']` | ✓ |
 | `allowedTransformations` (`allowedTransformations`) | `string[]` | The transformations that are allowed in the editor. | `['sink']` | ✓ |
 
 *Fields including [properties](https://developer.mozilla.org/en-US/docs/Glossary/Property/JavaScript) and [attributes](https://developer.mozilla.org/en-US/docs/Glossary/Attribute) define the current state of the widget and offer customization options.*

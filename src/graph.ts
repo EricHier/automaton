@@ -372,7 +372,8 @@ export class Graph {
         this._ac.addEventListener('keydown', (e: KeyboardEvent) => {
             if (e.key === 'm' && e.ctrlKey) {
                 e.preventDefault();
-                this.toggleMode();
+                if (this.component.allowedModes.includes(this.component.mode === 'simulate' ? 'edit' : 'simulate'))
+                    this.toggleMode();
             }
 
             if (!this._interactive) return;
@@ -393,13 +394,13 @@ export class Graph {
                 this._tm.mode = 'idle';
             }
 
-            if (e.key === 'n' && e.ctrlKey && !e.shiftKey) {
+            if (e.key === 'q' && e.ctrlKey && !e.shiftKey) {
                 e.preventDefault();
                 this._tm.addNode();
                 this._tm.visible = true;
             }
 
-            if (e.key === 'N' && e.ctrlKey && e.shiftKey) {
+            if (e.key === 'Q' && e.ctrlKey && e.shiftKey) {
                 e.preventDefault();
                 this._tm.lockNodeAdd = !this._tm.lockNodeAdd;
                 this._tm.visible = true;

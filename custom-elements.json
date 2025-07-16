@@ -223,6 +223,18 @@
             },
             {
               "kind": "field",
+              "name": "allowedModes",
+              "type": {
+                "text": "string[]"
+              },
+              "privacy": "public",
+              "default": "['edit', 'simulate']",
+              "description": "The modes that are allowed in the editor.",
+              "attribute": "allowedModes",
+              "reflects": true
+            },
+            {
+              "kind": "field",
               "name": "allowedTransformations",
               "type": {
                 "text": "string[]"
@@ -457,6 +469,15 @@
               "default": "['dfa', 'nfa', 'pda']",
               "description": "The types of automata that are allowed in the editor.",
               "fieldName": "allowedTypes"
+            },
+            {
+              "name": "allowedModes",
+              "type": {
+                "text": "string[]"
+              },
+              "default": "['edit', 'simulate']",
+              "description": "The modes that are allowed in the editor.",
+              "fieldName": "allowedModes"
             },
             {
               "name": "allowedTransformations",

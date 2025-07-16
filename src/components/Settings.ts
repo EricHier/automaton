@@ -202,7 +202,6 @@ export class Settings {
                 <sl-select
                     label=${msg("Transformations")}
                     .value=${this.parentComponent.allowedTransformations}
-                    value=${this.parentComponent.allowedTransformations.join(' ')}
                     multiple
                     @sl-change=${(e: SlChangeEvent) => {
                         this.parentComponent.allowedTransformations = (e.target as SlSelect).value as string[];
@@ -214,6 +213,19 @@ export class Settings {
                 </sl-select>
             </sl-details>
             <sl-details summary=${msg("View")}>
+                <sl-select
+                    label=${msg("Allowed modes")}
+                    .value=${this.parentComponent.allowedModes}
+                    multiple
+                    @sl-change=${(e: SlChangeEvent) => {
+                        this.parentComponent.allowedModes = (e.target as SlSelect).value as string[];
+                        this.parentComponent.requestUpdate();
+                    }}
+                    name="modes"
+                >
+                    <sl-option value="edit">${msg("Edit")}</sl-option>
+                    <sl-option value="simulate">${msg("Simulate")}</sl-option>
+                </sl-select>
                 <sl-switch
                     value=${this.parentComponent.showHelp == 'true' ? true : false}
                     ?checked=${this.parentComponent.showHelp == 'true' ? true : false}
