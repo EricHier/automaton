@@ -1,6 +1,6 @@
 {
   "name": "@webwriter/automaton",
-  "version": "2.0.5",
+  "version": "2.1.0",
   "description": "Build, visualize, and interact with different kinds of automata (DFA, NFA, PDA).",
   "keywords": [
     "webwriter-widget",
