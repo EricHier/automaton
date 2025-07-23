@@ -22,10 +22,6 @@ export class PDA extends Automaton {
 
     public extension = document.createElement('stack-extension') as StackExtension;
 
-    public checkAutomaton(): AutomatonError[] {
-        return [];
-    }
-
     constructor(nodes: Node[], transitions: Transition[]) {
         super(nodes, transitions);
         this.simulator = new PDASimulator(this);

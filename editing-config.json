@@ -69,7 +69,8 @@
       "sv": "Automat",
       "ja": "オートマトン",
       "zh-hant": "自動化"
-    }
+    },
+    "warningIgnorePattern": "development"
   },
   "./snippets/dfa-simple": {
     "label": {
@@ -245,7 +246,7 @@
       "ko": "간단한 PDA",
       "id": "PDA sederhana",
       "pt-BR": "PDA simples",
-      "zh-hans": "简单的掌上电脑",
+      "zh-hans": "简单的 PDA",
       "sv": "PDA enkel",
       "ja": "PDA シンプル",
       "zh-hant": "簡易 PDA"

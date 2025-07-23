@@ -13,9 +13,7 @@ export class NFA extends Automaton {
         super(nodes, transitions);
         this.simulator = new NFASimulator(this);
     }
-    public checkAutomaton(): AutomatonError[] {
-        return [];
-    }
+    
     public loadAutomaton(data: { nodes: Node[]; transitions: Transition[] }): void {
         this.nodes.clear();
         this.transitions.clear();

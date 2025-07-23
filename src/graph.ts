@@ -312,13 +312,11 @@ export class Graph {
                         html``
                     ) || '',
                 };
-                this.requestUpdate();
             }
         });
         this._n.on('blurNode', () => {
             this._hovered = null;
             this._currentError = null;
-            this.requestUpdate();
         });
         this._n.on('hoverEdge', (e: any) => {
             this._hovered = this._a.getTransition(e.edge);
@@ -353,8 +351,6 @@ export class Graph {
                     y: (e.nodes[0] ? this._a.getNode(e.nodes[0])?.y ?? 0 : 0) - e.pointer.canvas.y
                 }
             }
-
-            this.requestUpdate();
         });
         this._n.on('dragEnd', () => {
             this._n.storePositions();

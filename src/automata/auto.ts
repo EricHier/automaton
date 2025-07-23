@@ -142,7 +142,7 @@ export abstract class AutoSimulator extends Simulator {
         });
     }
 
-    public initStepByStep(_: Graph, callback: Function): { graphInteraction: boolean } {
+    public initStepByStep(_: Graph, callback: Function): void {
         Logger.log('Initializing step-by-step mode');
 
         this._stepByStepPath = this.getPath();
@@ -152,19 +152,19 @@ export abstract class AutoSimulator extends Simulator {
         if (this._stepByStepPath.errors && this._stepByStepPath.errors.length > 0) {
             callback({
                 status: SimulationStatus.ERROR,
+                step: 0,
+                wordPosition: 0,
                 simulationResult: this._stepByStepPath,
             });
-            return { graphInteraction: false };
+            return;
         }
 
         callback({
-            status: this._stepByStepPath.path!.nodes.length === 0 ? SimulationStatus.NO_PATH : SimulationStatus.RUNNING,
+            status: this._stepByStepPath.path!.transitions.length === 0 ? SimulationStatus.NO_PATH : SimulationStatus.RUNNING,
             wordPosition: this._stepByStepPath.path!.nodes.length === 0 ? this.word.length : this._currentWordPosition,
             step: this._currentStep,
             simulationResult: this._stepByStepPath,
-        })
-
-        return { graphInteraction: false };
+        });
     }
 
     public goToStep(step: number): {

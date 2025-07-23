@@ -352,9 +352,12 @@ export class SimulatorMenu extends LitElementWw {
         this.reset();
         this._mode = 'animate';
 
-        this._automaton.highlightNode(this._automaton.getInitialNode());
+        if (!!this._automaton.getInitialNode())
+            this._automaton.highlightNode(this._automaton.getInitialNode());
 
         this._automaton.simulator.startAnimation((result: SimulationFeedback) => {
+            Logger.log('Animation Result:', result);
+
             this.result = result;
             this._simulationResult = result.simulationResult || null;
 
@@ -439,25 +442,27 @@ export class SimulatorMenu extends LitElementWw {
             (this._automaton.simulator as ManualAutoSimulator).setManualMode(true);
         }
 
-        const { graphInteraction } = this._automaton.simulator.initStepByStep(this.graph, (res: any) => {
+        this._automaton.simulator.initStepByStep(this.graph, (res: any) => {
             Logger.log(res);
             this.result = res;
             this._simulationResult = res.simulationResult || null;
 
             this._backButton.disabled = res.step <= 0;
 
-            if (res.status === SimulationStatus.NO_PATH || res.status === SimulationStatus.ACCEPTED || res.status === SimulationStatus.REJECTED) {
+            if (
+                res.status === SimulationStatus.NO_PATH
+                || res.status === SimulationStatus.ACCEPTED
+                || res.status === SimulationStatus.REJECTED
+                || res.status === SimulationStatus.ERROR
+            ) {
                 this._nextButton.disabled = true;
             }
 
             this.requestUpdate();
         });
 
-        if (graphInteraction) {
-            this._nextButton.disabled = true;
-        }
-
-        this._automaton.highlightNode(this._automaton.getInitialNode());
+        if (!!this._automaton.getInitialNode())
+            this._automaton.highlightNode(this._automaton.getInitialNode());
 
         this.requestUpdate();
     }

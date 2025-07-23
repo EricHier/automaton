@@ -74,7 +74,18 @@ export abstract class Automaton {
         this.transitions.update(transitions);
     }
 
-    public abstract checkAutomaton(): AutomatonError[];
+    public checkAutomaton(): AutomatonError[] {
+        const errors: AutomatonError[] = [];
+        const initialNodes = this.nodes.get().filter((n) => n.initial);
+        
+        if (initialNodes.length === 0) {
+            errors.push(new AutomatonError('no-initial-state'));
+        } else if (initialNodes.length > 1) {
+            errors.push(new AutomatonError('multiple-initial-states'));
+        }
+
+        return errors;
+    }
     public abstract simulator: Simulator;
 
     public extension: HTMLElement | null = null;
@@ -480,7 +491,7 @@ export abstract class Simulator {
         simulationResult?: SimulationResult;
     };
 
-    public abstract initStepByStep(graph: Graph, callback: Function): { graphInteraction: boolean };
+    public abstract initStepByStep(graph: Graph, callback: Function): void;
 
     public abstract startAnimation(callback: (result: SimulationFeedback) => void): void;
     public abstract stopAnimation(callback: (result: SimulationFeedback) => void): void;

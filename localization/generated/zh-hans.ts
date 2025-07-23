@@ -12,6 +12,8 @@
       'h2e7f32ac617924d0': html`Missing transition for <b>${0}</b>`,
 'h5130af20b6d54f05': html`Multiple transitions for <b>${0}</b>`,
 's2ea31ea953b32ee5': `Transition with empty symbol`,
+'s335050fdf97d8f6e': `No initial state defined`,
+'s74a96f52fd23c3e8': `Multiple initial states defined`,
 's5787e20cab57b383': `Unknown error`,
 's1b00cf75d5f4f616': `Choose a move:`,
 's6c80030e2762459d': `push`,

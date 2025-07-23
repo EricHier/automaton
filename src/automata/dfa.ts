@@ -16,8 +16,8 @@ export class DFA extends Automaton {
     }
 
     checkAutomaton(): AutomatonError[] {
+        const errors: AutomatonError[] = super.checkAutomaton();
         const alphabet = this.getAlphabet();
-        const errors: AutomatonError[] = [];
 
         this.resetColors();
 
