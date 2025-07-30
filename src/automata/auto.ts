@@ -229,9 +229,8 @@ export abstract class AutoSimulator extends Simulator {
         }
 
         if (this._currentStep >= this._stepByStepPath.path!.nodes.length - 1) {
-            const finalNode = this._stepByStepPath.path!.nodes[this._stepByStepPath.path!.nodes.length - 1];
             return {
-                status: finalNode.final ? SimulationStatus.ACCEPTED : SimulationStatus.REJECTED,
+                status: this._stepByStepPath.accepted ? SimulationStatus.ACCEPTED : SimulationStatus.REJECTED,
                 firstStep: this._currentStep === 0,
                 finalStep: true,
                 wordPosition: this._currentWordPosition,

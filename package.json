@@ -59,8 +59,8 @@
     "lodash": "^4.17.21",
     "randexp": "^0.5.3",
     "uuid": "^11.1.0",
-    "vis-data": "^8.0.1",
-    "vis-network": "^10.0.1"
+    "vis-data": "^7.1.10",
+    "vis-network": "^9.1.13"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.20",

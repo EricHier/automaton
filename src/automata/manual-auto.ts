@@ -32,7 +32,7 @@ export abstract class ManualAutoSimulator extends AutoSimulator {
     protected abstract updateStateAfterManualMove(move: { to: Node, symbol: string, [key: string]: any }): void;
     protected abstract updateStateAfterGoToStep(step: number): void;
 
-    public initStepByStep(graph: Graph, cb: (feedback: SimulationFeedback) => void): { graphInteraction: boolean } {
+    public initStepByStep(graph: Graph, cb: (feedback: SimulationFeedback) => void): void {
         if (this._manualMode) {
             this._currentNode = this._a.getInitialNode() as Node;
             this._currentStep = 0;
@@ -81,10 +81,9 @@ export abstract class ManualAutoSimulator extends AutoSimulator {
 
             const nextMovePossible = this.highlightPossibleTransitions(this._currentNode);
             this._sendStepByStepFeedback(nextMovePossible, cb, true);
-
-            return { graphInteraction: true };
+        } else {
+            super.initStepByStep(graph, cb);
         }
-        return super.initStepByStep(graph, cb);
     }
 
     private _sendStepByStepFeedback(nextMovePossible: boolean, cb: (feedback: SimulationFeedback) => void, initial = false): boolean {
