@@ -1,6 +1,5 @@
 import { Transition, Node, Automaton } from './automata';
 import { Network, Position } from 'vis-network';
-import { v4 as uuidv4 } from 'uuid';
 import { ContextMenu } from './components/ContextMenu';
 import { ToolMenu } from './components/ToolMenu';
 import { DRAW } from './utils/draw';
@@ -172,7 +171,7 @@ export class Graph {
      * Represents the initial ghost node in the graph.
      */
     static initialGhostNode: Node = {
-        id: uuidv4(),
+        id: -1,
         label: '',
         x: -100,
         y: -100,
@@ -293,7 +292,7 @@ export class Graph {
             this._selectedType = null as any;
         });
         this._n.on('hoverNode', (e: any) => {
-            const nodeId = e.node as string;
+            const nodeId = e.node as number;
             if (nodeId === Graph.initialGhostNode.id) return;
             
             this._hovered = this._a.getNode(nodeId);
@@ -328,7 +327,7 @@ export class Graph {
         this._n.on('dragging', (e: any) => {
             if (!e.nodes || e.nodes.length == 0) return;
 
-            const draggedNodeId = e.nodes[0];
+            const draggedNodeId = e.nodes[0] as number;
             const draggedNode = this._a.getNode(draggedNodeId);
             
             if (draggedNode && draggedNode.initial && draggedNodeId !== Graph.initialGhostNode.id) {
@@ -347,8 +346,8 @@ export class Graph {
 
             if (e.nodes && e.nodes.length > 0) {
                 this._nodeCenterPointerOffset = {
-                    x: (e.nodes[0] ? this._a.getNode(e.nodes[0])?.x ?? 0 : 0) - e.pointer.canvas.x,
-                    y: (e.nodes[0] ? this._a.getNode(e.nodes[0])?.y ?? 0 : 0) - e.pointer.canvas.y
+                    x: (e.nodes[0] !== undefined ? this._a.getNode(e.nodes[0])?.x ?? 0 : 0) - e.pointer.canvas.x,
+                    y: (e.nodes[0] !== undefined ? this._a.getNode(e.nodes[0])?.y ?? 0 : 0) - e.pointer.canvas.y
                 }
             }
         });
@@ -414,28 +413,28 @@ export class Graph {
                 this._tm.visible = true;
             }
 
-            if (e.key === 'ArrowLeft' && this._selected && this._selectedType === 'Node') {
+            if (e.key === 'ArrowLeft' && this._selected && this._selectedType === 'Node' && !this._cm.isVisible()) {
                 e.preventDefault();
                 const x = (this._selected as Node).x || 0;
                 this.updateSelectedData({ ...this._selected, x: x - 10 });
                 this.updateGhostNodePosition();
             }
 
-            if (e.key === 'ArrowRight' && this._selected && this._selectedType === 'Node') {
+            if (e.key === 'ArrowRight' && this._selected && this._selectedType === 'Node' && !this._cm.isVisible()) {
                 e.preventDefault();
                 const x = (this._selected as Node).x || 0;
                 this.updateSelectedData({ ...this._selected, x: x + 10 });
                 this.updateGhostNodePosition();
             }
 
-            if (e.key === 'ArrowUp' && this._selected && this._selectedType === 'Node') {
+            if (e.key === 'ArrowUp' && this._selected && this._selectedType === 'Node' && !this._cm.isVisible()) {
                 e.preventDefault();
                 const y = (this._selected as Node).y || 0;
                 this.updateSelectedData({ ...this._selected, y: y - 10 });
                 this.updateGhostNodePosition();
             }
 
-            if (e.key === 'ArrowDown' && this._selected && this._selectedType === 'Node') {
+            if (e.key === 'ArrowDown' && this._selected && this._selectedType === 'Node' && !this._cm.isVisible()) {
                 e.preventDefault();
                 const y = (this._selected as Node).y || 0;
                 this.updateSelectedData({ ...this._selected, y: y + 10 });

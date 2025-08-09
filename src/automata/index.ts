@@ -1,6 +1,5 @@
 import { Graph } from '../graph';
 import { DataSet } from 'vis-data';
-import { v4 as uuidv4 } from 'uuid';
 import { EdgeOptions, NodeOptions } from 'vis-network';
 import { stripNode, stripTransition } from '../utils/updates';
 import { COLORS } from '../utils/colors';
@@ -9,7 +8,7 @@ import { AutomatonComponent, AutomatonType } from '../';
 import { AutomatonError } from '@u/errors';
 
 export interface Node extends NodeOptions {
-    id: string;
+    id: number;
     label: string;
 
     final: boolean;
@@ -17,9 +16,9 @@ export interface Node extends NodeOptions {
 }
 
 export interface Transition extends EdgeOptions {
-    id: string;
-    from: string;
-    to: string;
+    id: number;
+    from: number;
+    to: number;
     label: string;
     symbols: string[];
     stackOperations?: StackOperation[];
@@ -137,7 +136,7 @@ export abstract class Automaton {
         return this.nodes.get().find((n) => n.initial)!;
     }
 
-    protected getNodeLabel(id: string): string {
+    protected getNodeLabel(id: number): string {
         return this.nodes.get().find((n) => n.id === id)!.label;
     }
 
@@ -166,7 +165,7 @@ export abstract class Automaton {
         return { nodes: this.nodes, edges: this.transitions };
     }
 
-    public setFinalNode(id: string, final: boolean): void {
+    public setFinalNode(id: number, final: boolean): void {
         this.nodes.update({
             id,
             final,
@@ -180,11 +179,11 @@ export abstract class Automaton {
     }
 
     /* GETTERS */
-    public getNode(id: string): Node | null {
+    public getNode(id: number): Node | null {
         return this.nodes.get(id);
     }
 
-    public getTransition(id: string): Transition | null {
+    public getTransition(id: number): Transition | null {
         return this.transitions.get(id);
     }
 
@@ -193,7 +192,7 @@ export abstract class Automaton {
         this.nodes.add(node);
     }
 
-    public removeNode(id: string): void {
+    public removeNode(id: number): void {
         const transitions = this.transitions.get().filter((t) => t.from === id || t.to === id);
 
         for (const transition of transitions) {
@@ -202,7 +201,7 @@ export abstract class Automaton {
         this.nodes.remove(id);
     }
 
-    public updateNode(nodeId: string, data: Partial<Node>): void {
+    public updateNode(nodeId: number, data: Partial<Node>): void {
         this.nodes.update({ id: nodeId, ...data });
     }
 
@@ -211,21 +210,21 @@ export abstract class Automaton {
         this.transitions.add(transition);
     }
 
-    public removeTransition(id: string): void {
+    public removeTransition(id: number): void {
         this.transitions.remove(id);
     }
 
-    public removeTransitionsFromNode(id: string): void {
+    public removeTransitionsFromNode(id: number): void {
         this.transitions.remove(this.transitions.getIds({ filter: (e: Transition) => e.from === id }));
     }
 
-    public updateTransition(transitionId: string, transition: Partial<Transition>): void {
+    public updateTransition(transitionId: number, transition: Partial<Transition>): void {
         this.transitions.update({ id: transitionId, ...transition });
     }
 
     /* ------------------- */
 
-    public highlightErrorNode(id: string): void {
+    public highlightErrorNode(id: number): void {
         if (!this.showErrors) return;
 
         this.nodes.update({
@@ -288,8 +287,24 @@ export abstract class Automaton {
         );
     }
 
+    private static toNumber(id: string | number): number {
+        return typeof id === 'number' ? id : parseInt(id as string);
+    }
+
+    public getNewNodeId(): number {
+        return this.nodes.get().length > 0
+            ? Math.max(...this.nodes.getIds().map(Automaton.toNumber)) + 1
+            : 0;
+    }
+
     public getNewNodeLabel(): string {
-        return 'q' + this.nodes.get().length;
+        return 'q' + this.getNewNodeId();
+    }
+
+    public getNewTransitionId(): number {
+        return this.transitions.get().length > 0
+            ? Math.max(...this.transitions.getIds().map(Automaton.toNumber)) + 1
+            : 0;
     }
 
     public redrawNodes(): void {
@@ -360,7 +375,7 @@ export abstract class Automaton {
     private setupListeners() {
         this.nodes.on('add', (_, data: { items: (string | number)[] }) => {
             const initialNodeId = data.items.find((id) => this.nodes.get(id)?.initial);
-            if (initialNodeId) this.updateInitialNode(this.nodes.get(initialNodeId) as Node);
+            if (initialNodeId !== undefined) this.updateInitialNode(this.nodes.get(initialNodeId) as Node);
 
             const finalNodeIds = data.items.filter((id) => this.nodes.get(id)?.final);
             this.nodes.update(finalNodeIds.map((id) => ({ id, shape: 'custom' })) as Node[]);
@@ -392,7 +407,7 @@ export abstract class Automaton {
         this.transitions.on('add', (_, data: { items: (string | number)[] }) => {
             for (const id of data.items) {
                 const transition = this.transitions.get(id) as Transition;
-                this.updateTransition(id.toString(), { label: transition.symbols.join(', ') });
+                this.updateTransition(Automaton.toNumber(id), { label: transition.symbols.join(', ') });
             }
         });
 
@@ -406,7 +421,7 @@ export abstract class Automaton {
 
                 if (transition.label !== this.getTransitionLabel(transition)) {
                     const label = this.getTransitionLabel(transition);
-                    this.updateTransition(id.toString(), { label: label });
+                    this.updateTransition(Automaton.toNumber(id), { label: label });
                 }
             }
         });
@@ -426,9 +441,10 @@ export abstract class Automaton {
             from: Graph.initialGhostNode.id,
             to: node.id,
             label: '',
-            id: uuidv4(),
+            id: -1,
             symbols: [],
         });
+
 
         Graph.initialGhostNode = {
             ...Graph.initialGhostNode,

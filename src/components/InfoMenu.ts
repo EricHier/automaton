@@ -11,7 +11,6 @@ import SlAlert from '@shoelace-style/shoelace/dist/components/alert/alert.compon
 import { Graph } from '../graph';
 import { biExclamationOctagon, biInfo } from '../styles/icons';
 
-import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 @customElement('webwriter-automaton-infomenu')

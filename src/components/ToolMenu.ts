@@ -138,6 +138,7 @@ export class ToolMenu extends LitElementWw {
     }
 
     public handleNodeAdd(nodeData: any, callback: any) {
+        nodeData.id = this._graph.automaton.getNewNodeId();
         nodeData.label = this._graph.automaton.getNewNodeLabel();
         callback(nodeData);
         if (!this._lockNodeAdd) {
@@ -194,12 +195,12 @@ export class ToolMenu extends LitElementWw {
                 });
             }
         } else {
+            edgeData.id = this._graph.automaton.getNewTransitionId();
             edgeData.symbols = [newSymbol];
 
             if (this._graph.automaton.type === 'pda') {
                 edgeData.stackOperations = [{ operation: 'none', symbol: newSymbol }];
             }
-            // edgeData.label = 'a';
             callback(edgeData);
         }
 

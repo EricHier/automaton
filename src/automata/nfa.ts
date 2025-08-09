@@ -1,4 +1,3 @@
-import { AutomatonError } from '@u/errors';
 import { Automaton, SimulationResult, Node, Transition } from '../automata';
 import { ManualAutoSimulator } from './manual-auto';
 import { Logger } from '@u/logger';
@@ -55,7 +54,7 @@ export class NFASimulator extends ManualAutoSimulator {
         type PathTransition = { transition: Transition; symbol: string };
 
         // Cache the epsilon closure computations for performance
-        const epsilonClosures = new Map<string, Set<{ nodes: Node[]; transitions: PathTransition[] }>>();
+        const epsilonClosures = new Map<number, Set<{ nodes: Node[]; transitions: PathTransition[] }>>();
 
         const getEpsilonClosure = (node: Node): Set<{ nodes: Node[]; transitions: PathTransition[] }> => {
             if (epsilonClosures.has(node.id)) {
@@ -63,7 +62,7 @@ export class NFASimulator extends ManualAutoSimulator {
             }
 
             const closure = new Set<{ nodes: Node[]; transitions: PathTransition[] }>();
-            const visited = new Set<string>();
+            const visited = new Set<number>();
             const queue: { nodes: Node[]; transitions: PathTransition[] }[] = [{ nodes: [node], transitions: [] }];
 
             while (queue.length > 0) {

@@ -1,14 +1,13 @@
 import { Graph } from '../../graph';
 import { DFA } from '../../automata/dfa';
-import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@u/logger';
 
 export function AddSinkstateToDFA(dfa: DFA): void {
     const meanX = dfa.nodes.get().reduce((acc, node) => acc + node.x!, 0) / dfa.nodes.get().length;
     const meanY = dfa.nodes.get().reduce((acc, node) => acc + node.y!, 0) / dfa.nodes.get().length;
 
-    const sinkstateId = uuidv4();
-    const sinkstate = dfa.addNode({
+    const sinkstateId = dfa.getNewNodeId();
+    dfa.addNode({
         id: sinkstateId,
         label: 'sink',
 
@@ -28,7 +27,7 @@ export function AddSinkstateToDFA(dfa: DFA): void {
         const missingSymbols = alphabet.filter((symbol) => !transitions.some((t) => t.symbols.includes(symbol)));
         if (missingSymbols.length === 0) continue;
         dfa.addTransition({
-            id: uuidv4(),
+            id: dfa.getNewTransitionId(),
             label: missingSymbols.join(','),
             from: node.id,
             to: sinkstateId,

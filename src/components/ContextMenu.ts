@@ -17,7 +17,7 @@ export class ContextMenu {
         updateFn: Function;
         deleteFn: Function;
     } = {
-        data: { id: '', label: '', initial: false, final: false },
+        data: { id: 0, label: '', initial: false, final: false },
         type: undefined,
         updateFn: () => {},
         deleteFn: () => {},
